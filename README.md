@@ -7,15 +7,17 @@ from overlapping spheres via box-counting algorithm.
 
 ## Features
 
+### Current
 * Representation of the surface as either point clouds or exact surfaces.
 * Efficient algorithm for 3D box-counting calculations.
 * Customisable parameters to control the level of detail and accuracy of the calculation.
 
-TODO: 
-* Publish to conda
-* Complete example under `## Usage`
-* Complete `docs/example.ipynb` and `tests/`
-* Transform xyz coordinates when reading atoms to avoid using minXYZ repetitively in scanAtom().
+### To be Done
+* Installation from Conda, after publishing to Conda
+* Complete example under `## Usage`.
+* Complete `docs/example.ipynb`.
+* Consider removing `tests/` from [tool.poetry].
+* Consider transforming xyz coordinates when reading atoms to avoid using minXYZ repetitively in `scanAtom()`.
 
 ## Installation
 
@@ -50,7 +52,7 @@ from sphractal.boxCnt import runBoxCnt
 r2PC, bcDimPC, confIntPC, r2ES, bcDimES, confIntES = runBoxCnt('example.xyz')
 ```
 
-Check out the [notebook tutorial](docs/example.ipynb) for more detailed examples!
+Check out the [notebook tutorial](example.ipynb) for more detailed examples!
 
 ## Documentation
 
@@ -60,12 +62,12 @@ Detailed documentation and usage examples are hosted by [Read the Docs](https://
 
 `Sphractal` appreciates your enthusiasm and welcomes your expertise! 
 
-Please check out the [contributing guidelines](CONTRIBUTING.md) and [code of conduct](CONDUCT.md). 
+Please check out the [contributing guidelines](https://github.com/Jon-Ting/sphractal/blob/main/CONTRIBUTING.md) and [code of conduct](https://github.com/Jon-Ting/sphractal/blob/main/CONDUCT.md). 
 By contributing to this project, you agree to abide by its terms.
 
 ## License
 
-The project is distributed under an [MIT License](LICENSE).
+The project is distributed under an [MIT License](https://github.com/Jon-Ting/sphractal/blob/main/LICENSE).
 
 ## Credits
 
