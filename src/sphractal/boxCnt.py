@@ -21,23 +21,13 @@ ALPHA_CI = 1 - CONF_INT_PERC/100
 
 # @annotate('getVoxelBoxCnts', color='blue')
 def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                    npName, writeFileDir='.', exeDir='.', procUnit='cpu',
-                    radType='metal', numPoint=300, gridNum=1024,
-                    rmInSurf=True, vis=False, verbose=False, genPCD=False):
+                    npName, writeFileDir='boxCntOutputs', exeDir='../bin', procUnit='cpu',
+                    radType='metallic', numPoint=300, gridNum=1024,
+                    rmInSurf=True, vis=True, verbose=True, genPCD=False):
     """
     Count the boxes that cover the outer surface of a set of overlapping spheres represented as point clouds for
     different box sizes, using 3D box-counting algorithm written by Ruiz de Miras et al. in C++. All source codes are
     provided under {SPHRACTAL_DIR_PATH}/src/fbc/.
-
-    The 3D binary image resolution (gridNum) is restricted by RAM size available, the relationship is illustrated below:
-     -  1024 ->    2 GB (laptops -> typically 8 GB)
-     -  2048 ->   16 GB (HPC nodes with GPUs like NCI Gadi gpuvolta queue -> max 32 GB/node)
-     -  4096 ->  128 GB
-     -  8192 -> 1024 GB (HPC node with huge memories like NCI Gadi megamem queue -> max 2990 GB/node)
-     - 16384 -> 8192 GB
-    Further details about maximum grid size and memory estimation could be found in original codes of the authors in
-    {SPHRACTAL_DIR_PATH}/src/fbc/test.cpp.
-    As a reference, when 8192 grids are used, allocation of memory took 25 min; while the CPU algorithm runs for 18 min.
     
     Parameters
     ----------
@@ -57,10 +47,10 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         Path to the directory to store the output files.
     exeDir : str
         Path to the compiled C++ executable for box-counting.
-    procUnit : str
-        Type of C++ executable to run for box-counting, either 'cpu' or 'gpu'.
-    radType : str
-        Type of radii to use for the spheres, either 'metallic' or 'atomic'.
+    procUnit : {'cpu', 'gpu'}
+        Type of C++ executable to run for box-counting.
+    radType : {'metallic', 'atomic'}
+        Type of radii to use for the spheres.
     numPoint : int 
         Number of surface points to be generated around each atom.
     gridNum : int
@@ -72,7 +62,7 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     verbose : bool
         Whether to display the details.
     genPCD : bool
-        Whether to generate *.pcd file for box-counting using MATLAB code written by Kazuaki Iida.
+        Whether to generate pcd file for box-counting using MATLAB code written by Kazuaki Iida.
     
     Returns
     -------
@@ -80,13 +70,25 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         Box lengths.
     cntChange : list
         Number of boxes that cover the surface of interest, as represented by the voxels in the 3D binary image.
-    
+
     Examples
     --------
     >>> eles, rads, xyzs, _, minxyz, maxxyz = readXYZ('example.xyz')
     >>> neighs, _ = findNN(rads, xyzs, minxyz, maxxyz, 2.5)
     >>> surfs = findSurf(xyzs, neighs, 'alphaShape', 5.0)
     >>> scales, counts = genSurfPoints(eles, rads, surfs, xyzs, neighs, 'example')
+
+    Notes
+    -----
+    The 3D binary image resolution (gridNum) is restricted by RAM size available, the relationship is illustrated below:
+    -  1024 ->    2 GB (laptops -> typically 8 GB)
+    -  2048 ->   16 GB (HPC nodes with GPUs like NCI Gadi gpuvolta queue -> max 32 GB/node)
+    -  4096 ->  128 GB
+    -  8192 -> 1024 GB (HPC node with huge memories like NCI Gadi megamem queue -> max 2990 GB/node)
+    - 16384 -> 8192 GB
+    Further details about maximum grid size and memory estimation could be found in original codes of the authors in
+    {SPHRACTAL_DIR_PATH}/src/fbc/test.cpp.
+    As a reference, when 8192 grids are used, allocation of memory took 25 min; while the CPU algorithm runs for 18 min.
     """
     if verbose:
         print(f"  Approximating the surface with {numPoint} point clouds for each atom...")
@@ -107,8 +109,8 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
 
 # @annotate('getSphereBoxCnts', color='blue')
 def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                     maxDimDiff, minMaxBoxLens, minXYZ, npName, writeFileDir='.',
-                     rmInSurf=True, writeBox=False, verbose=False, boxLenConc=True, maxWorkers=2):
+                     maxDimDiff, minMaxBoxLens, minXYZ, npName, writeFileDir='boxCntOutputs',
+                     rmInSurf=True, writeBox=True, verbose=True, boxLenConc=False, maxWorkers=2):
     """
     Count the boxes that cover the outer surface of a set of overlapping spheres represented as exact spheres for
     different box sizes.
@@ -226,9 +228,8 @@ def findSlope(scaleChange, cntChange, writeFileDir, npName='', lenRange='trim',
             plt.plot(x, lowCIvals, 'r--')
             plt.xlabel('log(1/r)')
             plt.ylabel('log(N)')
-            plt.title(
-                f"{npName} R2: {r2score:.3f}, D_Box: {boxCntDim:.3f}, {CONF_INT_PERC}% CI: [{slopeCI[0]:.3f}, "
-                f"{slopeCI[1]:.3f}]")
+            plt.title(f"{npName} R2: {r2score:.3f}, D_Box: {boxCntDim:.3f}, {CONF_INT_PERC}% CI: "
+                      f"[{slopeCI[0]:.3f}, {slopeCI[1]:.3f}]")
         # Removal of next point (beware of weird behaviour in middle range)
         # lstSqErrs = np.subtract(y, yPred) ** 2
         # if len(y) % 2 == 0:
@@ -261,10 +262,12 @@ def findSlope(scaleChange, cntChange, writeFileDir, npName='', lenRange='trim',
 
 # @annotate('runCase', color='cyan')
 @estDuration
-def runBoxCnt(xyzFilePath, radType='metallic', findSurfOption='alphaShape', alphaMult=2.5,
-              writeFileDir='.', lenRange='trim', rmInSurf=True, vis=True, saveFig=True, showPlot=False, verbose=False,
-              runPointCloudBoxCnt=True, numPoints=300, gridNum=1024, exeDir='.', procUnit='cpu', genPCD=False,
-              runExactSphereBoxCnt=True, minLenMult=0.25, maxLenMult=1, writeBox=False, boxLenConc=True, maxWorkers=2):
+def runBoxCnt(xyzFilePath, 
+              radType='metallic', calcBL=False, findSurfOption='alphaShape', alphaMult=2.5,
+              writeFileDir='boxCntOutputs', lenRange='trim', 
+              rmInSurf=True, vis=True, saveFig=True, showPlot=False, verbose=True,
+              runPointCloudBoxCnt=True, numPoints=300, gridNum=1024, exeDir='../bin', procUnit='cpu', genPCD=False,
+              runExactSphereBoxCnt=True, minLenMult=0.25, maxLenMult=1, writeBox=True, boxLenConc=False, maxWorkers=2):
     """
     Run box-counting algorithm on the surface of a given object consisting of a set of spheres represented as either
     point clouds or exact spherical surface.
@@ -272,20 +275,21 @@ def runBoxCnt(xyzFilePath, radType='metallic', findSurfOption='alphaShape', alph
     Parameters
     ----------
     xyzFilePath : str
-        Path to *.xyz file containing the Cartesian coordinates of a set of spheres.
-    radType : str
-        Type of radii to use for the spheres, either 'metallic' or 'atomic'.
-    findSurfOption : str
-        Algorithm to identify the spheres on the surface, options are 'convexHull', 'numNeigh', and 'alphaShape'.
+        Path to an xyz file containing the Cartesian coordinates of a set of spheres.
+    radType : {'metallic', 'atomic'}
+        Type of radii to use for the spheres.
+    calcBL : bool
+        Whether to compute the average distance from its neighbours for each atom
+    findSurfOption : {'alphaShape', 'convexHull', 'numNeigh'}
+        Algorithm to identify the spheres on the surface.
     alphaMult : float 
         Multiplier to the minimum spherical radii to decide 'alpha' for the alpha shape algorithm, only used if
         'findSurfOption' is 'alphaShape'.
     writeFileDir : str
         Path to the directory to store the output files.
-    lenRange : str 
-        Range of box lengths to include for determining the box-counting dimension, either 'full' or 'trim'. Choosing
-        the latter finds the highest coefficient of determination by iteratively removing the box counts obtained using
-        boxes of extreme sizes.
+    lenRange : {'trim', 'full'} 
+        Range of box lengths to include for determining the box-counting dimension. Choosing 'trim' finds the highest 
+        coefficient of determination by iteratively removing the box counts obtained using boxes of extreme sizes.
     rmInSurf : bool
         Whether to remove the surface points on the inner surface.
     vis : bool 
@@ -304,10 +308,10 @@ def runBoxCnt(xyzFilePath, radType='metallic', findSurfOption='alphaShape', alph
         Resolution of the 3D binary image.
     exeDir : str
         Path to the compiled C++ executable for box-counting.
-    procUnit : str
-        Type of C++ executable to run for box-counting, either 'cpu' or 'gpu'.
+    procUnit : {'cpu', 'gpu'}
+        Type of C++ executable to run for box-counting.
     genPCD : bool
-        Whether to generate *.pcd file for box-counting using MATLAB code written by Kazuaki Iida.
+        Whether to generate pcd file for box-counting using MATLAB code written by Kazuaki Iida.
     runExactSphereBoxCnt : bool
         Whether to represent the surface as exact spheres.
     minLenMult : float
@@ -341,8 +345,9 @@ def runBoxCnt(xyzFilePath, radType='metallic', findSurfOption='alphaShape', alph
     --------
     >>> r2Points, bcDimPoints, confIntPoints, r2Exact, bcDimExact, confIntExact = runBoxCnt('example.xyz')
     """
+    radMult = 1.5 if radType == 'metallic' else 1.2  # Radius multiplier to identify nearest neighbour
     atomsEle, atomsRad, atomsXYZ, maxDimDiff, minXYZ, maxXYZ = readXYZ(xyzFilePath, radType)
-    atomsNeighIdxs, atomsAvgBondLen = findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, atomsRad.max())
+    atomsNeighIdxs, atomsAvgBondLen = findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, atomsRad.max(), radMult, calcBL)
     atomsSurfIdxs = findSurf(atomsXYZ, atomsNeighIdxs, findSurfOption, alphaMult * atomsRad.min())
     testCase = xyzFilePath.split('/')[-1][:-4]
     if verbose:
@@ -350,6 +355,8 @@ def runBoxCnt(xyzFilePath, radType='metallic', findSurfOption='alphaShape', alph
 
     r2PC, bcDimPC, confIntPC = np.nan, np.nan, (np.nan, np.nan)
     r2ES, bcDimES, confIntES = np.nan, np.nan, (np.nan, np.nan)
+    if not isdir(writeFileDir):
+        mkdir(writeFileDir)
     if runPointCloudBoxCnt:
         scalesPC, countsPC = getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                                              testCase, writeFileDir, exeDir, procUnit,

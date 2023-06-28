@@ -5,7 +5,7 @@ from numba import njit, prange
 import numpy as np
 # from nvtx import annotate
 from scipy.spatial import ConvexHull, Delaunay
-from sphractal.constants import ATOMIC_RAD_DICT, BULK_CN, METALLIC_RAD_DICT, NN_RAD_MULT
+from sphractal.constants import ATOMIC_RAD_DICT, BULK_CN, METALLIC_RAD_DICT
 
 
 def estDuration(func):
@@ -35,7 +35,7 @@ def getMinMaxXYZ(atomsXYZ):
 
 # @annotate('readXYZ', color='cyan')
 def readXYZ(filePath, radType='metallic'):
-    """Parse a *.xyz or *.lmp file."""
+    """Parse an xyz or a lmp file."""
     radDict = METALLIC_RAD_DICT if radType == 'metallic' else ATOMIC_RAD_DICT
     atomsEle, atomsRad, atomsXYZ = [], [], []
     numLinesSkip = 9 if '.lmp' in filePath else 2
@@ -67,7 +67,7 @@ def allDirVecs():
 
 # @annotate('findNN', color='magenta')
 @njit(fastmath=True, cache=True)
-def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, calcBL=False):
+def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult, calcBL=False):
     """Compute the nearest neighbour list and average bond length for each atom."""
     (minX, minY, minZ), (maxX, maxY, maxZ) = minXYZ, maxXYZ
     atomsNeighIdxs = [[int(j) for j in range(0)] for _ in range(len(atomsRad))]
@@ -88,7 +88,7 @@ def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, calcBL=False):
 
                     diffX, diffY, diffZ = abs(atom1X - atom2X), abs(atom1Y - atom2Y), abs(atom1Z - atom2Z)
                     sumOfSquares = diffX * diffX + diffY * diffY + diffZ * diffZ
-                    if sumOfSquares < ((atom1rad+atom2rad)*NN_RAD_MULT) ** 2:
+                    if sumOfSquares < ((atom1rad+atom2rad)*radMult) ** 2:
                         atomsNeighIdxs[i].append(j)
                         atomsNeighIdxs[j].append(i)
                         if calcBL:
