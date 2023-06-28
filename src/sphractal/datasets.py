@@ -1,14 +1,13 @@
-from importlib import resources
+from importlib.resources import files
 
 
 def getExampleDataPath():
-    """Get path to example.xyz.
+    """Get path to example.xyz (an octahedron palladium nanoparticle).
 
     Returns
     -------
     pathlib.PosixPath
         Path to file.
     """
-    with resources.path('sphractal.data', 'example.xyz') as f:
-        dataFilePath = f
-    return dataFilePath
+    return files('sphractal.data').joinpath('example.xyz')
+
