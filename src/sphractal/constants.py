@@ -37,4 +37,3 @@ METALLIC_RAD_DICT = {
     'Sg': defRad, 'Bh': defRad, 'Hs': defRad, 'Mt': defRad, 'Ds': defRad, 'Rg': defRad, 'Cn': defRad, 'Nh': defRad,
     'Fl': defRad, 'Mc': defRad, 'Lv': defRad, 'Ts': defRad, 'Og': defRad
 }
-NN_RAD_MULT = 1.5  # Radius multiplier to identify nearest neighbour

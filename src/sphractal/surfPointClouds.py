@@ -79,7 +79,7 @@ def pointsToVoxels(pointXYZs, gridSize):
 
 # @annotate('writeSurfVoxelIdxs', color='yellow')
 def writeSurfVoxelIdxs(writeFileDir, voxelIdxs):
-    """Generate *.txt file required for 3D box-counting using C++ code written by Ruiz de Miras and Posadas."""
+    """Generate a txt file required for 3D box-counting using C++ code written by Ruiz de Miras and Posadas."""
     with open(f"{writeFileDir}/surfVoxelIdxs.txt", 'w') as f:
         for idx in voxelIdxs:
             f.write(f"{idx}\n")
@@ -87,7 +87,7 @@ def writeSurfVoxelIdxs(writeFileDir, voxelIdxs):
 
 # @annotate('writePCD', color='yellow')
 def writePCD(writeFileDir, npName, surfPointXYZs):
-    """Generate *.pcd file required for 3D box-counting using MATLAB code written by Kazuaki Iida."""
+    """Generate a pcd file required for 3D box-counting using MATLAB code written by Kazuaki Iida."""
     surfPointsDir = f"{writeFileDir}/surfPoints"
     if not isdir(surfPointsDir):
         mkdir(surfPointsDir)
@@ -101,7 +101,7 @@ def writePCD(writeFileDir, npName, surfPointXYZs):
 
 # @annotate('writeSurfPoints', color='blue')
 def writeSurfPoints(writeFileDir, npName, atomsSurfIdxs, atomsXYZ, surfPointXYZs, nonSurfPointXYZs):
-    """Generate *.xyz file for visualisation of classified point clouds."""
+    """Generate an xyz file for visualisation of classified point clouds."""
     surfPointsDir = f"{writeFileDir}/surfPoints"
     if not isdir(surfPointsDir):
         mkdir(surfPointsDir)
@@ -118,7 +118,7 @@ def writeSurfPoints(writeFileDir, npName, atomsSurfIdxs, atomsXYZ, surfPointXYZs
 
 # @annotate('writeSurfVoxels', color='green')
 def writeSurfVoxels(writeFileDir, npName, surfVoxelXYZs):
-    """Generate *.xyz file useful for visualisation of computed surface voxels."""
+    """Generate an xyz file useful for visualisation of computed surface voxels."""
     surfVoxelsDir = f"{writeFileDir}/surfVoxels"
     if not isdir(surfVoxelsDir):
         mkdir(surfVoxelsDir)

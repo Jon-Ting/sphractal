@@ -26,8 +26,8 @@ Software:
  
 The test.cpp file can be compiled with the following command: > nvcc -O3 -o test bcCUDA4D.cu bcCUDA3D.cu bcCUDA2D.cu bcCPU.cpp test.cpp
 
-
 3. CITATION
+
 If Fast Box-Counting has been useful for your research, please, cite as:
 "Fast Computation of Fractal Dimension for 2D, 3D and 4D Data" 
 Juan Ruiz de Miras, Miguel Ángel Posadas, Antonio José Ibáñez-Molina, María Felipa Soriano and Sergio Iglesias-Parro
