@@ -14,6 +14,9 @@ from overlapping spheres via box-counting algorithm.
 
 ### To be Done
 * Installation from Conda, after publishing to Conda
+* Nested multiprocessing.
+* Complete docstrings for `findSurf()`.
+* Complete help function for all functions.
 * Complete example under `## Usage`.
 * Complete `docs/example.ipynb`.
 * Consider removing `tests/` from [tool.poetry].
