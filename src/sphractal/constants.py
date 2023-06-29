@@ -2,7 +2,9 @@ BULK_CN = 12  # Assuming FCC/HCP packing
 defRad = 1.0  # Default radius value for missing data
 # Atomic radii (computed from theoretical models) from E. Clementi; D.L. Raimondi; W.P. Reinhardt (1967) "Atomic
 # Screening Constants from SCF Functions. II. Atoms with 37 to 86 Electrons." The Journal of Chemical Physics. 47 (4):
-# 1300-1307; NN_RAD_MULT should be 1.2, 1.0 if radii are 20% larger
+# 1300-1307; 
+# Recommendations of values for multipliers: {radMult: 1.2, alphaMult: 2.0}
+# If radii are 20% larger, recommendations: {radMult: 1.0, alphaMult: 5/3}
 ATOMIC_RAD_DICT = {
     'H': 0.53, 'He': 0.31, 'Li': 1.67, 'Be': 1.12, 'B': 0.87, 'C': 0.67, 'N': 0.56, 'O': 0.48, 'F': 0.42, 'Ne': 0.38,
     'Na': 1.90, 'Mg': 1.45, 'Al': 1.18, 'Si': 1.11, 'P': 0.98, 'S': 0.88, 'Cl': 0.79, 'Ar': 0.71, 'K': 2.43, 'Ca': 1.94,
@@ -20,7 +22,7 @@ ATOMIC_RAD_DICT = {
     'Lv': defRad, 'Ts': defRad, 'Og': defRad
 }
 # Metallic radii from N.N. Greenwood; A. Earnshaw (1997) "Chemistry of Elements (2nd ed.)" Butterworth-Heinemann;
-# NN_RAD_MULT should be 1.5
+# Recommendations of values for multipliers: {radMult: 1.5, alphaMult: 2.5}
 METALLIC_RAD_DICT = {
     'H': defRad, 'He': defRad, 'Li': 1.52, 'Be': 1.12, 'B': defRad, 'C': defRad, 'N': defRad, 'O': defRad, 'F': defRad,
     'Ne': defRad, 'Na': 1.86, 'Mg': 1.60, 'Al': 1.43, 'Si': defRad, 'P': defRad, 'S': defRad, 'Cl': defRad,
