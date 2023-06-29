@@ -9,8 +9,8 @@ from statsmodels.api import OLS, add_constant
 
 from sphractal.surfExact import findTargetAtoms, MIN_VAL_FROM_BOUND, scanAllAtoms, writeBoxCoords
 from sphractal.surfPointClouds import genSurfPoints
-from sphractal.utils import estDuration, findNN, findSurf, readXYZ
-# from sphractal.utils import annotate
+from sphractal.utils import findNN, findSurf, readXYZ
+# from sphractal.utils import estDuration, annotate
 
 
 NUM_BOX_LEN_SAMPLE = 10
@@ -261,7 +261,7 @@ def findSlope(scaleChange, cntChange, writeFileDir, npName='', lenRange='trim',
 
 
 # @annotate('runCase', color='cyan')
-@estDuration
+# @estDuration
 def runBoxCnt(xyzFilePath, 
               radType='metallic', calcBL=False, findSurfOption='alphaShape', alphaMult=2.5,
               writeFileDir='boxCntOutputs', lenRange='trim', 
