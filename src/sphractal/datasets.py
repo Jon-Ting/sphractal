@@ -9,5 +9,5 @@ def getExampleDataPath():
     pathlib.PosixPath
         Path to file.
     """
-    return files('sphractal.data').joinpath('example.xyz')
+    return str(files('sphractal.data').joinpath('example.xyz'))
 
