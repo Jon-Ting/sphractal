@@ -131,11 +131,11 @@ def writeSurfVoxels(writeFileDir, npName, surfVoxelXYZs):
 # @annotate('getSurfPoints', color='cyan')
 def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                   npName, writeFileDir, 
-                  radType='metallic', numPoint=300, gridNum=1024,
+                  radType='atomic', numPoint=300, gridNum=1024,
                   rmInSurf=True, vis=False, verbose=False, genPCD=False):
     """Generate point clouds approximating the outer spherical surface formed by a set of atoms."""
     # Avoid repeating generation of surface points around atoms with the same radii
-    radDict = METALLIC_RAD_DICT if radType == 'metallic' else ATOMIC_RAD_DICT
+    radDict = ATOMIC_RAD_DICT if radType == 'atomic' else METALLIC_RAD_DICT
     surfPointsEles = {atomEle: fibonacciSphere(numPoint, radDict[atomEle]) for atomEle in set(atomsEle)}
 
     # Generate point clouds and convert to voxels

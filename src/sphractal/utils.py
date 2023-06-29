@@ -34,9 +34,9 @@ def getMinMaxXYZ(atomsXYZ):
 
 
 # @annotate('readXYZ', color='cyan')
-def readXYZ(filePath, radType='metallic'):
+def readXYZ(filePath, radType='atomic'):
     """Parse an xyz or a lmp file."""
-    radDict = METALLIC_RAD_DICT if radType == 'metallic' else ATOMIC_RAD_DICT
+    radDict = ATOMIC_RAD_DICT if radType == 'atomic' else METALLIC_RAD_DICT
     atomsEle, atomsRad, atomsXYZ = [], [], []
     numLinesSkip = 9 if '.lmp' in filePath else 2
     with open(filePath, 'r') as f:
@@ -50,8 +50,8 @@ def readXYZ(filePath, radType='metallic'):
             atomX, atomY, atomZ = float(eleXYZ[-3]), float(eleXYZ[-2]), float(eleXYZ[-1])
             atomsXYZ.append((atomX, atomY, atomZ))
     atomsEle, atomsRad, atomsXYZ = np.array(atomsEle, dtype='U2'), np.array(atomsRad), np.array(atomsXYZ)
-    maxDimDiff, minXYZ, maxXYZ = getMinMaxXYZ(atomsXYZ)
-    return atomsEle, atomsRad, atomsXYZ, maxDimDiff, minXYZ, maxXYZ
+    maxRange, minXYZ, maxXYZ = getMinMaxXYZ(atomsXYZ)
+    return atomsEle, atomsRad, atomsXYZ, maxRange, minXYZ, maxXYZ
 
 
 @njit(fastmath=True, cache=True)
@@ -67,7 +67,7 @@ def allDirVecs():
 
 # @annotate('findNN', color='magenta')
 @njit(fastmath=True, cache=True)
-def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult, calcBL=False):
+def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, alphaMult, calcBL=False):
     """Compute the nearest neighbour list and average bond length for each atom."""
     (minX, minY, minZ), (maxX, maxY, maxZ) = minXYZ, maxXYZ
     atomsNeighIdxs = [[int(j) for j in range(0)] for _ in range(len(atomsRad))]
@@ -88,7 +88,7 @@ def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult, calcBL=False
 
                     diffX, diffY, diffZ = abs(atom1X - atom2X), abs(atom1Y - atom2Y), abs(atom1Z - atom2Z)
                     sumOfSquares = diffX * diffX + diffY * diffY + diffZ * diffZ
-                    if sumOfSquares < ((atom1rad+atom2rad)*radMult) ** 2:
+                    if sumOfSquares < ((atom1rad+atom2rad)*alphaMult) ** 2:
                         atomsNeighIdxs[i].append(j)
                         atomsNeighIdxs[j].append(i)
                         if calcBL:
@@ -171,11 +171,11 @@ def findSurf(atomsXYZ, atomsNeighIdxs, option='alphaShape', alpha=2.5):
         Cartesian coordinates of each atom.
     atomsNeighIdxs : 2D ndarray
         Neighbour atoms indices of each atom.
-    option : {'alphaShape', 'convexHull', 'numNeigh'}
+    option : {'alphaShape', 'convexHull', 'numNeigh'}, optional
         Algorithm to identify the spheres on the surface. 
         'convexHull' tends to identify less surface atoms; 'numNeigh' tends to identify more surface atoms. 
         'alphaShape' is a generalisation of 'convexHull'.
-    alpha : Union[int, float]
+    alpha : Union[int, float], optional
         'alpha' for the alpha shape algorithm, only used if 'option' is 'alphaShape'.
     
     Returns
