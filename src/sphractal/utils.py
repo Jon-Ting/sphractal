@@ -1,5 +1,6 @@
 from math import ceil, floor, sqrt
 from time import time
+# from warnings import warn
 
 from numba import njit, prange
 import numpy as np
@@ -161,7 +162,7 @@ def alphaShape(atomsXYZ, tetraVtxsIdxs, alpha):
 
 
 # @annotate('findSurf', color='yellow')
-def findSurf(atomsXYZ, atomsNeighIdxs, option='alphaShape', alpha=2.5):
+def findSurf(atomsXYZ, atomsNeighIdxs, option='alphaShape', alpha=3.0):
     """
     Return the indices of surface atoms.
     
@@ -195,7 +196,7 @@ def findSurf(atomsXYZ, atomsNeighIdxs, option='alphaShape', alpha=2.5):
         for atomIdx in np.array(ConvexHull(atomsXYZ).vertices):
             atomsSurfIdxs[atomIdx] = True
     elif option == 'numNeigh':
-        for (atomIdx, atomNeighIdxs) in atomsNeighIdxs:
+        for (atomIdx, atomNeighIdxs) in enumerate(atomsNeighIdxs):
             if len(atomNeighIdxs[atomNeighIdxs > -1]) < BULK_CN:
                 atomsSurfIdxs[atomIdx] = True
     elif option == 'alphaShape':
