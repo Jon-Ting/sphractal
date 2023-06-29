@@ -138,7 +138,8 @@ def scanAllAtoms(args):
     allAtomsSurfBoxs.difference_update(allAtomsBulkBoxs)
 
     if verbose:
-        print(f"{str(magnFac).rjust(8)}{str(len(allAtomsBulkBoxs)).rjust(12)}{str(len(allAtomsSurfBoxs)).rjust(12)}")
+        epsInvStr = f"{1 / scanBoxLen:.2f}"
+        print(f"{epsInvStr.rjust(10)}{str(len(allAtomsBulkBoxs)).rjust(12)}{str(len(allAtomsSurfBoxs)).rjust(12)}")
     return allAtomsSurfBoxs, allAtomsBulkBoxs
 
 
