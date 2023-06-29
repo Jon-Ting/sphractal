@@ -127,13 +127,18 @@ def rmDupTris(tris):
 
 @njit(fastmath=True, cache=True)
 def findTetras(tetraVtxsIdxs, r, alpha):
-    """Return tetrahedrons with side lengths smaller than a specified value."""
+    """Return tetrahedrons with their circumsphere radii smaller than a specified alpha value."""
     return tetraVtxsIdxs[r < alpha, :]
 
 
 # @annotate('alphaShape', color='cyan')
 def alphaShape(atomsXYZ, tetraVtxsIdxs, alpha):
-    """Return points that form the surface using alpha shape algorithm."""
+    """
+    Return points that form the surface using alpha shape algorithm.
+
+    Algorithm modified from https://stackoverflow.com/questions/26303878/alpha-shapes-in-3d
+    Radius of the sphere fitting inside the tetrahedral < alpha (http://mathworld.wolfram.com/Circumsphere.html)
+    """
     # Find radius of the circumsphere
     tetraVtxs = atomsXYZ[tetraVtxsIdxs]
     norm2 = np.sum(tetraVtxs ** 2, axis=2)[:, :, np.newaxis]
@@ -158,18 +163,29 @@ def alphaShape(atomsXYZ, tetraVtxsIdxs, alpha):
 # @annotate('findSurf', color='yellow')
 def findSurf(atomsXYZ, atomsNeighIdxs, option='alphaShape', alpha=2.5):
     """
-    Identify surface atoms and update the Atom objects.
-
-    convexHull:
-        - Tend to identify less than actual surface atoms
-    numNeigh:
-        - Tend to identify more than actual surface atoms
-    alphaShape:
-        - Generalisation of convex hull
-        - Algorithm modified from https://stackoverflow.com/questions/26303878/alpha-shapes-in-3d
-        - Radius of the sphere fitting inside the tetrahedral < alpha (http://mathworld.wolfram.com/Circumsphere.html)
-
-    Alternatives:
+    Return the indices of surface atoms.
+    
+    Parameters
+    ----------
+    atomsXYZ : 2D ndarray
+        Cartesian coordinates of each atom.
+    atomsNeighIdxs : 2D ndarray
+        Neighbour atoms indices of each atom.
+    option : {'alphaShape', 'convexHull', 'numNeigh'}
+        Algorithm to identify the spheres on the surface. 
+        'convexHull' tends to identify less surface atoms; 'numNeigh' tends to identify more surface atoms. 
+        'alphaShape' is a generalisation of 'convexHull'.
+    alpha : Union[int, float]
+        'alpha' for the alpha shape algorithm, only used if 'option' is 'alphaShape'.
+    
+    Returns
+    -------
+    1D ndarray
+        Indices of surface atoms.
+    
+    Notes
+    -----
+    Other alternatives include:
     - https://dl.acm.org/doi/abs/10.1145/2073304.2073339
     - https://onlinelibrary.wiley.com/doi/pdf/10.1002/jcc.25384
     - https://www.jstage.jst.go.jp/article/tmrsj/45/4/45_115/_article
