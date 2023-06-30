@@ -1,5 +1,7 @@
 # Sphractal
 
+[![ci-cd](https://github.com/Jon-Ting/sphractal/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Jon-Ting/sphractal/actions/workflows/ci-cd.yml)
+
 ## Description
 
 `Sphractal` is a package that provides functionality to estimate the fractal dimension of complex 3D surfaces formed 
@@ -13,7 +15,7 @@ from overlapping spheres via box-counting algorithm.
 * Customisable parameters to control the level of detail and accuracy of the calculation.
 
 ### To be Done
-* Complete `tests/`.
+* Set path for exeDir.
 * Publish to Conda.
 * Nested multiprocessing.
 * Better looking plots, allow figure size to be specified, allow choice for 'paper' and 'presentation'.
