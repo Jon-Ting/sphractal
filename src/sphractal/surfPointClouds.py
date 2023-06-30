@@ -90,6 +90,8 @@ def writePCD(writeFileDir, npName, surfPointXYZs):
     """Generate a pcd file required for 3D box-counting using MATLAB code written by Kazuaki Iida."""
     surfPointsDir = f"{writeFileDir}/surfPoints"
     if not isdir(surfPointsDir):
+        if not isdir(writeFileDir):
+            mkdir(writeFileDir)
         mkdir(surfPointsDir)
     with open(f"{surfPointsDir}/{npName}_surfPoints.pcd", 'w') as f:
         f.write('# .PCD v.7 - Point Cloud Data file format\nVERSION .7')
@@ -104,6 +106,8 @@ def writeSurfPoints(writeFileDir, npName, atomsSurfIdxs, atomsXYZ, surfPointXYZs
     """Generate an xyz file for visualisation of classified point clouds."""
     surfPointsDir = f"{writeFileDir}/surfPoints"
     if not isdir(surfPointsDir):
+        if not isdir(writeFileDir):
+            mkdir(writeFileDir)
         mkdir(surfPointsDir)
     with open(f"{surfPointsDir}/{npName}_surfPoints.xyz", 'w') as f:
         f.write(f"{len(surfPointXYZs) + len(nonSurfPointXYZs) + len(atomsSurfIdxs)}\n\n")
@@ -121,6 +125,8 @@ def writeSurfVoxels(writeFileDir, npName, surfVoxelXYZs):
     """Generate an xyz file useful for visualisation of computed surface voxels."""
     surfVoxelsDir = f"{writeFileDir}/surfVoxels"
     if not isdir(surfVoxelsDir):
+        if not isdir(writeFileDir):
+            mkdir(writeFileDir)
         mkdir(surfVoxelsDir)
     with open(f"{surfVoxelsDir}/{npName}_surfVoxels.xyz", 'w') as f:
         f.write(f"{len(surfVoxelXYZs)}\n\n")

@@ -2,6 +2,7 @@ from concurrent.futures import ProcessPoolExecutor as Pool
 from math import log10
 from os import mkdir, system
 from os.path import isdir
+from warnings import warn
 
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
@@ -61,9 +62,9 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     
     Returns
     -------
-    scaleChange : list
+    scales : list
         Box lengths.
-    cntChange : list
+    counts : list
         Number of boxes that cover the surface of interest, as represented by the voxels in the 3D binary image.
 
     Examples
@@ -87,6 +88,8 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     """
     if verbose:
         print(f"  Approximating the surface with {numPoint} point clouds for each atom...")
+    if not isdir(writeFileDir):
+        mkdir(writeFileDir)
 
     genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                   npName, writeFileDir,
@@ -94,12 +97,12 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                   rmInSurf, vis, verbose, genPCD)
     system(f"{exeDir}/3DbinImBC{procUnit}.exe {gridNum} {writeFileDir}/surfVoxelIdxs.txt "
            f"{writeFileDir}/surfVoxelBoxCnts.txt")
-    scaleChange, cntChange = [], []
+    scales, counts = [], []
     with open(f"{writeFileDir}/surfVoxelBoxCnts.txt", 'r') as f:
         for line in f:
-            scaleChange.append(log10(1 / int(line.split()[0])))
-            cntChange.append(log10(int(line.split()[1])))
-    return scaleChange[::-1], cntChange[::-1]
+            scales.append(log10(1 / int(line.split()[0])))
+            counts.append(log10(int(line.split()[1])))
+    return scales[::-1], counts[::-1]
 
 
 # @annotate('getSphereBoxCnts', color='blue')
@@ -148,9 +151,9 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
     
     Returns
     -------
-    scaleChange : list
+    scales : list
         Box lengths.
-    cntChange : list
+    counts : list
         Number of boxes that cover the exact spherical surface of interest.
     
     Examples
@@ -163,10 +166,14 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
     if verbose:
         print(f"  Representing the surface by treating each atom as exact spheres...")
         print(f"    (1/eps)    (# bulk)    (# surf)")
+    if writeBox:
+        if not isdir(writeFileDir):
+            mkdir(writeFileDir)
+
     atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs)
     overallBoxLen = maxRange + MIN_VAL_FROM_BOUND * 2
     allLensSurfBoxs, allLensBulkBoxs, allLensSurfCnts, allLensBulkCnts = [], [], [], []
-    scaleChange, scanBoxLens, scanAllAtomsInps = [], [], []
+    scales, scanBoxLens, scanAllAtomsInps = [], [], []
     approxScanBoxLens = np.geomspace(minMaxBoxLens[1], minMaxBoxLens[0], num=numBoxLenSample)
     for approxScanBoxLen in approxScanBoxLens:  # Evenly reduced box lengths on log scale
         magnFac = int(overallBoxLen / approxScanBoxLen)
@@ -183,7 +190,7 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
             allLensBulkBoxs.append(allAtomsBulkBoxs)
             allLensSurfCnts.append(len(allAtomsSurfBoxs))
 
-        scaleChange.append(log10(magnFac / overallBoxLen))
+        scales.append(log10(magnFac / overallBoxLen))
         scanBoxLens.append(scanBoxLen)
 
     if boxLenConc:
@@ -193,24 +200,24 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
                 allLensSurfBoxs.append(allAtomsSurfBoxs)
                 allLensBulkBoxs.append(allAtomsBulkBoxs)
                 allLensSurfCnts.append(len(allAtomsSurfBoxs))
-    cntChange = [log10(sCnt) if sCnt != 0 else np.nan for sCnt in allLensSurfCnts]
+    counts = [log10(sCnt) if sCnt != 0 else np.nan for sCnt in allLensSurfCnts]
 
     if writeBox:
         writeBoxCoords(atomsEle, atomsXYZ, allLensSurfBoxs, allLensBulkBoxs, minXYZ, scanBoxLens, writeFileDir, npName)
-    return scaleChange, cntChange
+    return scales, counts
 
 
 # @annotate('findSlope', color='green')
-def findSlope(scaleChange, cntChange, npName='', writeFileDir='boxCntOutputs', lenRange='trim',
-              minSampleNum=5, confIntPerc=95, visReg=True, saveFig=False, showPlot=False):
+def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange='trim',
+              minSampleNum=5, confLvl=95, visReg=True, saveFig=False, showPlot=False):
     """
     Compute the slope (box counting dimension) from the box-counting data collected.
 
     Parameters
     ----------
-    scaleChange : list
+    scales : list
         Box lengths.
-    cntChange : list
+    counts : list
         Number of boxes that cover the exact spherical surface of interest.
     npName : str, optional
         Identifier of the measured object, which forms part of the output file name, ideally unique.
@@ -221,14 +228,14 @@ def findSlope(scaleChange, cntChange, npName='', writeFileDir='boxCntOutputs', l
         coefficient of determination by iteratively removing the box counts obtained using boxes of extreme sizes.
     minSampleNum : int, optional
         Minimum number of box count data points to be retained for slope estimation from the linear regression fitting.
-    confIntPerc : Union[int, float]
+    confLvl : Union[int, float]
         Confidence level of confidence interval in percentage.
     visReg : bool, optional
         Whether to generate figures from the linear regression fitting process.
     saveFig : bool, optional
-        Whether to save the plots generated.
+        Whether to save the plots generated, only works when 'visReg' is True.
     showPlot : bool, optional
-        Whether to show the plots generated.
+        Whether to show the plots generated, only works when 'visReg' is True.
     
     Returns
     -------
@@ -239,16 +246,18 @@ def findSlope(scaleChange, cntChange, npName='', writeFileDir='boxCntOutputs', l
     slopeCI : tuple
         Confidence interval of the box-counting dimension of the point clouds surface.
     """
-    while np.nan in cntChange:
-        nanIdx = cntChange.index(np.nan)
-        del cntChange[nanIdx]
-        del scaleChange[nanIdx]
-    firstPointIdx, lastPointIdx, removeSmallBoxes = 0, len(scaleChange), True  # countChange.count(countChange[0])
+    while np.nan in counts:
+        nanIdx = counts.index(np.nan)
+        del counts[nanIdx]
+        del scales[nanIdx]
+    firstPointIdx, lastPointIdx, removeSmallBoxes = 0, len(scales), True  # countChange.count(countChange[0])
 
-    alphaCI = 1 - confIntPerc/100
-    r2score, boxCntDim, slopeCI, r2scorePrev, boxCntDimPrev, slopeCIPrev = 0.0, 0.0, (0.0, 0.0), 0.0, 0.0, (0.0, 0.0)
-    while len(scaleChange[firstPointIdx:lastPointIdx]) > minSampleNum:
-        x, y = scaleChange[firstPointIdx:lastPointIdx], cntChange[firstPointIdx:lastPointIdx]
+    if abs(confLvl) > 100:
+        warn(f"Confidence level out of range, confidence intervals are unreliable! 'confLvl' should be within [0, 100) instead of {confLvl}")
+    alphaCI = 1 - confLvl/100
+    r2score, boxCntDim, slopeCI, r2scorePrev, boxCntDimPrev, slopeCIPrev = 0.0, 0.0, np.array((np.inf, np.inf)), 0.0, 0.0, np.array((np.inf, np.inf))
+    while len(scales[firstPointIdx:lastPointIdx]) > minSampleNum:
+        x, y = scales[firstPointIdx:lastPointIdx], counts[firstPointIdx:lastPointIdx]
         regModel = OLS(endog=y, exog=add_constant(x)).fit()
         r2score, boxCntDim, slopeCI = regModel.rsquared, regModel.params[1], regModel.conf_int(alpha=alphaCI)[1]
         yPred = regModel.predict()  # Returns ndarray, allowing subtraction later
@@ -264,7 +273,7 @@ def findSlope(scaleChange, cntChange, npName='', writeFileDir='boxCntOutputs', l
             ax.set_xlabel('log(1/r)')
             ax.set_ylabel('log(N)')
             ax.yaxis.set_major_formatter(FormatStrFormatter('% 1.1f'))
-            ax.set_title(f"{npName} R2: {r2score:.3f}, D_Box: {boxCntDim:.3f}, {confIntPerc}% CI: "
+            ax.set_title(f"{npName} R2: {r2score:.3f}, D_Box: {boxCntDim:.3f}, {confLvl}% CI: "
                       f"[{slopeCI[0]:.3f}, {slopeCI[1]:.3f}]");
         # Removal of next point (beware of weird behaviour in middle range)
         # lstSqErrs = np.subtract(y, yPred) ** 2
@@ -286,6 +295,8 @@ def findSlope(scaleChange, cntChange, npName='', writeFileDir='boxCntOutputs', l
         if saveFig:
             boxCntDimsDir = f"{writeFileDir}/boxCntDims"
             if not isdir(boxCntDimsDir):
+                if not isdir(writeFileDir):
+                    mkdir(writeFileDir)
                 mkdir(boxCntDimsDir)
             plt.savefig(f"{boxCntDimsDir}/{npName}_boxCntDim.png")
         if showPlot:
@@ -300,7 +311,7 @@ def findSlope(scaleChange, cntChange, npName='', writeFileDir='boxCntOutputs', l
 # @estDuration
 def runBoxCnt(xyzFilePath, 
               radType='atomic', calcBL=False, findSurfOption='alphaShape', alphaMult=2.0,
-              writeFileDir='boxCntOutputs', lenRange='trim', minSampleNum=5, confIntPerc=95, 
+              writeFileDir='boxCntOutputs', lenRange='trim', minSampleNum=5, confLvl=95, 
               rmInSurf=True, vis=True, saveFig=False, showPlot=False, verbose=False,
               runPointCloudBoxCnt=True, numPoints=300, gridNum=1024, exeDir='../bin', procUnit='cpu', genPCD=False,
               runExactSphereBoxCnt=True, minLenMult=0.25, maxLenMult=1, numBoxLenSample=10, writeBox=True, 
@@ -329,7 +340,7 @@ def runBoxCnt(xyzFilePath,
         coefficient of determination by iteratively removing the box counts obtained using boxes of extreme sizes.
     minSampleNum : int, optional
         Minimum number of box count data points to be retained for slope estimation from the linear regression fitting.
-    confIntPerc : Union[int, float], optional
+    confLvl : Union[int, float], optional
         Confidence level of confidence interval in percentage.
     rmInSurf : bool, optional
         Whether to remove the surface points on the inner surface.
@@ -406,7 +417,7 @@ def runBoxCnt(xyzFilePath,
                                              radType, numPoints, gridNum,
                                              rmInSurf, vis, verbose, genPCD)
         r2PC, bcDimPC, confIntPC = findSlope(scalesPC, countsPC, f"{testCase}_PC", writeFileDir, lenRange,
-                                             minSampleNum, confIntPerc, vis, saveFig, showPlot)
+                                             minSampleNum, confLvl, vis, saveFig, showPlot)
     if runExactSphereBoxCnt:
         minAtomRad = atomsRad.min()
         scalesES, countsES = getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
@@ -414,7 +425,7 @@ def runBoxCnt(xyzFilePath,
                                               minXYZ, testCase, writeFileDir, numBoxLenSample,
                                               rmInSurf, writeBox, verbose, boxLenConc, maxWorkers)
         r2ES, bcDimES, confIntES = findSlope(scalesES, countsES, f"{testCase}_ES", writeFileDir, lenRange,
-                                             minSampleNum, confIntPerc, vis, saveFig, showPlot)
+                                             minSampleNum, confLvl, vis, saveFig, showPlot)
     if verbose:
         if runPointCloudBoxCnt:
             print(f"  Point clouds  D_Box: {bcDimPC:.4f} [{confIntPC[0]:.4f}, {confIntPC[1]:.4f}],  R2: {r2PC:.4f}")

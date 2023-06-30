@@ -150,6 +150,8 @@ def writeBoxCoords(atomsEle, atomsXYZ, allSurfBoxs, allBulkBoxs, minXYZ, scanBox
     minX, minY, minZ = minXYZ
     boxCoordsDir = f"{writeFileDir}/boxCoords"
     if not isdir(boxCoordsDir):
+        if not isdir(writeFileDir):
+            mkdir(writeFileDir)
         mkdir(boxCoordsDir)
     with open(f"{boxCoordsDir}/{npName}_boxCoords.xyz", 'w') as f:
         for (i, scanBoxLen) in enumerate(scanBoxLens):
