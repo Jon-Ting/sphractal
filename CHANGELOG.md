@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.2 (2023-06-30)
+
+### Fix
+
+* **cicd:** Updated ci-cd workflow ([`24b253c`](https://github.com/Jon-Ting/sphractal/commit/24b253cac9a6d8b6df81751376415ba02b7806cb))
+
 ## v0.4.1 (2023-06-29)
 
 
