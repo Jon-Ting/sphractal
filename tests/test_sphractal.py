@@ -216,11 +216,11 @@ def test_findTargetAtoms(egAtomsNeighIdxs, egTargetAtomIdxs):
 @mark.parametrize('saveFig, figExists', [(True, True), (False, False)])
 def test_findSlopeVis(lenRange, visReg, saveFig, figExists, egSphereBoxCnts):
     """Unit test of findSlope() functionalities for different 'lenRange', 'visReg', and 'saveFig' options."""
-    boxCntDimsAct = findSlope(egSphereBoxCnts[0], egSphereBoxCnts[1], 'example_ES', 'boxCntOutputs', lenRange, visReg=visReg, saveFig=saveFig)
-    assert exists('./boxCntOutputs/boxCntDims/example_ES_boxCntDim.png') == figExists, 'example_ES_boxCntDim.png is not found'
-    assert isfile('./boxCntOutputs/boxCntDims/example_ES_boxCntDim.png') == figExists, 'example_ES_boxCntDim.png is not a file'
-    if isdir('./boxCntOutputs'):
-        rmtree('./boxCntOutputs')
+    boxCntDimsAct = findSlope(egSphereBoxCnts[0], egSphereBoxCnts[1], 'example_ES', 'tests/boxCntOutputs', lenRange, visReg=visReg, saveFig=saveFig)
+    assert exists('./tests/boxCntOutputs/boxCntDims/example_ES_boxCntDim.png') == figExists, 'example_ES_boxCntDim.png is not found'
+    assert isfile('./tests/boxCntOutputs/boxCntDims/example_ES_boxCntDim.png') == figExists, 'example_ES_boxCntDim.png is not a file'
+    if isdir('./tests/boxCntOutputs'):
+        rmtree('./tests/boxCntOutputs')
 
 
 @mark.filterwarnings('ignore')
@@ -245,26 +245,26 @@ def test_findSlopeAcc(scales, counts, boxCntDimsExp):
 def test_getVoxelBoxCntVis(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs):
     """Unit test of getVoxelBoxCnts() functionalities to generate output files for visualisation."""
     voxelScalesAct, voxelCountsAct = getVoxelBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
-                                                     'example', verbose=True, genPCD=True)
-    assert exists('./boxCntOutputs/surfVoxelIdxs.txt'), 'surfVoxelBoxIdxs.txt is not found'
-    assert isfile('./boxCntOutputs/surfVoxelIdxs.txt'), 'surfVoxelBoxIdxs.txt is a file'
-    assert exists('./boxCntOutputs/surfVoxelBoxCnts.txt'), 'surfVoxelBoxCnts is not found'
-    assert isfile('./boxCntOutputs/surfVoxelBoxCnts.txt'), 'surfVoxelBoxCnts is not a file'
-    assert exists('./boxCntOutputs/surfPoints/example_surfPoints.xyz'), 'example_surfPoints.xyz is not found'
-    assert isfile('./boxCntOutputs/surfPoints/example_surfPoints.xyz'), 'example_surfPoints.xyz is not a file'
-    assert exists('./boxCntOutputs/surfPoints/example_surfPoints.pcd'), 'example_surfPoints.pcd is not found'
-    assert isfile('./boxCntOutputs/surfPoints/example_surfPoints.pcd'), 'example_surfPoints.pcd is not a file'
-    assert exists('./boxCntOutputs/surfVoxels/example_surfVoxels.xyz'), 'example_surfVoxels.xyz is not found'
-    assert isfile('./boxCntOutputs/surfVoxels/example_surfVoxels.xyz'), 'example_surfVoxels.xyz is not a file'
-    if isdir('./boxCntOutputs'):
-        rmtree('./boxCntOutputs')
+                                                     'example', 'tests/boxCntOutputs', 'bin', verbose=True, genPCD=True)
+    assert exists('./tests/boxCntOutputs/surfVoxelIdxs.txt'), 'surfVoxelBoxIdxs.txt is not found'
+    assert isfile('./tests/boxCntOutputs/surfVoxelIdxs.txt'), 'surfVoxelBoxIdxs.txt is a file'
+    assert exists('./tests/boxCntOutputs/surfVoxelBoxCnts.txt'), 'surfVoxelBoxCnts is not found'
+    assert isfile('./tests/boxCntOutputs/surfVoxelBoxCnts.txt'), 'surfVoxelBoxCnts is not a file'
+    assert exists('./tests/boxCntOutputs/surfPoints/example_surfPoints.xyz'), 'example_surfPoints.xyz is not found'
+    assert isfile('./tests/boxCntOutputs/surfPoints/example_surfPoints.xyz'), 'example_surfPoints.xyz is not a file'
+    assert exists('./tests/boxCntOutputs/surfPoints/example_surfPoints.pcd'), 'example_surfPoints.pcd is not found'
+    assert isfile('./tests/boxCntOutputs/surfPoints/example_surfPoints.pcd'), 'example_surfPoints.pcd is not a file'
+    assert exists('./tests/boxCntOutputs/surfVoxels/example_surfVoxels.xyz'), 'example_surfVoxels.xyz is not found'
+    assert isfile('./tests/boxCntOutputs/surfVoxels/example_surfVoxels.xyz'), 'example_surfVoxels.xyz is not a file'
+    if isdir('./tests/boxCntOutputs'):
+        rmtree('./tests/boxCntOutputs')
 
 
 @mark.parametrize('rmInSurf, voxelScalesExp, voxelCountsExp', [(True, [-2.70926996, -2.40823997, -2.10720997, -1.80617997, -1.50514998, -1.20411998, -0.90308999, -0.60205999, -0.30103], [0.90308999, 1.50514998, 2.30963017, 2.91855453, 3.49192171, 4.05419158, 4.47568571, 4.51703746, 4.52071928]), (False, [-2.70926996, -2.40823997, -2.10720997, -1.80617997, -1.50514998, -1.20411998, -0.90308999, -0.60205999, -0.30103], [0.90308999, 1.50514998, 2.35024802, 3.02530587, 3.62479758, 4.14640714, 4.54740546, 4.5884958, 4.59508819])])
 def test_getVoxelBoxCntAcc(rmInSurf, voxelScalesExp, voxelCountsExp, egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs):
     """Unit test of getVoxelBoxCnts() outputs accuracy."""
     voxelScalesAct, voxelCountsAct = getVoxelBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
-                                                     'example', rmInSurf=rmInSurf, vis=False)
+                                                     'example', 'tests/boxCntOutputs', 'bin', rmInSurf=rmInSurf, vis=False)
     assert voxelScalesAct == approx(voxelScalesExp), 'Incorrect scales'
     assert voxelCountsAct == approx(voxelCountsExp), 'Incorrect box counts'
 
@@ -273,22 +273,22 @@ def test_getVoxelBoxCntAcc(rmInSurf, voxelScalesExp, voxelCountsExp, egAtomsEle,
 def test_getSphereBoxCnt(rmInSurf, sphereScalesExp, sphereCountsExp, egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs, egMinMaxXYZ):
     """Unit test of getSphereBoxCnts()."""
     sphereScalesAct, sphereCountsAct = getSphereBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
-                                                        MAX_RANGE, (ATOM_RAD*0.25, ATOM_RAD), egMinMaxXYZ[0], 'example', rmInSurf=rmInSurf)
+                                                        MAX_RANGE, (ATOM_RAD*0.25, ATOM_RAD), egMinMaxXYZ[0], 'example', 'tests/boxCntOutputs', rmInSurf=rmInSurf)
     assert sphereCountsAct == approx(sphereCountsExp), 'Incorrect scales'
     assert sphereCountsAct == approx(sphereCountsExp), 'Incorrect box counts'
-    assert exists('./boxCntOutputs/boxCoords/example_boxCoords.xyz'), 'example_boxCoords.xyz is not found'
-    assert isfile('./boxCntOutputs/boxCoords/example_boxCoords.xyz'), 'example_boxCoords.xyz is not a file'
-    if isdir('./boxCntOutputs'):
-        rmtree('./boxCntOutputs')
+    assert exists('./tests/boxCntOutputs/boxCoords/example_boxCoords.xyz'), 'example_boxCoords.xyz is not found'
+    assert isfile('./tests/boxCntOutputs/boxCoords/example_boxCoords.xyz'), 'example_boxCoords.xyz is not a file'
+    if isdir('./tests/boxCntOutputs'):
+        rmtree('./tests/boxCntOutputs')
 
 
 def test_runBoxCnt(egVoxelBoxCntDims, egSphereBoxCntDims):
     """Unit and regression test of runBoxCnt()."""
-    boxCntDimsAct = runBoxCnt(getExampleDataPath(), runPointCloudBoxCnt=True, runExactSphereBoxCnt=True)
+    boxCntDimsAct = runBoxCnt(getExampleDataPath(), writeFileDir='tests/boxCntOutputs', runPointCloudBoxCnt=True, exeDir='bin', runExactSphereBoxCnt=True)
     assert boxCntDimsAct[:2] == approx(egVoxelBoxCntDims[:2]), 'Incorrect R2 and D_Box for point clouds representation'
     assert boxCntDimsAct[2] == approx(egVoxelBoxCntDims[2]), 'Incorrect confidence interval for point clouds representation'
     assert boxCntDimsAct[-3:-1] == approx(egSphereBoxCntDims[:2]), 'Incorrect R2 and D_Box for exact surface representation'
     assert boxCntDimsAct[-1] == approx(egSphereBoxCntDims[2]), 'Incorrect confidence interval for exact surface representation'
-    if isdir('./boxCntOutputs'):
-        rmtree('./boxCntOutputs')
+    if isdir('./tests/boxCntOutputs'):
+        rmtree('./tests/boxCntOutputs')
 
