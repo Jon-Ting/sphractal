@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.4 (2023-07-01)
+
+### Documentation
+
+* **readme:** Updated readme to specify the delay in point cloud functionalities ([`4d73e24`](https://github.com/Jon-Ting/sphractal/commit/4d73e24a911d82c7786c280b13b4258abf229446))
+
 ## v0.4.3 (2023-07-01)
 
 ### Fix
