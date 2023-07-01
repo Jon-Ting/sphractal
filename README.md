@@ -10,13 +10,25 @@ from overlapping spheres via box-counting algorithm.
 ## Features
 
 ### Current
-* Representation of the surface as either point clouds or exact surfaces.
+* Representation of the surface as either point clouds (feature yet to be made available due to C++ compilation issues) or exact surfaces.
 * Efficient algorithm for 3D box-counting calculations.
 * Customisable parameters to control the level of detail and accuracy of the calculation.
 
 ### To be Done
 * Set path for exeDir.
 * Publish to Conda.
+  * cd condaForge/
+  * conda skeleton pypi sphractal
+  * vim sphractal/meta.yaml ('name', 'version', 'git_rev', 'git_url', 'imports', 'home', 'noarch', 'maintainer')
+  * vim build.sh
+  * vim bld.bat
+  * conda-build sphractal (record path)
+  * conda install --use-local sphractal
+  * conda list
+  * anaconda login
+  * anaconda upload PATH_TO_BZ2
+  * conda config --set anaconda_upload yes
+  * anaconda logout
 * Nested multiprocessing.
 * Better looking plots, allow figure size to be specified, allow choice for 'paper' and 'presentation'.
 * Consider transforming xyz coordinates when atoms are read in to avoid using minXYZ repetitively in `scanAtom()`.
