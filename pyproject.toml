@@ -2,10 +2,22 @@
 name = "sphractal"
 version = "0.4.2"
 description = "Package to estimate fractal dimension of 3D surfaces formed from overlapping spheres via box-counting algorithm."
-authors = ["Jonathan Yik Chang Ting"]
+authors = ["Jonathan Yik Chang Ting <jonting97@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-include = ["tests/*"]
+homepage = "https://github.com/Jon-Ting/sphractal"
+repository = "https://github.com/Jon-Ting/sphractal"
+documentation = "https://sphractal.readthedocs.io/en/latest/"
+keywords = ["box-counting", "box-count", "fractal", "dimension", "sphere", "surface"]
+classifiers = [
+    "Intended Audience :: Science/Research", 
+    "Natural Language :: English", 
+    "Operating System :: OS Independent", 
+    "Programming Language :: C++", 
+    "Programming Language :: Python :: 3", 
+    "Topic :: Scientific/Engineering", 
+]
+include = ["tests/*", "src/fbc/*"]
 
 [tool.poetry.dependencies]
 python = ">=3.9"
