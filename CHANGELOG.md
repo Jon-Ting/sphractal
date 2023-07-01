@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.3 (2023-07-01)
+
+### Fix
+
+* **test:** Commented out tests for functionalities related to point cloud representation temporarily ([`86c5192`](https://github.com/Jon-Ting/sphractal/commit/86c5192be9bf8eca3721609d2f22e7e3fff615c8))
+* **test:** Fixed missing directory error when running pytest from package root ([`062c4db`](https://github.com/Jon-Ting/sphractal/commit/062c4db2496d51491f9258a7fa0ab1fcef87a3e0))
+* **mkdir:** Made sure that directories are generated before files are ([`c529767`](https://github.com/Jon-Ting/sphractal/commit/c529767b1dc168ead1932f19dd6a1191abeaaf7e))
+
+### Documentation
+
+* **readme:** Updated readme ([`a5e3aa0`](https://github.com/Jon-Ting/sphractal/commit/a5e3aa0a36943d149143b2a23588d87585a2d2cd))
+
 ## v0.4.2 (2023-06-30)
 
 ### Fix
