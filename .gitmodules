@@ -1,0 +1,3 @@
+[submodule "staged-recipes"]
+	path = staged-recipes
+	url = git@github.com:Jon-Ting/staged-recipes.git
