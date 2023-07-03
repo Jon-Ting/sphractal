@@ -1,6 +1,3 @@
-[submodule "staged-recipes"]
-	path = staged-recipes
-	url = git@github.com:Jon-Ting/staged-recipes.git
 [submodule "src/fastBC"]
 	path = src/fastBC
 	url = git@github.com:Jon-Ting/fastBC.git
