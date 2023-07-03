@@ -2,6 +2,21 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.0 (2023-07-03)
+
+### Feature
+
+* **pointcloud:** Implemented and provided clear instructions to use point cloud surface representation related functionalities ([`62d247c`](https://github.com/Jon-Ting/sphractal/commit/62d247c3fd277a3f4c96822f807bd0d56d392bbd))
+
+### Fix
+
+* **setup:** Turned tuple for classifiers in setup.py into list ([`5fa7910`](https://github.com/Jon-Ting/sphractal/commit/5fa79104290534003656a63d3ba9d807bf27f6d6))
+
+### Documentation
+
+* **example:** Deleted .virtual_documents from docs/ ([`78dbe38`](https://github.com/Jon-Ting/sphractal/commit/78dbe382b2a2038b2978e3e1cb61c5a5631116ee))
+* **example:** Updated example.ipynb to make sure fastBC executable could be detected ([`42cd8a6`](https://github.com/Jon-Ting/sphractal/commit/42cd8a6eef54158cfa39012cb0493db2f87f7c60))
+
 ## v0.4.4 (2023-07-01)
 
 ### Documentation
