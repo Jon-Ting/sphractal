@@ -16,7 +16,6 @@ from overlapping spheres via box-counting algorithm.
 
 ### Under Development
 * Nested multiprocessing (boxLenConc=True).
-* Better looking plots, allow figure size to be specified, allow choice for 'paper' and 'presentation'.
 * Transformation of xyz coordinates when atoms are read in to avoid using minXYZ repetitively in `scanAtom()`.
 * Integration of C++ code for point cloud surface representation into the package.
 

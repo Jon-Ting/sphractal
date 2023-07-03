@@ -9,10 +9,11 @@ from matplotlib.ticker import FormatStrFormatter
 import numpy as np
 from statsmodels.api import OLS, add_constant
 
-from sphractal.surfExact import findTargetAtoms, MIN_VAL_FROM_BOUND, scanAllAtoms, writeBoxCoords
-from sphractal.surfPointClouds import genSurfPoints
+from sphractal.constants import PLT_PARAMS
 from sphractal.utils import findNN, findSurf, readXYZ
 # from sphractal.utils import estDuration, annotate
+from sphractal.surfPointClouds import genSurfPoints
+from sphractal.surfExact import findTargetAtoms, MIN_VAL_FROM_BOUND, scanAllAtoms, writeBoxCoords
 
 
 # @annotate('getVoxelBoxCnts', color='blue')
@@ -143,7 +144,7 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
     verbose : bool, optional
         Whether to display the details.
     boxLenConc : bool, optional
-        Whether to parallelise the box-counting across different box lengths.
+        Whether to parallelise the box-counting across different box lengths (under development, stick to default for now).
     maxWorkers : int, optional
         Maximum number of processes to spawn for parallelisation of box-counting across different box lengths, only used
         if 'boxLenConc' is True.
@@ -208,7 +209,8 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
 
 # @annotate('findSlope', color='green')
 def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange='trim',
-              minSampleNum=5, confLvl=95, visReg=True, saveFig=False, showPlot=False):
+              minSampleNum=5, confLvl=95, 
+              visReg=True, figType='article', saveFig=False, showPlot=False):
     """
     Compute the slope (box counting dimension) from the box-counting data collected.
 
@@ -231,6 +233,8 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
         Confidence level of confidence interval in percentage.
     visReg : bool, optional
         Whether to generate figures from the linear regression fitting process.
+    figType : {'article', 'poster', 'ppt'}
+        Type of figures to be generated.
     saveFig : bool, optional
         Whether to save the plots generated, only works when 'visReg' is True.
     showPlot : bool, optional
@@ -245,6 +249,16 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
     slopeCI : tuple
         Confidence interval of the box-counting dimension of the point clouds surface.
     """
+    if visReg:
+        import matplotlib as mpl
+        mpl.rcParams.update(mpl.rcParamsDefault)
+
+        plt.rc('font', family='sans-serif')
+        plt.rc('xtick', labelsize='x-small')
+        plt.rc('ytick', labelsize='x-small')
+        params = PLT_PARAMS[figType]
+        figsize, dpi, fontsize, labelsize, legendsize, linewidth, markersize = params['figsize'], params['dpi'], params['fontsize'], params['labelsize'], params['legendsize'], params['linewidth'], params['markersize']
+
     while np.nan in counts:
         nanIdx = counts.index(np.nan)
         del counts[nanIdx]
@@ -262,18 +276,24 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
         yPred = regModel.predict()  # Returns ndarray, allowing subtraction later
         if visReg:
             plt.close()
-            _, ax = plt.subplots()
-            ax.scatter(x, y)
-            ax.plot(x, yPred, label='OLS')
+            fig = plt.figure(figsize=figsize, dpi=dpi)
+            ax = fig.add_subplot(1, 1, 1)
+            handleScatter = ax.scatter(x, y, marker='o', s=markersize, c='r', alpha=1, edgecolors='k', linewidths=1.2, zorder=3)
+            handleFittedLine = ax.plot(x, yPred, linestyle='-', linewidth=1., color='k', label='OLS')
+            ax.grid(linestyle='dotted')
             predOLS = regModel.get_prediction()
             lowCIvals, upCIvals = predOLS.summary_frame()['mean_ci_lower'], predOLS.summary_frame()['mean_ci_upper']
-            ax.plot(x, upCIvals, 'r--')
-            ax.plot(x, lowCIvals, 'r--')
-            ax.set_xlabel('log(1/r)')
-            ax.set_ylabel('log(N)')
+            handleConfInt = ax.plot(x, upCIvals, linestyle='--', linewidth=linewidth, color='b')
+            ax.plot(x, lowCIvals, linestyle='--', linewidth=linewidth, color='b')
+            ax.fill_between(x, upCIvals, lowCIvals, alpha=0.2)
+            ax.set_xlabel(r'log$(1/\epsilon)$', fontsize=labelsize)
+            ax.set_ylabel(r'log$(N)$', fontsize=labelsize)
             ax.yaxis.set_major_formatter(FormatStrFormatter('% 1.1f'))
-            ax.set_title(f"{npName} R2: {r2score:.3f}, D_Box: {boxCntDim:.3f}, {confLvl}% CI: "
-                      f"[{slopeCI[0]:.3f}, {slopeCI[1]:.3f}]");
+            ax.legend(handles=(handleScatter, handleFittedLine[0], handleConfInt[0]), 
+                      labels=('Actual box counts', fr"Best fit line ($R^2$: {r2score:.3f})", f"{confLvl}% confidence bands"), 
+                      title=fr"$D_{{box}}$: {boxCntDim:.3f} [{slopeCI[0]:.3f}, {slopeCI[1]:.3f}]", title_fontsize=legendsize, 
+                      fontsize=legendsize)
+            #plt.tight_layout()
         # Removal of next point (beware of weird behaviour in middle range)
         # lstSqErrs = np.subtract(y, yPred) ** 2
         # if len(y) % 2 == 0:
@@ -297,7 +317,7 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
                 if not isdir(writeFileDir):
                     mkdir(writeFileDir)
                 mkdir(boxCntDimsDir)
-            plt.savefig(f"{boxCntDimsDir}/{npName}_boxCntDim.png")
+            plt.savefig(f"{boxCntDimsDir}/{npName}_boxCntDim.pdf", bbox_inches='tight')
         if showPlot:
             plt.show()
         r2scorePrev, boxCntDimPrev, slopeCIPrev = r2score, boxCntDim, slopeCI
@@ -311,7 +331,7 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
 def runBoxCnt(xyzFilePath, 
               radType='atomic', calcBL=False, findSurfOption='alphaShape', alphaMult=2.0,
               writeFileDir='boxCntOutputs', lenRange='trim', minSampleNum=5, confLvl=95, 
-              rmInSurf=True, vis=True, saveFig=False, showPlot=False, verbose=False,
+              rmInSurf=True, vis=True, figType='article', saveFig=False, showPlot=False, verbose=False,
               runPointCloudBoxCnt=True, numPoints=300, gridNum=1024, exePath='$FASTBC_EXE', genPCD=False,
               runExactSphereBoxCnt=True, minLenMult=0.25, maxLenMult=1, numBoxLenSample=10, writeBox=True, 
               boxLenConc=False, maxWorkers=2):
@@ -345,6 +365,8 @@ def runBoxCnt(xyzFilePath,
         Whether to remove the surface points on the inner surface.
     vis : bool, optional
         Whether to generate output files for visualisation.
+    figType : {'article', 'poster', 'ppt'}
+        Type of figures to be generated.
     saveFig : bool, optional
         Whether to save the plots generated, only used if 'vis' is True.
     showPlot : bool, optional
@@ -414,7 +436,7 @@ def runBoxCnt(xyzFilePath,
                                              radType, numPoints, gridNum,
                                              rmInSurf, vis, verbose, genPCD)
         r2PC, bcDimPC, confIntPC = findSlope(scalesPC, countsPC, f"{testCase}_PC", writeFileDir, lenRange,
-                                             minSampleNum, confLvl, vis, saveFig, showPlot)
+                                             minSampleNum, confLvl, vis, figType, saveFig, showPlot)
     if runExactSphereBoxCnt:
         minAtomRad = atomsRad.min()
         scalesES, countsES = getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
@@ -422,7 +444,7 @@ def runBoxCnt(xyzFilePath,
                                               minXYZ, testCase, writeFileDir, numBoxLenSample,
                                               rmInSurf, writeBox, verbose, boxLenConc, maxWorkers)
         r2ES, bcDimES, confIntES = findSlope(scalesES, countsES, f"{testCase}_ES", writeFileDir, lenRange,
-                                             minSampleNum, confLvl, vis, saveFig, showPlot)
+                                             minSampleNum, confLvl, vis, figType, saveFig, showPlot)
     if verbose:
         if runPointCloudBoxCnt:
             print(f"  Point clouds  D_Box: {bcDimPC:.4f} [{confIntPC[0]:.4f}, {confIntPC[1]:.4f}],  R2: {r2PC:.4f}")
