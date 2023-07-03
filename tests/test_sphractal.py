@@ -9,8 +9,7 @@ from sphractal.datasets import getExampleDataPath
 from sphractal.utils import estDuration, getMinMaxXYZ, readXYZ, findNN, findSurf, calcDist, closestSurfAtoms, oppositeInnerAtoms
 from sphractal.surfPointClouds import fibonacciSphere, pointsOnAtom, pointsToVoxels
 from sphractal.surfExact import getNearFarCoord, scanBox, writeBoxCoords, findTargetAtoms
-from sphractal.boxCnt import getVoxelBoxCnts, getSphereBoxCnts, findSlope
-from sphractal import runBoxCnt
+from sphractal.boxCnt import getVoxelBoxCnts, getSphereBoxCnts, findSlope, runBoxCnt
 
 
 EG_XYZ_ATOM_NUM = 670
@@ -186,7 +185,6 @@ def test_fibonacciSphere(numPoint, sphereRad, xyzsExp):
 #def test_pointsToVoxels(gridSize, numVoxelsExp, egPointXYZs):
 #    """Unit test of pointsToVoxels(). (To be implemented)"""
 #    voxelXYZs, voxelIdxs = pointsToVoxels(egPointXYZs, gridSize)
-#
 #    assert len(voxelIdxs) == numVoxelsExp, 'Incorrect number of voxels'
 
 
@@ -234,7 +232,7 @@ def test_findSlopeConfInt(minSampleNum, isFinite1, confLvl, isFinite2, egSphereB
 
 #@mark.parametrize('scales, counts, boxCntDimsExp', [([-2.70926996, -2.40823997, -2.10720997, -1.80617997, -1.50514998, -1.20411998, -0.90308999, -0.60205999, -0.30103], [0.90308999, 1.50514998, 2.30963017, 2.91855453, 3.49192171, 4.05419158, 4.47568571, 4.51703746, 4.52071928], (0.99646974, 2.11889159, np.array((1.94381059, 2.29397261)))), ([-0.23688234, -0.16309612, -0.10004438, -0.03477764, 0.03932408, 0.10260591, 0.17060299, 0.24023892, 0.30488175, 0.37314659], [3.20194306, 3.32139128, 3.5171959 , 3.68142216, 3.80522891, 3.9531796 , 4.09272064, 4.27207379, 4.38937875, 4.52953301], (0.99660096, 2.24426950, np.array((2.11334077, 2.37519824))))])
 #def test_findSlopeAcc(scales, counts, boxCntDimsExp):
-#    """Unit test of findSlope() outputs accuracy."""
+#    """Unit test of findSlope() outputs accuracy (To be uncommented when compiled C++ code could be shipped together)."""
 #    boxCntDimsAct = findSlope(scales, counts)
 #    assert isinstance(boxCntDimsAct[2], np.ndarray), 'Confidence interval returned is not ndarray'
 #    assert len(boxCntDimsAct[2]) == 2, 'Confidence interval returned is not two numbers'
@@ -243,7 +241,7 @@ def test_findSlopeConfInt(minSampleNum, isFinite1, confLvl, isFinite2, egSphereB
 
 
 #def test_getVoxelBoxCntVis(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs):
-#    """Unit test of getVoxelBoxCnts() functionalities to generate output files for visualisation."""
+#    """Unit test of getVoxelBoxCnts() functionalities to generate output files for visualisation (To be uncommented when compiled C++ code could be shipped together)."""
 #    voxelScalesAct, voxelCountsAct = getVoxelBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
 #                                                     'example', 'tests/boxCntOutputs', 'bin', verbose=True, genPCD=True)
 #    assert exists('./tests/boxCntOutputs/surfVoxelIdxs.txt'), 'surfVoxelBoxIdxs.txt is not found'
@@ -262,7 +260,7 @@ def test_findSlopeConfInt(minSampleNum, isFinite1, confLvl, isFinite2, egSphereB
 
 #@mark.parametrize('rmInSurf, voxelScalesExp, voxelCountsExp', [(True, [-2.70926996, -2.40823997, -2.10720997, -1.80617997, -1.50514998, -1.20411998, -0.90308999, -0.60205999, -0.30103], [0.90308999, 1.50514998, 2.30963017, 2.91855453, 3.49192171, 4.05419158, 4.47568571, 4.51703746, 4.52071928]), (False, [-2.70926996, -2.40823997, -2.10720997, -1.80617997, -1.50514998, -1.20411998, -0.90308999, -0.60205999, -0.30103], [0.90308999, 1.50514998, 2.35024802, 3.02530587, 3.62479758, 4.14640714, 4.54740546, 4.5884958, 4.59508819])])
 #def test_getVoxelBoxCntAcc(rmInSurf, voxelScalesExp, voxelCountsExp, egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs):
-#    """Unit test of getVoxelBoxCnts() outputs accuracy."""
+#    """Unit test of getVoxelBoxCnts() outputs accuracy (To be uncommented when compiled C++ code could be shipped together)."""
 #    voxelScalesAct, voxelCountsAct = getVoxelBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
 #                                                     'example', 'tests/boxCntOutputs', 'bin', rmInSurf=rmInSurf, vis=False)
 #    assert voxelScalesAct == approx(voxelScalesExp), 'Incorrect scales'
@@ -283,7 +281,7 @@ def test_getSphereBoxCnt(rmInSurf, sphereScalesExp, sphereCountsExp, egAtomsEle,
 
 
 #def test_runBoxCnt(egVoxelBoxCntDims, egSphereBoxCntDims):
-#    """Unit and regression test of runBoxCnt()."""
+#    """Unit and regression test of runBoxCnt() (To be uncommented when compiled C++ code could be shipped together)."""
 #    boxCntDimsAct = runBoxCnt(getExampleDataPath(), writeFileDir='tests/boxCntOutputs', runPointCloudBoxCnt=True, exeDir='bin', runExactSphereBoxCnt=True)
 #    assert boxCntDimsAct[:2] == approx(egVoxelBoxCntDims[:2]), 'Incorrect R2 and D_Box for point clouds representation'
 #    assert boxCntDimsAct[2] == approx(egVoxelBoxCntDims[2]), 'Incorrect confidence interval for point clouds representation'
