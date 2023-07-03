@@ -17,7 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3", 
     "Topic :: Scientific/Engineering", 
 ]
-include = ["tests/*", "src/fbc/*", "setup.py"]
+include = ["tests/*", "setup.py"]
 
 [tool.poetry.dependencies]
 python = ">=3.9"
@@ -37,7 +37,7 @@ sphinx-rtd-theme = ">=1.2.2"
 python-semantic-release = ">=7.34.6"
 
 [tool.semantic_release]
-version_variable = "pyproject.toml:version" # version location
+version_variable = "setup.py:__version__"   # version location
 branch = "main"                             # branch to make releases of
 changelog_file = "CHANGELOG.md"             # changelog file
 build_command = "poetry build"              # build dists
