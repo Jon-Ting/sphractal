@@ -10,32 +10,19 @@ from overlapping spheres via box-counting algorithm.
 ## Features
 
 ### Current
-* Representation of the surface as either point clouds (feature yet to be made available due to C++ compilation issues) or exact surfaces.
+* Representation of the surface as either point clouds or exact surfaces.
 * Efficient algorithm for 3D box-counting calculations.
 * Customisable parameters to control the level of detail and accuracy of the calculation.
 
-### To be Done
-* Set path for exeDir.
-* Publish to Conda.
-  * cd condaForge/
-  * conda skeleton pypi sphractal
-  * vim sphractal/meta.yaml ('name', 'version', 'git_rev', 'git_url', 'imports', 'home', 'noarch', 'maintainer')
-  * vim build.sh
-  * vim bld.bat
-  * conda-build sphractal (record path)
-  * conda install --use-local sphractal
-  * conda list
-  * anaconda login
-  * anaconda upload PATH_TO_BZ2
-  * conda config --set anaconda_upload yes
-  * anaconda logout
-* Nested multiprocessing.
+### Under Development
+* Nested multiprocessing (boxLenConc=True).
 * Better looking plots, allow figure size to be specified, allow choice for 'paper' and 'presentation'.
-* Consider transforming xyz coordinates when atoms are read in to avoid using minXYZ repetitively in `scanAtom()`.
+* Transformation of xyz coordinates when atoms are read in to avoid using minXYZ repetitively in `scanAtom()`.
+* Integration of C++ code for point cloud surface representation into the package.
 
 ## Installation
 
-Use `pip` or `conda` (yet to be implemented) to install `Sphractal`:
+Use `pip` or `conda` to install `Sphractal`:
 
 ```bash
 $ pip install sphractal
@@ -44,22 +31,30 @@ $ pip install sphractal
 $ conda install -c conda-forge sphractal
 ```
 
-`Sphractal` requires a C++ code to be compiled for the functionalities related to point clouds surface representation 
-to work. This could be done by first changing into the director containing the C++ source code: 
+### Special Requirement for Point Cloud Surface Representation
+`Sphractal` requires an executable compiled from another freely available repository for the functionalities related 
+to point clouds surface representation to operate properly. 
 
+This could be done by:
+
+* Downloading the source code from the [repository](https://github.com/Jon-Ting/fastBC.git) to a directory of your choice:
 ```bash
-$ cd {SPHRACTAL_DIR_PATH}/src/fbc/
+git clone https://github.com/Jon-Ting/fastBC.git
 ```
 
-And then compile either of the two file using respective C++ compiler. 
-The second option is only viable for machines with `CUDA` platform available.
+* Building an executable by doing either one of the following compilations according to the instructions on the [README.md](https://github.com/Jon-Ting/fastBC/blob/main/README.md) page. This will decide whether you will be running the box counting algorithm with GPU acceleration. Feel free to rename the executables to any other sensible names:
+```bash
+$ g++ 3DbinImBCcpu.cpp bcCPU.cpp -o 3DbinImBCcpu.exe
+```
+```bash
+$ nvcc -O3 3DbinImBCgpu.cpp bcCUDA3D.cu -o 3DbinImBCgpu.exe
+```
 
+* (Optional) Setting the path to the executable as an environment variable accessible by Python (replace `PATH_TO_EXE` by the absolute path to the executable file you just built), otherwise you could always pass the path to the executable to the relevant functions:
 ```bash
-$ g++ 3DbinImBCcpu.cpp bcCPU.cpp -o {SPHRACTAL_DIR_PATH}/bin/3DbinImBCcpu.exe
+$ export FASTBC_EXE={PATH_TO_EXE}
 ```
-```bash
-$ nvcc -O3 bcCUDA3D.cu 3DbinImBCgpu.cpp -o {SPHRACTAL_DIR_PATH}/bin/3DbinImBCgpu.exe
-```
+Note that for the environment variable to be persistent (to still exist after the terminal is closed), the line should be added to your `~/.bashrc`.
 
 ## Usage
 

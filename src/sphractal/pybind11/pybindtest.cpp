@@ -1,3 +1,4 @@
+#include <pybind11/pybind11.h>
 #include <iostream>
 #include <cmath>
 #include <chrono>
@@ -10,7 +11,7 @@ void pointsTo3DImage(unsigned char* matrix, int* idxarr, int n) {
         matrix[idxarr[i]] = 1;
 }
 
-int main(int argc, char* argv[]) {
+int boxCnt3DbinIm(int argc, char* argv[]) {
     // Check command line arguments
     if (argc != 4) {
         std::cerr << "Usage: " << argv[0] << " <input_file> <output_file> <grid_num>\n";
@@ -74,3 +75,8 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
+PYBIND11_MODULE(runBoxCnt3DbinIm, m) {
+    m.doc() = "pybind11 example plugin"; // optional module docstring
+
+    m.def("boxCnt3DbinIm", &boxCnt3DbinIm, "A function that adds two numbers");
+}

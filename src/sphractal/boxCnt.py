@@ -17,13 +17,15 @@ from sphractal.utils import findNN, findSurf, readXYZ
 
 # @annotate('getVoxelBoxCnts', color='blue')
 def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                    npName, writeFileDir='boxCntOutputs', exeDir='../bin', procUnit='cpu',
+                    npName, writeFileDir='boxCntOutputs', exePath='$FASTBC_EXE',
                     radType='atomic', numPoint=300, gridNum=1024,
                     rmInSurf=True, vis=True, verbose=False, genPCD=False):
     """
     Count the boxes that cover the outer surface of a set of overlapping spheres represented as point clouds for
-    different box sizes, using 3D box-counting algorithm written by Ruiz de Miras et al. in C++. All source codes are
-    provided under {SPHRACTAL_DIR_PATH}/src/fbc/.
+    different box sizes, using 3D box-counting algorithm written by Ruiz de Miras et al. in C++. 
+
+    IMPORTANT: Make sure the source code has been downloaded from https://github.com/Jon-Ting/fastBC and compiled 
+    on your machine. 'exePath' should point to the right directory if FASTBC_EXE is not set as an environment variable.
     
     Parameters
     ----------
@@ -41,10 +43,8 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         Identifier of the measured object, which forms part of the output file name, ideally unique.
     writeFileDir : str, optional
         Path to the directory to store the output files.
-    exeDir : str, optional
+    exePath : str, optional
         Path to the compiled C++ executable for box-counting.
-    procUnit : {'cpu', 'gpu'}, optional
-        Type of C++ executable to run for box-counting.
     radType : {'atomic', 'metallic'}, optional
         Type of radii to use for the spheres.
     numPoint : int, optional
@@ -82,9 +82,9 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     -  4096 ->  128 GB
     -  8192 -> 1024 GB (HPC node with huge memories like NCI Gadi megamem queue -> max 2990 GB/node)
     - 16384 -> 8192 GB
-    Further details about maximum grid size and memory estimation could be found in original codes of the authors in
-    {SPHRACTAL_DIR_PATH}/src/fbc/test.cpp.
-    As a reference, when 8192 grids are used, allocation of memory took 25 min; while the CPU algorithm runs for 18 min.
+    Further details about maximum grid size and memory estimation could be found in 'test.cpp' documented by the authors 
+    (https://www.ugr.es/~demiras/fbc/). As a reference, when 8192 grids are used, allocation of memory took 25 min; while 
+    the CPU algorithm runs for 18 min.
     """
     if verbose:
         print(f"  Approximating the surface with {numPoint} point clouds for each atom...")
@@ -95,8 +95,7 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                   npName, writeFileDir,
                   radType, numPoint, gridNum,
                   rmInSurf, vis, verbose, genPCD)
-    system(f"{exeDir}/3DbinImBC{procUnit}.exe {gridNum} {writeFileDir}/surfVoxelIdxs.txt "
-           f"{writeFileDir}/surfVoxelBoxCnts.txt")
+    system(f"{exePath} {gridNum} {writeFileDir}/surfVoxelIdxs.txt {writeFileDir}/surfVoxelBoxCnts.txt")
     scales, counts = [], []
     with open(f"{writeFileDir}/surfVoxelBoxCnts.txt", 'r') as f:
         for line in f:
@@ -313,7 +312,7 @@ def runBoxCnt(xyzFilePath,
               radType='atomic', calcBL=False, findSurfOption='alphaShape', alphaMult=2.0,
               writeFileDir='boxCntOutputs', lenRange='trim', minSampleNum=5, confLvl=95, 
               rmInSurf=True, vis=True, saveFig=False, showPlot=False, verbose=False,
-              runPointCloudBoxCnt=True, numPoints=300, gridNum=1024, exeDir='../bin', procUnit='cpu', genPCD=False,
+              runPointCloudBoxCnt=True, numPoints=300, gridNum=1024, exePath='$FASTBC_EXE', genPCD=False,
               runExactSphereBoxCnt=True, minLenMult=0.25, maxLenMult=1, numBoxLenSample=10, writeBox=True, 
               boxLenConc=False, maxWorkers=2):
     """
@@ -358,10 +357,8 @@ def runBoxCnt(xyzFilePath,
         Number of surface points to be generated around each atom.
     gridNum : int, optional
         Resolution of the 3D binary image.
-    exeDir : str, optional
+    exePath : str, optional
         Path to the compiled C++ executable for box-counting.
-    procUnit : {'cpu', 'gpu'}
-        Type of C++ executable to run for box-counting.
     genPCD : bool, optional
         Whether to generate pcd file for box-counting using MATLAB code written by Kazuaki Iida.
     runExactSphereBoxCnt : bool, optional
@@ -413,7 +410,7 @@ def runBoxCnt(xyzFilePath,
         mkdir(writeFileDir)
     if runPointCloudBoxCnt:
         scalesPC, countsPC = getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                                             testCase, writeFileDir, exeDir, procUnit,
+                                             testCase, writeFileDir, exePath,
                                              radType, numPoints, gridNum,
                                              rmInSurf, vis, verbose, genPCD)
         r2PC, bcDimPC, confIntPC = findSlope(scalesPC, countsPC, f"{testCase}_PC", writeFileDir, lenRange,
