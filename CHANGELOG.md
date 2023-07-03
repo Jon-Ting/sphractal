@@ -69,33 +69,33 @@
 
 ### Feature
 
-- Added imports for more functions
+* Added imports for more functions
 
 ### Documentation
 
-- Updated readme and example in `docs/`
+* Updated readme and example in `docs/`
 
 ### Refactor
 
-- Added compiled C++ GPU code
+* Added compiled C++ GPU code
 
 ## v0.2.0 (29/06/2023)
 
 ### Feature
 
-- Allowed `calcBL` to be specified for `findNN()`
+* Allowed `calcBL` to be specified for `findNN()`
 
 ### Documentation
 
-- Updated readme
-- Updated readme for C++ code
-- Updated example in `docs/`
-- Updated docstrings for surfPointClouds.py functions
+* Updated readme
+* Updated readme for C++ code
+* Updated example in `docs/`
+* Updated docstrings for surfPointClouds.py functions
 
 ### Build
 
-- Updated poetry.lock
+* Updated poetry.lock
 
 ## v0.1.0 (27/06/2023)
 
-- First release of `sphractal`
+* First release of `sphractal`

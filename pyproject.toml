@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sphractal"
-version = "0.4.4"
+version = "0.5.0"
 description = "Package to estimate fractal dimension of 3D surfaces formed from overlapping spheres via box-counting algorithm."
 authors = ["Jonathan Yik Chang Ting <jonting97@gmail.com>"]
 license = "MIT"
@@ -23,7 +23,7 @@ include = ["tests/*", "setup.py"]
 python = ">=3.9"
 matplotlib = ">=3.7.1"
 statsmodels = ">=0.14.0"
-scipy = {version = ">=1.11.0", python = ">=3.9,<3.13"}
+scipy = {version = ">=1.11.1", python = ">=3.9,<3.13"}
 numba = ">=0.57.1"
 numpy = ">=1.22,<1.25"
 
@@ -37,7 +37,10 @@ sphinx-rtd-theme = ">=1.2.2"
 python-semantic-release = ">=7.34.6"
 
 [tool.semantic_release]
-version_variable = "setup.py:__version__"   # version location
+version_variable = [
+    "pyproject.toml:tool.poetry.version",
+    "setup.py:__version__",
+]                                           # version location
 branch = "main"                             # branch to make releases of
 changelog_file = "CHANGELOG.md"             # changelog file
 build_command = "poetry build"              # build dists
