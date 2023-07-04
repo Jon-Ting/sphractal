@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.1 (2023-07-04)
+
+### Fix
+
+* **readme:** Fixed broken links in readme ([`3e68a87`](https://github.com/Jon-Ting/sphractal/commit/3e68a87d75b0efb8584a8ad81a90824b61118834))
+
+### Documentation
+
+* **findSlope:** Added in-line comments for findSlope() ([`573a20c`](https://github.com/Jon-Ting/sphractal/commit/573a20c67d99c8afad5fa923660d5f437d0fbfa9))
+
 ## v0.6.0 (2023-07-04)
 
 ### Feature
