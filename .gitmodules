@@ -1,3 +1,6 @@
 [submodule "src/fastBC"]
 	path = src/fastBC
 	url = git@github.com:Jon-Ting/fastBC.git
+[submodule "sphractal-feedstock"]
+	path = sphractal-feedstock
+	url = git@github.com:conda-forge/sphractal-feedstock.git
