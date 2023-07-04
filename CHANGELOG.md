@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.0 (2023-07-04)
+
+### Feature
+
+* **findSlope:** Added functionalities to generate publication-ready figures ([`5653519`](https://github.com/Jon-Ting/sphractal/commit/5653519a0fd49f12543eefcb7de96366113472ae))
+
+### Fix
+
+* **findSlope:** Reverted to producing figures with png format ([`a6ed73e`](https://github.com/Jon-Ting/sphractal/commit/a6ed73ee64c24cbba0f91d1f916d9ddba14d5f52))
+
+### Documentation
+
+* **example:** Updated example.ipynb with new figures ([`8341718`](https://github.com/Jon-Ting/sphractal/commit/83417184919473a3676f13e0fbbeca8c783783bb))
+
 ## v0.5.0 (2023-07-03)
 
 ### Feature
