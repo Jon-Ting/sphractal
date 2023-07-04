@@ -256,21 +256,25 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
         params = PLT_PARAMS[figType]
         figsize, dpi, fontsize, labelsize, legendsize, linewidth, markersize = params['figsize'], params['dpi'], params['fontsize'], params['labelsize'], params['legendsize'], params['linewidth'], params['markersize']
 
+    # Remove invalid entries in the box counts data collected
     while np.nan in counts:
         nanIdx = counts.index(np.nan)
         del counts[nanIdx]
         del scales[nanIdx]
-    firstPointIdx, lastPointIdx, removeSmallBoxes = 0, len(scales), True  # countChange.count(countChange[0])
 
     if abs(confLvl) > 100:
         warn(f"Confidence level out of range, confidence intervals are unreliable! 'confLvl' should be within [0, 100) instead of {confLvl}")
     alphaCI = 1 - confLvl/100
+
+    firstPointIdx, lastPointIdx, removeSmallBoxes = 0, len(scales), True
     r2score, boxCntDim, slopeCI, r2scorePrev, boxCntDimPrev, slopeCIPrev = 0.0, 0.0, np.array((np.inf, np.inf)), 0.0, 0.0, np.array((np.inf, np.inf))
     while len(scales[firstPointIdx:lastPointIdx]) > minSampleNum:
+
         x, y = scales[firstPointIdx:lastPointIdx], counts[firstPointIdx:lastPointIdx]
         regModel = OLS(endog=y, exog=add_constant(x)).fit()
         r2score, boxCntDim, slopeCI = regModel.rsquared, regModel.params[1], regModel.conf_int(alpha=alphaCI)[1]
         yPred = regModel.predict()  # Returns ndarray, allowing subtraction later
+
         if visReg:
             plt.close()
             fig = plt.figure(figsize=figsize, dpi=dpi)
@@ -278,11 +282,14 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
             handleScatter = ax.scatter(x, y, marker='o', s=markersize, c='r', alpha=1, edgecolors='k', linewidths=1.2, zorder=3)
             handleBestFit = ax.plot(x, yPred, linestyle='-', linewidth=1., color='k', label='OLS')
             ax.grid(linestyle='dotted')
+
+            # Compute confidence bands
             predOLS = regModel.get_prediction()
             lowCIvals, upCIvals = predOLS.summary_frame()['mean_ci_lower'], predOLS.summary_frame()['mean_ci_upper']
             handleConfBand = ax.plot(x, upCIvals, linestyle='--', linewidth=linewidth, color='b')
             ax.plot(x, lowCIvals, linestyle='--', linewidth=linewidth, color='b')
             ax.fill_between(x, upCIvals, lowCIvals, alpha=0.2)
+
             ax.set_xlabel(r'log$(1/\epsilon)$', fontsize=labelsize)
             ax.set_ylabel(r'log$(N)$', fontsize=labelsize)
             ax.yaxis.set_major_formatter(FormatStrFormatter('% 1.1f'))
@@ -291,6 +298,7 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
                       title=fr"$D_{{box}}$: {boxCntDim:.3f} [{slopeCI[0]:.3f}, {slopeCI[1]:.3f}]", title_fontsize=legendsize, 
                       fontsize=legendsize)
             #plt.tight_layout()
+
         # Removal of next point (beware of weird behaviour in middle range)
         # lstSqErrs = np.subtract(y, yPred) ** 2
         # if len(y) % 2 == 0:
@@ -299,6 +307,7 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
         #     lowBoundErrSum, upBoundErrSum = lstSqErrs[:len(y) // 2].sum(), lstSqErrs[len(y) // 2 + 1:].sum()
         # if lowBoundErrSum > upBoundErrSum: firstPointIdx += 1
         # else: lastPointIdx -= 1
+
         if lenRange == 'trim':
             if removeSmallBoxes:
                 if round(r2score, 3) < round(r2scorePrev, 3):
@@ -308,6 +317,8 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
                 if round(r2score, 3) < round(r2scorePrev, 3):
                     return r2scorePrev, boxCntDimPrev, slopeCIPrev
                 firstPointIdx += 1
+        r2scorePrev, boxCntDimPrev, slopeCIPrev = r2score, boxCntDim, slopeCI
+
         if saveFig:
             boxCntDimsDir = f"{writeFileDir}/boxCntDims"
             if not isdir(boxCntDimsDir):
@@ -317,7 +328,6 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
             plt.savefig(f"{boxCntDimsDir}/{npName}_boxCntDim.png", bbox_inches='tight')
         if showPlot:
             plt.show()
-        r2scorePrev, boxCntDimPrev, slopeCIPrev = r2score, boxCntDim, slopeCI
         if lenRange == 'full':
             break
     return r2score, boxCntDim, slopeCI
