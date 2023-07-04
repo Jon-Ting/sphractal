@@ -1,3 +1,7 @@
+# Directories under development
+src/sphractal/pybind11/
+docs/qualityFigsTest.ipynb
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
