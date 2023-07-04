@@ -9,13 +9,14 @@ from overlapping spheres via box-counting algorithm.
 
 ## Features
 
-### Current
+### Aims
 * Representation of the surface as either point clouds or exact surfaces.
 * Efficient algorithm for 3D box-counting calculations.
 * Customisable parameters to control the level of detail and accuracy of the calculation.
 
 ### Under Development
 * Nested multiprocessing (boxLenConc=True).
+* Optional input argument of surface atoms (to guarantee accurate box counts).
 * Transformation of xyz coordinates when atoms are read in to avoid using minXYZ repetitively in `scanAtom()`.
 * Integration of C++ code for point cloud surface representation into the package.
 
@@ -49,9 +50,9 @@ $ g++ 3DbinImBCcpu.cpp bcCPU.cpp -o 3DbinImBCcpu.exe
 $ nvcc -O3 3DbinImBCgpu.cpp bcCUDA3D.cu -o 3DbinImBCgpu.exe
 ```
 
-* (Optional) Setting the path to the executable as an environment variable accessible by Python (replace `PATH_TO_EXE` by the absolute path to the executable file you just built), otherwise you could always pass the path to the executable to the relevant functions:
+* (Optional) Setting the path to the executable as an environment variable accessible by Python (replace `<PATH_TO_EXE>` by the absolute path to the executable file you just built), otherwise you could always pass the path to the executable to the relevant functions:
 ```bash
-$ export FASTBC_EXE={PATH_TO_EXE}
+$ export FASTBC_EXE=<PATH_TO_EXE>
 ```
 Note that for the environment variable to be persistent (to still exist after the terminal is closed), the line should be added to your `~/.bashrc`.
 
@@ -64,7 +65,7 @@ xyzFilePath = getExampleDataPath()  # Replace with the path to your xyz or lmp f
 boxCntResults = runBoxCnt(xyzFilePath)
 ```
 
-Check out the [notebook tutorial](example.ipynb) for more detailed examples!
+Check out the [notebook tutorial](https://github.com/Jon-Ting/sphractal/blob/main/docs/example.ipynb) for further explanations and demonstrations!
 
 ## Documentation
 
@@ -86,6 +87,7 @@ The project is distributed under an [MIT License](https://github.com/Jon-Ting/sp
 
 The package was created with [`cookiecutter`](https://cookiecutter.readthedocs.io/en/latest/) using the 
 `py-pkgs-cookiecutter` [template](https://github.com/py-pkgs/py-pkgs-cookiecutter).
+The speeding up of the inner functions via just-in-time compilations with [Numba](https://numba.pydata.org/) was inspired by the advice received during the [NCI-NVIDIA Open Hackathon 2023](https://opus.nci.org.au/display/Help/NCI-NVIDIA+Open+Hackathon+2023).
 
 ## Contact
 
