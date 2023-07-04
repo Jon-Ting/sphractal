@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.0 (2023-07-04)
+
+### Feature
+
+* **boxLenConc:** Implemented automatic parallelisation functionalities ([`b4f6c36`](https://github.com/Jon-Ting/sphractal/commit/b4f6c364c92ece88fa7bfea45ecaa565681c4647))
+
+### Performance
+
+* **boxLenConc:** Reduced the number of times of calling cpu_counts() ([`c0911cf`](https://github.com/Jon-Ting/sphractal/commit/c0911cf1e04fde90be2ac38e8bd9004bf662caf2))
+
 ## v0.6.1 (2023-07-04)
 
 ### Fix
