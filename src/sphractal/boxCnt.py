@@ -250,9 +250,6 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
         Confidence interval of the box-counting dimension of the point clouds surface.
     """
     if visReg:
-        import matplotlib as mpl
-        mpl.rcParams.update(mpl.rcParamsDefault)
-
         plt.rc('font', family='sans-serif')
         plt.rc('xtick', labelsize='x-small')
         plt.rc('ytick', labelsize='x-small')
@@ -279,17 +276,17 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
             fig = plt.figure(figsize=figsize, dpi=dpi)
             ax = fig.add_subplot(1, 1, 1)
             handleScatter = ax.scatter(x, y, marker='o', s=markersize, c='r', alpha=1, edgecolors='k', linewidths=1.2, zorder=3)
-            handleFittedLine = ax.plot(x, yPred, linestyle='-', linewidth=1., color='k', label='OLS')
+            handleBestFit = ax.plot(x, yPred, linestyle='-', linewidth=1., color='k', label='OLS')
             ax.grid(linestyle='dotted')
             predOLS = regModel.get_prediction()
             lowCIvals, upCIvals = predOLS.summary_frame()['mean_ci_lower'], predOLS.summary_frame()['mean_ci_upper']
-            handleConfInt = ax.plot(x, upCIvals, linestyle='--', linewidth=linewidth, color='b')
+            handleConfBand = ax.plot(x, upCIvals, linestyle='--', linewidth=linewidth, color='b')
             ax.plot(x, lowCIvals, linestyle='--', linewidth=linewidth, color='b')
             ax.fill_between(x, upCIvals, lowCIvals, alpha=0.2)
             ax.set_xlabel(r'log$(1/\epsilon)$', fontsize=labelsize)
             ax.set_ylabel(r'log$(N)$', fontsize=labelsize)
             ax.yaxis.set_major_formatter(FormatStrFormatter('% 1.1f'))
-            ax.legend(handles=(handleScatter, handleFittedLine[0], handleConfInt[0]), 
+            ax.legend(handles=(handleScatter, handleBestFit[0], handleConfBand[0]), 
                       labels=('Actual box counts', fr"Best fit line ($R^2$: {r2score:.3f})", f"{confLvl}% confidence bands"), 
                       title=fr"$D_{{box}}$: {boxCntDim:.3f} [{slopeCI[0]:.3f}, {slopeCI[1]:.3f}]", title_fontsize=legendsize, 
                       fontsize=legendsize)
@@ -317,7 +314,7 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
                 if not isdir(writeFileDir):
                     mkdir(writeFileDir)
                 mkdir(boxCntDimsDir)
-            plt.savefig(f"{boxCntDimsDir}/{npName}_boxCntDim.pdf", bbox_inches='tight')
+            plt.savefig(f"{boxCntDimsDir}/{npName}_boxCntDim.png", bbox_inches='tight')
         if showPlot:
             plt.show()
         r2scorePrev, boxCntDimPrev, slopeCIPrev = r2score, boxCntDim, slopeCI
