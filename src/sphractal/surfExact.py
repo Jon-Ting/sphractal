@@ -123,17 +123,17 @@ def scanAtomsForLoop(atomsIdxs, magnFac, scanBoxLen, minXYZ,
 # @annotate('scanAllAtoms', color='magenta')
 def scanAllAtoms(args):
     """Count the number of boxes that cover the outer spherical surface of a set of atoms for a given box size."""
-    magnFac, scanBoxLen, atomsIdxs, minXYZ, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, rmInSurf, verbose = args
+    magnFac, scanBoxLen, atomsIdxs, minXYZ, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, rmInSurf, verbose, maxWorkers = args
     scanAtomInps = [(magnFac, scanBoxLen, minXYZ, atomIdx, atomsRad[atomIdx],
                      atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, rmInSurf) for atomIdx in atomsIdxs]
     allAtomsSurfBoxs, allAtomsBulkBoxs = [], []
-    with Pool() as pool:
-        for scanAtomResult in pool.map(scanAtom, scanAtomInps):
+    with Pool(max_workers=maxWorkers) as pool:
+        for scanAtomResult in pool.map(scanAtom, scanAtomInps, chunksize=ceil(len(atomsIdxs) / maxWorkers)):
             allAtomsSurfBoxs.extend(scanAtomResult[0])
             allAtomsBulkBoxs.extend(scanAtomResult[1])
-    # allAtomsSurfBoxs, allAtomsBulkBoxs = scanAtomsForLoop(atomsIdxs, magnFac, scanBoxLen, minXYZ,
-    #                                                         atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-    #                                                         rmInSurf)
+    #allAtomsSurfBoxs, allAtomsBulkBoxs = scanAtomsForLoop(atomsIdxs, magnFac, scanBoxLen, minXYZ,
+    #                                                      atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
+    #                                                      rmInSurf)
     allAtomsSurfBoxs, allAtomsBulkBoxs = set(allAtomsSurfBoxs), set(allAtomsBulkBoxs)
     allAtomsSurfBoxs.difference_update(allAtomsBulkBoxs)
 

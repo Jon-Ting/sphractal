@@ -15,7 +15,6 @@ from overlapping spheres via box-counting algorithm.
 * Customisable parameters to control the level of detail and accuracy of the calculation.
 
 ### Under Development
-* Nested multiprocessing (boxLenConc=True).
 * Optional input argument of surface atoms (to guarantee accurate box counts).
 * Transformation of xyz coordinates when atoms are read in to avoid using minXYZ repetitively in `scanAtom()`.
 * Integration of C++ code for point cloud surface representation into the package.

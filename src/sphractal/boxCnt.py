@@ -1,5 +1,6 @@
 from concurrent.futures import ProcessPoolExecutor as Pool
-from math import log10
+from math import ceil, log10
+from multiprocessing import cpu_count
 from os import mkdir, system
 from os.path import isdir
 from warnings import warn
@@ -108,7 +109,7 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
 # @annotate('getSphereBoxCnts', color='blue')
 def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                      maxRange, minMaxBoxLens, minXYZ, npName, writeFileDir='boxCntOutputs', numBoxLenSample=10,
-                     rmInSurf=True, writeBox=True, verbose=False, boxLenConc=False, maxWorkers=2):
+                     rmInSurf=True, writeBox=True, verbose=False):
     """
     Count the boxes that cover the outer surface of a set of overlapping spheres represented as exact spheres for
     different box sizes.
@@ -143,11 +144,6 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
         Whether to generate output files for visualisation.
     verbose : bool, optional
         Whether to display the details.
-    boxLenConc : bool, optional
-        Whether to parallelise the box-counting across different box lengths (under development, stick to default for now).
-    maxWorkers : int, optional
-        Maximum number of processes to spawn for parallelisation of box-counting across different box lengths, only used
-        if 'boxLenConc' is True.
     
     Returns
     -------
@@ -163,14 +159,19 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
     >>> surfs = findSurf(xyzs, neighs, 'alphaShape', 2.0)
     >>> scales, counts = getSphereBoxCnts(eles, rads, surfs, xyzs, neighs, 100, (0.2, 1), minxyz, 'example')
     """
+    atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs)
+    boxLenScanMaxWorkers = ceil(cpu_count() * numBoxLenSample / len(atomsIdxs))
+    boxLenConc = False if ceil(cpu_count() * numBoxLenSample / len(atomsIdxs)) < 2 else True
+    atomScanMaxWorkers = cpu_count() - boxLenScanMaxWorkers if boxLenConc else cpu_count()
+
     if verbose:
         print(f"  Representing the surface by treating each atom as exact spheres...")
+        print(f"  Parallelised with {atomScanMaxWorkers} out of {cpu_count()} cores for scanning over atoms, the rest over box lengths...")
         print(f"    (1/eps)    (# bulk)    (# surf)")
     if writeBox:
         if not isdir(writeFileDir):
             mkdir(writeFileDir)
 
-    atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs)
     overallBoxLen = maxRange + MIN_VAL_FROM_BOUND * 2
     allLensSurfBoxs, allLensBulkBoxs, allLensSurfCnts, allLensBulkCnts = [], [], [], []
     scales, scanBoxLens, scanAllAtomsInps = [], [], []
@@ -180,7 +181,7 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
         scanBoxLen = overallBoxLen / magnFac
         scanAllAtomsInp = (magnFac, scanBoxLen, atomsIdxs, minXYZ,
                            atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, 
-                           rmInSurf, verbose)
+                           rmInSurf, verbose, atomScanMaxWorkers)
         if boxLenConc:
             scanAllAtomsInps.append(scanAllAtomsInp) 
         else:
@@ -194,8 +195,8 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
         scanBoxLens.append(scanBoxLen)
 
     if boxLenConc:
-        with Pool(max_workers=maxWorkers) as pool:
-            for scanAllAtomsResult in pool.map(scanAllAtoms, scanAllAtomsInps):
+        with Pool(max_workers=boxLenScanMaxWorkers) as pool:
+            for scanAllAtomsResult in pool.map(scanAllAtoms, scanAllAtomsInps, chunksize=ceil(numBoxLenSample / boxLenScanMaxWorkers)):
                 allAtomsSurfBoxs, allAtomsBulkBoxs = scanAllAtomsResult
                 allLensSurfBoxs.append(allAtomsSurfBoxs)
                 allLensBulkBoxs.append(allAtomsBulkBoxs)
@@ -340,8 +341,7 @@ def runBoxCnt(xyzFilePath,
               writeFileDir='boxCntOutputs', lenRange='trim', minSampleNum=5, confLvl=95, 
               rmInSurf=True, vis=True, figType='article', saveFig=False, showPlot=False, verbose=False,
               runPointCloudBoxCnt=True, numPoints=300, gridNum=1024, exePath='$FASTBC_EXE', genPCD=False,
-              runExactSphereBoxCnt=True, minLenMult=0.25, maxLenMult=1, numBoxLenSample=10, writeBox=True, 
-              boxLenConc=False, maxWorkers=2):
+              runExactSphereBoxCnt=True, minLenMult=0.25, maxLenMult=1, numBoxLenSample=10, writeBox=True): 
     """
     Run box-counting algorithm on the surface of a given object consisting of a set of spheres represented as either
     point clouds or exact spherical surface.
@@ -400,11 +400,6 @@ def runBoxCnt(xyzFilePath,
         Number of box lengths to use for the collection of the box count data, spaced evenly on logarithmic scale.
     writeBox : bool, optional
         Whether to generate output files for visualisation.
-    boxLenConc : bool, optional
-        Whether to parallelise the box-counting across different box lengths.
-    maxWorkers : int, optional
-        Maximum number of processes to spawn for parallelisation of box-counting across different box sizes, only used
-        if 'boxLenConc' is True.
     
     Returns
     -------
@@ -449,7 +444,7 @@ def runBoxCnt(xyzFilePath,
         scalesES, countsES = getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                                               maxRange, (minAtomRad * minLenMult, minAtomRad * maxLenMult),
                                               minXYZ, testCase, writeFileDir, numBoxLenSample,
-                                              rmInSurf, writeBox, verbose, boxLenConc, maxWorkers)
+                                              rmInSurf, writeBox, verbose)
         r2ES, bcDimES, confIntES = findSlope(scalesES, countsES, f"{testCase}_ES", writeFileDir, lenRange,
                                              minSampleNum, confLvl, vis, figType, saveFig, showPlot)
     if verbose:
