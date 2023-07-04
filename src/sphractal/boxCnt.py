@@ -160,13 +160,14 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
     >>> scales, counts = getSphereBoxCnts(eles, rads, surfs, xyzs, neighs, 100, (0.2, 1), minxyz, 'example')
     """
     atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs)
-    boxLenScanMaxWorkers = ceil(cpu_count() * numBoxLenSample / len(atomsIdxs))
-    boxLenConc = False if ceil(cpu_count() * numBoxLenSample / len(atomsIdxs)) < 2 else True
-    atomScanMaxWorkers = cpu_count() - boxLenScanMaxWorkers if boxLenConc else cpu_count()
+    numCPUs = cpu_count()
+    boxLenScanMaxWorkers = ceil(numCPUs * numBoxLenSample / len(atomsIdxs))
+    boxLenConc = False if boxLenScanMaxWorkers < 2 else True
+    atomScanMaxWorkers = numCPUs - boxLenScanMaxWorkers if boxLenConc else numCPUs
 
     if verbose:
         print(f"  Representing the surface by treating each atom as exact spheres...")
-        print(f"  Parallelised with {atomScanMaxWorkers} out of {cpu_count()} cores for scanning over atoms, the rest over box lengths...")
+        print(f"  Parallelised with {atomScanMaxWorkers} out of {numCPUs} cores for scanning over atoms, the rest over box lengths...")
         print(f"    (1/eps)    (# bulk)    (# surf)")
     if writeBox:
         if not isdir(writeFileDir):
