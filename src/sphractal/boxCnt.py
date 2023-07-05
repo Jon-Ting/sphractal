@@ -11,10 +11,10 @@ import numpy as np
 from statsmodels.api import OLS, add_constant
 
 from sphractal.constants import PLT_PARAMS
-from sphractal.utils import findNN, findSurf, readXYZ
-# from sphractal.utils import estDuration, annotate
 from sphractal.surfPointClouds import genSurfPoints
 from sphractal.surfExact import findTargetAtoms, MIN_VAL_FROM_BOUND, scanAllAtoms, writeBoxCoords
+from sphractal.utils import findNN, findSurf, readXYZ
+# from sphractal.utils import estDuration, annotate
 
 
 # @annotate('getVoxelBoxCnts', color='blue')

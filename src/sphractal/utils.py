@@ -6,6 +6,7 @@ from numba import njit, prange
 import numpy as np
 # from nvtx import annotate
 from scipy.spatial import ConvexHull, Delaunay
+
 from sphractal.constants import ATOMIC_RAD_DICT, BULK_CN, METALLIC_RAD_DICT
 
 

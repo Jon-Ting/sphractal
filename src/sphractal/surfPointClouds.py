@@ -1,8 +1,9 @@
 from math import cos, pi, sin, sqrt
-from numba import njit
-import numpy as np
 from os import mkdir
 from os.path import isdir
+
+from numba import njit
+import numpy as np
 
 from sphractal.constants import ATOMIC_RAD_DICT, METALLIC_RAD_DICT
 from sphractal.utils import calcDist, oppositeInnerAtoms

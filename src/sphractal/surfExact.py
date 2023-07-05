@@ -1,9 +1,10 @@
 from concurrent.futures import ProcessPoolExecutor as Pool
 from math import ceil
-from numba import njit
-import numpy as np
 from os import mkdir
 from os.path import isdir
+
+from numba import njit
+import numpy as np
 
 from sphractal.utils import calcDist, oppositeInnerAtoms
 # from sphractal.utils import annotate
