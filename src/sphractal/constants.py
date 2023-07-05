@@ -45,3 +45,6 @@ PLT_PARAMS = {'article': {'figSize': (3.5, 2.5), 'dpi': 300, 'fontSize': 'medium
                          'legendSize': 'medium', 'lineWidth': 1.0, 'markerSize': 48},
               'ppt': {'figSize': (4, 3), 'dpi': 144, 'fontSize': 'large', 'labelSize': 'medium', 'legendSize': 'small',
                       'lineWidth': 1.0, 'markerSize': 36}}
+
+NN_RAD_MULT = 1.5  # Radius multiplier to identify nearest neighbour
+

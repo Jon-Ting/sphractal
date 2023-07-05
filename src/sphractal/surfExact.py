@@ -1,22 +1,23 @@
 from concurrent.futures import ProcessPoolExecutor as Pool
-from math import ceil
-from numba import njit
-import numpy as np
+from math import sqrt
 from os import mkdir
 from os.path import isdir
 
-from sphractal.utils import calcDist, oppositeInnerAtoms
-# from sphractal.utils import annotate
+from itertools import product
+import numpy as np
+
+from sphractal.constants import ATOMIC_RAD_DICT
+from sphractal.utils import ceil, oppositeInnerAtoms
 
 
 MIN_VAL_FROM_BOUND = 5.0  # Angstrom
+NUM_SCAN_THRESH_MP = 27
 
 
-@njit(fastmath=True, cache=True)
-def getNearFarCoord(scanBoxIdx, boxLen, lowBound, atomCoord):
-    """Find the nearest and furthest point of a given box from a given atom."""
-    scanBoxMax = lowBound - MIN_VAL_FROM_BOUND + (scanBoxIdx+1)*boxLen
-    scanBoxMin = scanBoxMax - boxLen
+def getNearFarCoord(scanBoxIdx, scanBoxLen, lowBound, atomCoord):
+    """Find the nearest and furthest point of box scanBoxIdx from atomCoord."""
+    scanBoxMax = lowBound - MIN_VAL_FROM_BOUND + (scanBoxIdx + 1) * scanBoxLen
+    scanBoxMin = scanBoxMax - scanBoxLen
     if atomCoord < scanBoxMin:
         scanBoxNear, scanBoxFar = scanBoxMin, scanBoxMax
     elif atomCoord > scanBoxMax:
@@ -24,160 +25,251 @@ def getNearFarCoord(scanBoxIdx, boxLen, lowBound, atomCoord):
     else:
         scanBoxNear = atomCoord
         # The farthest point is always a corner
-        scanBoxFar = scanBoxMin if scanBoxMax-atomCoord < boxLen/2 else scanBoxMax
+        scanBoxFar = scanBoxMin if scanBoxMax - atomCoord < scanBoxLen / 2 else scanBoxMax
     return scanBoxNear, scanBoxFar
 
 
-@njit(fastmath=True, cache=True)
-def scanBox(minXYZ, scanBoxIdxs, scanBoxNearFarXYZs, boxLen,
-            atomIdx, atomRad, atomXYZ, atomNeighIdxs,
-            atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-            rmInSurf=True):
-    """Find the nearest and furthest point of a given box from a given atom."""
-    # Remove the box if it covers the inner surface
-    if rmInSurf:
-        scanBoxX = minXYZ[0] - MIN_VAL_FROM_BOUND + (scanBoxIdxs[0]+1)*boxLen - boxLen*0.5
-        scanBoxY = minXYZ[1] - MIN_VAL_FROM_BOUND + (scanBoxIdxs[1]+1)*boxLen - boxLen*0.5
-        scanBoxZ = minXYZ[2] - MIN_VAL_FROM_BOUND + (scanBoxIdxs[2]+1)*boxLen - boxLen*0.5
-        if not oppositeInnerAtoms(np.array((scanBoxX, scanBoxY, scanBoxZ)), atomXYZ, atomNeighIdxs,
-                                  atomsSurfIdxs, atomsXYZ, atomsNeighIdxs):
-            return 'none'
-
-    # Check what does the box cover
-    distNear = calcDist(atomXYZ, np.array(scanBoxNearFarXYZs[:3]))
-    distFar = calcDist(atomXYZ, np.array(scanBoxNearFarXYZs[-3:]))
-    if atomIdx in atomsSurfIdxs:
-        if distNear < atomRad < distFar:
-            return 'surf'
-        elif distFar < atomRad:
-            return 'bulk'
-        else:
-            return 'none'
-    else:
-        if distNear < atomRad < distFar or distFar < atomRad:
-            return 'bulk'
-        else:
-            return 'none'
-
-
-# @annotate('scanAtom', color='cyan')
-@njit(fastmath=True, cache=True)
-def scanAtom(args):
-    """Count the number of boxes that cover the outer spherical surface of a given atom."""
-    magn, boxLen, minXYZ, atomIdx, atomRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, rmInSurf = args
-    atomXYZ, atomNeighIdxsPadded = atomsXYZ[atomIdx], atomsNeighIdxs[atomIdx]
-    atomNeighIdxs = atomNeighIdxsPadded[atomNeighIdxsPadded > -1]
-
-    atomX, atomY, atomZ = atomXYZ
+def scanBoxConc(atomBoxIdxs, scanBoxDirections, magnFac, scanBoxLen, minXYZ, atom, atoms,
+                rmInSurf=True):
+    """
+    Check whether a given box covers a given atom's outer spherical surface.
+    TODO: Check whether it's working, Add the algorithm to remove inner surface
+    """
+    belong = None
+    scanBoxIdxX = atomBoxIdxs[0] + scanBoxDirections[0]
+    scanBoxIdxY = atomBoxIdxs[1] + scanBoxDirections[1]
+    scanBoxIdxZ = atomBoxIdxs[2] + scanBoxDirections[2]
+    scanBoxIdxs = (scanBoxIdxX, scanBoxIdxY, scanBoxIdxZ)
+    if any(i < 0 or i >= magnFac for i in scanBoxIdxs):
+        return
     minX, minY, minZ = minXYZ
-    atomBoxIdxX = int((atomX - minX + MIN_VAL_FROM_BOUND)/boxLen)
-    atomBoxIdxY = int((atomY - minY + MIN_VAL_FROM_BOUND)/boxLen)
-    atomBoxIdxZ = int((atomZ - minZ + MIN_VAL_FROM_BOUND)/boxLen)
-    numScan = ceil((atomRad + boxLen)/boxLen)
-    atomSurfBoxs, atomBulkBoxs = [], []
-    for i in range(-numScan, numScan + 1):
-        scanBoxIdxX = atomBoxIdxX + i
-        if scanBoxIdxX < 0 or scanBoxIdxX >= magn:
-            continue
-        scanBoxNearX, scanBoxFarX = getNearFarCoord(scanBoxIdxX, boxLen, minX, atomX)
-        for j in range(-numScan, numScan + 1):
-            scanBoxIdxY = atomBoxIdxY + j
-            if scanBoxIdxY < 0 or scanBoxIdxY >= magn:
+    scanBoxNearX, scanBoxFarX = getNearFarCoord(scanBoxIdxX, scanBoxLen, minXYZ[0], atom.X)
+    scanBoxNearY, scanBoxFarY = getNearFarCoord(scanBoxIdxY, scanBoxLen, minXYZ[1], atom.Y)
+    scanBoxNearZ, scanBoxFarZ = getNearFarCoord(scanBoxIdxZ, scanBoxLen, minXYZ[2], atom.Z)
+
+    if rmInSurf:
+        scanBoxX = minX - MIN_VAL_FROM_BOUND + (scanBoxIdxX + 1) * scanBoxLen - scanBoxLen * 0.5
+        scanBoxY = minY - MIN_VAL_FROM_BOUND + (scanBoxIdxY + 1) * scanBoxLen - scanBoxLen * 0.5
+        scanBoxZ = minZ - MIN_VAL_FROM_BOUND + (scanBoxIdxZ + 1) * scanBoxLen - scanBoxLen * 0.5
+        if not oppositeInnerAtoms(np.array((scanBoxX, scanBoxY, scanBoxZ)), atom, atoms):
+            return belong, scanBoxIdxs 
+
+    distNear = sqrt((atom.X - scanBoxNearX) ** 2 + (atom.Y - scanBoxNearX) ** 2 + (atom.Z - scanBoxNearZ) ** 2)
+    distFar = sqrt((atom.X - scanBoxFarX) ** 2 + (atom.Y - scanBoxFarY) ** 2 + (atom.Z - scanBoxFarZ) ** 2)
+    atomRad = ATOMIC_RAD_DICT[atom.ele]
+    if not atom.isSurf:
+        if distNear < atomRad < distFar or distFar < atomRad:
+            belong = 'bulk'
+    else:
+        if distNear < atomRad < distFar:
+            belong = 'surf'
+        elif distFar < atomRad:
+            belong = 'bulk'
+    return belong, scanBoxIdxs
+
+
+def scanBoxNestedNoCheck(minXYZ, scanBoxIdxs, scanBoxNearFarXYZs, scanBoxLen, atom, atomRad,
+                         atoms,
+                         rmInSurf=True):
+    belong = None
+    minX, minY, minZ = minXYZ
+    scanBoxIdxX, scanBoxIdxY, scanBoxIdxZ = scanBoxIdxs
+    scanBoxNearX, scanBoxNearY, scanBoxNearZ, scanBoxFarX, scanBoxFarY, scanBoxFarZ = scanBoxNearFarXYZs
+
+    if rmInSurf:
+        scanBoxX = minX - MIN_VAL_FROM_BOUND + (scanBoxIdxX + 1) * scanBoxLen - scanBoxLen * 0.5
+        scanBoxY = minY - MIN_VAL_FROM_BOUND + (scanBoxIdxY + 1) * scanBoxLen - scanBoxLen * 0.5
+        scanBoxZ = minZ - MIN_VAL_FROM_BOUND + (scanBoxIdxZ + 1) * scanBoxLen - scanBoxLen * 0.5
+        if not oppositeInnerAtoms(np.array((scanBoxX, scanBoxY, scanBoxZ)), atom, atoms):
+            return belong, scanBoxIdxs
+
+    distNear = sqrt(
+        (atom.X - scanBoxNearX) ** 2 + (atom.Y - scanBoxNearY) ** 2 + (atom.Z - scanBoxNearZ) ** 2)
+    distFar = sqrt(
+        (atom.X - scanBoxFarX) ** 2 + (atom.Y - scanBoxFarY) ** 2 + (atom.Z - scanBoxFarZ) ** 2)
+    if not atom.isSurf:
+        if distNear < atomRad < distFar or distFar < atomRad:
+            belong = 'bulk'
+    else:
+        if distNear < atomRad < distFar:
+            belong = 'surf'
+        elif distFar < atomRad:
+            belong = 'bulk'
+    return belong, scanBoxIdxs
+
+
+def scanBoxNested(minXYZ, scanBoxIdxs, scanBoxNearFarXYZs, scanBoxLen, atom, atomRad,
+                  surfBoxes, bulkBoxes,  
+                  atoms,
+                  rmInSurf=True):
+    minX, minY, minZ = minXYZ
+    scanBoxIdxX, scanBoxIdxY, scanBoxIdxZ = scanBoxIdxs
+    scanBoxNearX, scanBoxNearY, scanBoxNearZ, scanBoxFarX, scanBoxFarY, scanBoxFarZ = scanBoxNearFarXYZs
+    if rmInSurf:
+        scanBoxX = minX - MIN_VAL_FROM_BOUND + (scanBoxIdxX + 1) * scanBoxLen - scanBoxLen * 0.5
+        scanBoxY = minY - MIN_VAL_FROM_BOUND + (scanBoxIdxY + 1) * scanBoxLen - scanBoxLen * 0.5
+        scanBoxZ = minZ - MIN_VAL_FROM_BOUND + (scanBoxIdxZ + 1) * scanBoxLen - scanBoxLen * 0.5
+        if not oppositeInnerAtoms(np.array((scanBoxX, scanBoxY, scanBoxZ)), atom, atoms):
+            return
+    # Shorter but slower alternative
+    # scanBoxDirs = [scanBoxDir for scanBoxDir in product(range(-numScan, numScan + 1), repeat=3)]
+    # for scanBoxDir in scanBoxDirs:
+    #     scanBoxIdxX, scanBoxIdxY, scanBoxIdxZ = atomBoxIdxX + scanBoxDir[0], \
+    #         atomBoxIdxY + scanBoxDir[1], atomBoxIdxZ + scanBoxDir[2]
+    #     if any(l < 0 or l >= magnFac for l in (scanBoxIdxX, scanBoxIdxY, scanBoxIdxZ)): continue
+    #     scanBoxNearX, scanBoxFarX = getNearFarCoord(scanBoxIdxX, scanBoxLen, minX, atom.X)
+    #     scanBoxNearY, scanBoxFarY = getNearFarCoord(scanBoxIdxY, scanBoxLen, minY, atom.Y)
+    #     scanBoxNearZ, scanBoxFarZ = getNearFarCoord(scanBoxIdxZ, scanBoxLen, minZ, atom.Z)
+    distNear = sqrt(
+        (atom.X - scanBoxNearX) ** 2 + (atom.Y - scanBoxNearY) ** 2 + (atom.Z - scanBoxNearZ) ** 2)
+    distFar = sqrt(
+        (atom.X - scanBoxFarX) ** 2 + (atom.Y - scanBoxFarY) ** 2 + (atom.Z - scanBoxFarZ) ** 2)
+    if not atom.isSurf:
+        if distNear < atomRad < distFar or distFar < atomRad:
+            if scanBoxIdxs in bulkBoxes:
+                return
+            elif scanBoxIdxs in surfBoxes:
+                surfBoxes.remove(scanBoxIdxs)
+                bulkBoxes.add(scanBoxIdxs)
+            else:
+                bulkBoxes.add(scanBoxIdxs)
+    else:  # For surface atom
+        if distNear < atomRad < distFar:
+            if scanBoxIdxs in bulkBoxes or scanBoxIdxs in surfBoxes:
+                return
+            else:
+                surfBoxes.add(scanBoxIdxs)
+        elif distFar < atomRad:
+            if scanBoxIdxs in bulkBoxes:
+                return
+            elif scanBoxIdxs in surfBoxes:
+                surfBoxes.remove(scanBoxIdxs)
+                bulkBoxes.add(scanBoxIdxs)
+            else:
+                bulkBoxes.add(scanBoxIdxs)
+    return surfBoxes, bulkBoxes
+
+
+def scanAtom(magnFac, scanBoxLen, minXYZ, atom,
+             atoms,
+             atomSurfBoxes, atomBulkBoxes,
+             rmInSurf=True,
+             boxConc=True):
+    """
+    Count the boxes that cover the outer spherical surface of a given atom.
+    TODO: Transform xyz coordinates when reading into atoms to prevent using minXYZ repetitively.
+    """
+    minX, minY, minZ = minXYZ
+    atomBoxIdxX = int((atom.X - minX + MIN_VAL_FROM_BOUND) / scanBoxLen)
+    atomBoxIdxY = int((atom.Y - minY + MIN_VAL_FROM_BOUND) / scanBoxLen)
+    atomBoxIdxZ = int((atom.Z - minZ + MIN_VAL_FROM_BOUND) / scanBoxLen)
+    atomRad = ATOMIC_RAD_DICT[atom.ele]
+    numScan = ceil((atomRad + scanBoxLen) / scanBoxLen)
+    # boxConc = True if numScan > NUM_SCAN_THRESH_MP else False  # TODO: covered input argument (argument to be removed)
+    if boxConc:
+        scanBoxInp = [((atomBoxIdxX, atomBoxIdxY, atomBoxIdxZ), scanBoxDirection, magnFac, scanBoxLen,
+                       minXYZ, atom, atoms, rmInSurf) for scanBoxDirection in
+                      product(range(-numScan, numScan + 1), repeat=3)]
+        with Pool() as pool:
+            for scanBoxResult in pool.starmap(scanBoxConc, scanBoxInp):
+                if scanBoxResult[0] == 'surf':
+                    atomSurfBoxes.add(scanBoxResult[1])
+                elif scanBoxResult[0] == 'bulk':
+                    atomBulkBoxes.add(scanBoxResult[1])
+    else:
+        for i in range(-numScan, numScan + 1):
+            scanBoxIdxX = atomBoxIdxX + i
+            if scanBoxIdxX < 0 or scanBoxIdxX >= magnFac:
                 continue
-            scanBoxNearY, scanBoxFarY = getNearFarCoord(scanBoxIdxY, boxLen, minY, atomY)
-            for k in range(-numScan, numScan + 1):
-                scanBoxIdxZ = atomBoxIdxZ + k
-                if scanBoxIdxZ < 0 or scanBoxIdxZ >= magn:
+            scanBoxNearX, scanBoxFarX = getNearFarCoord(scanBoxIdxX, scanBoxLen, minX, atom.X)
+            for j in range(-numScan, numScan + 1):
+                scanBoxIdxY = atomBoxIdxY + j
+                if scanBoxIdxY < 0 or scanBoxIdxY >= magnFac:
                     continue
-                scanBoxNearZ, scanBoxFarZ = getNearFarCoord(scanBoxIdxZ, boxLen, minZ, atomZ)
+                scanBoxNearY, scanBoxFarY = getNearFarCoord(scanBoxIdxY, scanBoxLen, minY, atom.Y)
+                for k in range(-numScan, numScan + 1):
+                    scanBoxIdxZ = atomBoxIdxZ + k
+                    if scanBoxIdxZ < 0 or scanBoxIdxZ >= magnFac:
+                        continue
+                    scanBoxNearZ, scanBoxFarZ = getNearFarCoord(scanBoxIdxZ, scanBoxLen, minZ, atom.Z)
 
-                belong = scanBox(minXYZ, (scanBoxIdxX, scanBoxIdxY, scanBoxIdxZ),
-                                 (scanBoxNearX, scanBoxNearY, scanBoxNearZ, scanBoxFarX, scanBoxFarY, scanBoxFarZ),
-                                 boxLen,
-                                 atomIdx, atomRad, atomXYZ, atomNeighIdxs,
-                                 atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                                 rmInSurf)
-                if belong == 'surf':
-                    atomSurfBoxs.append((scanBoxIdxX, scanBoxIdxY, scanBoxIdxZ))
-                elif belong == 'bulk':
-                    atomBulkBoxs.append((scanBoxIdxX, scanBoxIdxY, scanBoxIdxZ))
-    return atomSurfBoxs, atomBulkBoxs
+                    scanBoxIdxs = (scanBoxIdxX, scanBoxIdxY, scanBoxIdxZ)
+                    scanBoxNearFarXYZs = (scanBoxNearX, scanBoxNearY, scanBoxNearZ,
+                                          scanBoxFarX, scanBoxFarY, scanBoxFarZ)
+                    scanBoxResult = scanBoxNested(minXYZ, scanBoxIdxs, scanBoxNearFarXYZs,
+                                                  scanBoxLen, atom, atomRad,
+                                                  atomSurfBoxes, atomBulkBoxes, 
+                                                  atoms,
+                                                  rmInSurf)
+                    if scanBoxResult:
+                        atomSurfBoxes, atomBulkBoxes = scanBoxResult
 
-
-# @annotate('scanAtomsForLoop', color='cyan')
-@njit(fastmath=True, cache=True)
-def scanAtomsForLoop(atomsIdxs, magn, boxLen, minXYZ,
-                     atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                     rmInSurf=True):
-    """Serialised loop to scan the atoms for timing comparison with the parallelised version."""
-    allAtomsSurfBoxs, allAtomsBulkBoxs = [], []
-    for atomIdx in atomsIdxs:
-        scanAtomInp = (magn, boxLen, minXYZ, atomIdx,
-                       atomsRad[atomIdx], atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, rmInSurf)
-        atomSurfBoxs, atomBulkBoxs = scanAtom(scanAtomInp)
-        allAtomsSurfBoxs.extend(atomSurfBoxs)
-        allAtomsBulkBoxs.extend(atomBulkBoxs)
-    return allAtomsSurfBoxs, allAtomsBulkBoxs
+    return atomSurfBoxes, atomBulkBoxes
 
 
-# @annotate('scanAllAtoms', color='magenta')
-def scanAllAtoms(args):
-    """Count the number of boxes that cover the outer spherical surface of a set of atoms for a given box size."""
-    magn, boxLen, atomsIdxs, minXYZ, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, rmInSurf, verbose, maxCPU = args
-    scanAtomInps = [(magn, boxLen, minXYZ, atomIdx, atomsRad[atomIdx],
-                     atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, rmInSurf) for atomIdx in atomsIdxs]
-    allAtomsSurfBoxs, allAtomsBulkBoxs = [], []
-    with Pool(max_workers=maxCPU) as pool:
-        for scanAtomResult in pool.map(scanAtom, scanAtomInps, chunksize=ceil(len(atomsIdxs) / maxCPU)):
-            allAtomsSurfBoxs.extend(scanAtomResult[0])
-            allAtomsBulkBoxs.extend(scanAtomResult[1])
-    # allAtomsSurfBoxs, allAtomsBulkBoxs = scanAtomsForLoop(atomsIdxs, magn, boxLen, minXYZ,
-    #                                                       atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-    #                                                       rmInSurf)
-    allAtomsSurfBoxs, allAtomsBulkBoxs = set(allAtomsSurfBoxs), set(allAtomsBulkBoxs)
-    allAtomsSurfBoxs.difference_update(allAtomsBulkBoxs)
+def scanAllAtoms(magnFac, scanBoxLen, targetAtoms, minXYZ,
+                 allAtoms,
+                 rmInSurf=True, verbose=False,
+                 atomConc=True, boxConc=True):  # TODO: atomConc, boxConc, etc to be removed eventually
+    """Count the boxes that cover the outer spherical surface of a set of atoms for a given box size."""
+    allAtomsSurfBoxes, allAtomsBulkBoxes = set(), set()
+    if atomConc:
+        scanAtomInp = [(magnFac, scanBoxLen, minXYZ, atom,
+                        allAtoms,
+                        allAtomsSurfBoxes, allAtomsBulkBoxes, 
+                        rmInSurf,
+                        boxConc) for atom in targetAtoms]
+        with Pool() as pool:
+            for scanAtomResult in pool.starmap(scanAtom, scanAtomInp):
+                allAtomsSurfBoxes.update(scanAtomResult[0])
+                allAtomsBulkBoxes.update(scanAtomResult[1])
+        allAtomsSurfBoxes.difference_update(allAtomsBulkBoxes)
+    else:
+        for atom in targetAtoms:
+            allAtomsSurfBoxes, allAtomsBulkBoxes = scanAtom(magnFac, scanBoxLen, minXYZ, atom,
+                                                            allAtoms,
+                                                            allAtomsSurfBoxes, allAtomsBulkBoxes,
+                                                            rmInSurf,
+                                                            boxConc)
 
     if verbose:
-        epsInvStr = f"{1 / boxLen:.2f}"
-        print(f"{epsInvStr.rjust(10)}{str(len(allAtomsBulkBoxs)).rjust(12)}{str(len(allAtomsSurfBoxs)).rjust(12)}")
-    return allAtomsSurfBoxs, allAtomsBulkBoxs
+        print(f"\tMagnification, Counts (bulk, surf):\t{magnFac} {len(allAtomsBulkBoxes)} {len(allAtomsSurfBoxes)}")
+    return allAtomsSurfBoxes, allAtomsBulkBoxes
 
 
-# @annotate('writeBoxCoords', color='yellow')
-def writeBoxCoords(atomsEle, atomsXYZ, allSurfBoxs, allBulkBoxs, minXYZ, boxLens,
+def writeBoxCoords(atoms, allSurfBoxes, allBulkBoxes, minXYZ, scanBoxLens,
                    writeFileDir, npName):
     """Write out coordinates of scanned boxes."""
     minX, minY, minZ = minXYZ
     boxCoordsDir = f"{writeFileDir}/boxCoords"
     if not isdir(boxCoordsDir):
-        if not isdir(writeFileDir):
-            mkdir(writeFileDir)
         mkdir(boxCoordsDir)
     with open(f"{boxCoordsDir}/{npName}_boxCoords.xyz", 'w') as f:
-        for (i, boxLen) in enumerate(boxLens):
+        for (i, scanBoxLen) in enumerate(scanBoxLens):
             if i != 0:
                 f.write('\n')
-            f.write(f"{len(atomsEle) + len(allSurfBoxs[i]) + len(allBulkBoxs[i])}\n")
-            for (j, atomXYZ) in enumerate(atomsXYZ):
-                f.write(f"\n{atomsEle[j]}\t{atomXYZ[0]} {atomXYZ[1]} {atomXYZ[2]}")
-            for (boxIDX, boxIDY, boxIDZ) in allSurfBoxs[i]:
-                boxX = minX - MIN_VAL_FROM_BOUND + boxIDX*boxLen + boxLen/2
-                boxY = minY - MIN_VAL_FROM_BOUND + boxIDY*boxLen + boxLen/2
-                boxZ = minZ - MIN_VAL_FROM_BOUND + boxIDZ*boxLen + boxLen/2
+            f.write(f"{len(atoms) + len(allSurfBoxes[i]) + len(allBulkBoxes[i])}\n")
+            for atom in atoms:
+                f.write(f"\n{atom.ele}\t{atom.X} {atom.Y} {atom.Z}")
+            for (boxIDX, boxIDY, boxIDZ) in allSurfBoxes[i]:
+                boxX = minX - MIN_VAL_FROM_BOUND + boxIDX * scanBoxLen + scanBoxLen / 2
+                boxY = minY - MIN_VAL_FROM_BOUND + boxIDY * scanBoxLen + scanBoxLen / 2
+                boxZ = minZ - MIN_VAL_FROM_BOUND + boxIDZ * scanBoxLen + scanBoxLen / 2
                 f.write(f"\nOV\t{boxX:.6f} {boxY:.6f} {boxZ:.6f}")
-            for (boxIDX, boxIDY, boxIDZ) in allBulkBoxs[i]:
-                boxX = minX - MIN_VAL_FROM_BOUND + boxIDX*boxLen + boxLen/2
-                boxY = minY - MIN_VAL_FROM_BOUND + boxIDY*boxLen + boxLen/2
-                boxZ = minZ - MIN_VAL_FROM_BOUND + boxIDZ*boxLen + boxLen/2
+            for (boxIDX, boxIDY, boxIDZ) in allBulkBoxes[i]:
+                boxX = minX - MIN_VAL_FROM_BOUND + boxIDX * scanBoxLen + scanBoxLen / 2
+                boxY = minY - MIN_VAL_FROM_BOUND + boxIDY * scanBoxLen + scanBoxLen / 2
+                boxZ = minZ - MIN_VAL_FROM_BOUND + boxIDZ * scanBoxLen + scanBoxLen / 2
                 f.write(f"\nIV\t{boxX:.6f} {boxY:.6f} {boxZ:.6f}")
 
 
-# @annotate('findTargetAtoms', color='cyan')
-@njit(fastmath=True, cache=True)
-def findTargetAtoms(atomsNeighIdxs):
-    """Find atoms to be scanned if not removing inner surfaces (atoms with neighbours that are on the surface)."""
-    atomsIdxs = []
-    for (atomIdx, atomNeighIdxs) in enumerate(atomsNeighIdxs):
-        if sum(atomNeighIdxs[atomNeighIdxs > -1]) > 0:
-            atomsIdxs.append(atomIdx)
-    return np.array(atomsIdxs)
+def findTargetAtoms(atoms, rmInSurf=True):
+    targetAtoms = []
+    for atom in atoms:
+        if rmInSurf:
+            if atom.isSurf:
+                targetAtoms.append(atom)
+        else:
+            if sum(tuple(atoms[neighIdx].isSurf for neighIdx in atom.neighs)) > 0:
+                targetAtoms.append(atom)
+    return targetAtoms

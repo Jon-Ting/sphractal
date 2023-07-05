@@ -1,71 +1,56 @@
 from math import cos, pi, sin, sqrt
-from numba import njit
-import numpy as np
 from os import mkdir
 from os.path import isdir
 
-from sphractal.constants import ATOMIC_RAD_DICT, METALLIC_RAD_DICT
-from sphractal.utils import calcDist, oppositeInnerAtoms
-# from sphractal.utils import annotate
+from sphractal.constants import ATOMIC_RAD_DICT
+from sphractal.utils import dist, np, oppositeInnerAtoms
 
 
-@njit(fastmath=True, cache=True)
 def fibonacciSphere(numPoint, sphereRad):
-    """Generate evenly spread points on the surface of a sphere with a specified radius."""
-    xyzs = np.empty((numPoint, 3), dtype=np.float64)
-    phi = pi * (sqrt(5)-1)  # Golden angle (radians)
+    """Generate evenly spread numSample points on the surface of a sphere with radius sphereRad."""
+    xyzs = []
+    phi = pi * (sqrt(5) - 1)  # Golden angle (radians)
     for i in range(numPoint):
-        y = 1 - (i / float(numPoint-1))*2  # y \in [1, -1]
+        y = 1 - (i / float(numPoint - 1)) * 2  # y \in [1, -1]
         radius = sqrt(1 - y*y)  # Radius at y
         theta = phi * i  # Golden angle increment
         x = cos(theta) * radius
         z = sin(theta) * radius
-        xyzs[i] = (x * sphereRad, y * sphereRad, z * sphereRad)
+        xyzs.append(np.array((x*sphereRad, y*sphereRad, z*sphereRad)))
     return xyzs
 
 
-@njit(fastmath=True, cache=True)
-def withinNeighRad(surfPointXYZ, atomNeighIdxs, atomsRad, atomsXYZ):
-    """Return whether a surface point generated around a given atom falls within the radius of a neighbouring atom."""
-    for neighIdx in atomNeighIdxs:
-        if calcDist(atomsXYZ[neighIdx], surfPointXYZ) <= atomsRad[neighIdx]:
+def withinNeighRad(surfPointXYZ, atom1, atoms):
+    """Check if surfPointXYZ falls within the radius of a neighbouring atom of atom1."""
+    for neighIdx in atom1.neighs:
+        atom2 = atoms[neighIdx]
+        if dist((atom2.X, atom2.Y, atom2.Z), surfPointXYZ) <= ATOMIC_RAD_DICT[atom2.ele]:
             return True
     return False
 
 
-# @annotate('pointsOnAtom', color='cyan')
-@njit(fastmath=True, cache=True)
-def pointsOnAtom(atomIdx, numPoint, atomsSurfIdxs, atomsRad, atomsXYZ, atomsNeighIdxs, surfPoints=None, rmInSurf=True):
-    """Generate surface points around an atom and classify them as either inner or outer surface."""
-    if surfPoints is None:
-        surfPoints = fibonacciSphere(numPoint, atomsRad[atomIdx])
-    atomXYZ, atomNeighIdxsPadded = atomsXYZ[atomIdx], atomsNeighIdxs[atomIdx]
-    atomNeighIdxs = atomNeighIdxsPadded[atomNeighIdxsPadded > -1]
+def pointsOnAtom(atom1, atoms, numSample, rmInSurf=True):
+    """Generate points around atom1 and classify them as either inner or outer surface."""
+    surfPoints = fibonacciSphere(numSample, ATOMIC_RAD_DICT[atom1.ele])
     outerSurfs, innerSurfs = [], []
     for surfPoint in surfPoints:
-        surfPointXYZ = surfPoint + atomXYZ
-        if withinNeighRad(surfPointXYZ, atomNeighIdxs, atomsRad, atomsXYZ):
+        surfPointXYZ = surfPoint + np.array((atom1.X, atom1.Y, atom1.Z))
+        if withinNeighRad(surfPointXYZ, atom1, atoms):
             continue
-        if (not rmInSurf) or (rmInSurf and oppositeInnerAtoms(surfPointXYZ, atomXYZ,
-                                                              atomNeighIdxs, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs)):
+        if (not rmInSurf) or (rmInSurf and oppositeInnerAtoms(surfPointXYZ, atom1, atoms)):
             outerSurfs.append(surfPointXYZ)
         else:
             innerSurfs.append(surfPointXYZ)
     return outerSurfs, innerSurfs
 
 
-# @annotate('pointsToVoxels', color='magenta')
-@njit(fastmath=True, cache=True)
-def pointsToVoxels(pointXYZs, gridSize):
+def pointsToVoxels(pointXYZs, gridSize, writeFileDir):
     """Turn coordinates of point clouds into coordinates of occupied voxels."""
     # Get segmenting points in 3D space
-    rangeXYZ = np.array([pointXYZs[:, i].max() - pointXYZs[:, i].min() for i in range(3)])
-    maxRange = max(rangeXYZ)
-    minXYZs, maxXYZs, segmentXYZs = np.empty(3), np.empty(3), np.empty((3, gridSize + 1))
-    for i in range(3):
-        minXYZs[i] = pointXYZs[:, i].min() - (maxRange-rangeXYZ[i]) * 0.5
-        maxXYZs[i] = pointXYZs[:, i].max() + (maxRange-rangeXYZ[i]) * 0.5
-        segmentXYZs[i] = np.linspace(minXYZs[i], maxXYZs[i], num=gridSize+1)
+    rangeXYZ = pointXYZs.ptp(0)
+    minXYZs = np.min(pointXYZs, 0) - (max(rangeXYZ) - rangeXYZ) * 0.5
+    maxXYZs = np.max(pointXYZs, 0) + (max(rangeXYZ) - rangeXYZ) * 0.5
+    segmentXYZs = tuple(np.linspace(minXYZs[axis], maxXYZs[axis], num=(gridSize + 1)) for axis in range(3))
 
     # Get the index of the segment that each point lies within
     voxelXs = np.clip(np.searchsorted(segmentXYZs[0], pointXYZs[:, 0]) - 1, 0, gridSize)
@@ -73,25 +58,17 @@ def pointsToVoxels(pointXYZs, gridSize):
     voxelZs = np.clip(np.searchsorted(segmentXYZs[2], pointXYZs[:, 2]) - 1, 0, gridSize)
 
     # Get indices of occupied voxels after flattened
-    voxelIdxs = set(voxelXs*gridSize*gridSize + voxelYs*gridSize + voxelZs)
-    return np.column_stack((voxelXs, voxelYs, voxelZs)), voxelIdxs
-
-
-# @annotate('writeSurfVoxelIdxs', color='yellow')
-def writeSurfVoxelIdxs(writeFileDir, voxelIdxs):
-    """Generate a txt file required for 3D box-counting using C++ code written by Ruiz de Miras and Posadas."""
+    voxelIdxs = set(np.ravel_multi_index((voxelXs, voxelYs, voxelZs), (gridSize, gridSize, gridSize)))
     with open(f"{writeFileDir}/surfVoxelIdxs.txt", 'w') as f:
         for idx in voxelIdxs:
             f.write(f"{idx}\n")
+    return np.column_stack((voxelXs, voxelYs, voxelZs)), voxelIdxs
 
 
-# @annotate('writePCD', color='yellow')
 def writePCD(writeFileDir, npName, surfPointXYZs):
-    """Generate a pcd file required for 3D box-counting using MATLAB code written by Kazuaki Iida."""
+    """Output format useful for 3D box counting using MATLAB code by Kazuaki Iida"""
     surfPointsDir = f"{writeFileDir}/surfPoints"
     if not isdir(surfPointsDir):
-        if not isdir(writeFileDir):
-            mkdir(writeFileDir)
         mkdir(surfPointsDir)
     with open(f"{surfPointsDir}/{npName}_surfPoints.pcd", 'w') as f:
         f.write('# .PCD v.7 - Point Cloud Data file format\nVERSION .7')
@@ -101,32 +78,24 @@ def writePCD(writeFileDir, npName, surfPointXYZs):
             f.write(f"{xyz[0]} {xyz[1]} {xyz[2]}\n")
 
 
-# @annotate('writeSurfPoints', color='blue')
-def writeSurfPoints(writeFileDir, npName, atomsSurfIdxs, atomsXYZ, surfPointXYZs, nonSurfPointXYZs):
-    """Generate an xyz file for visualisation of classified point clouds."""
+def writeSurfPoints(writeFileDir, npName, atoms, surfPointXYZs, nonSurfPointXYZs):
     surfPointsDir = f"{writeFileDir}/surfPoints"
     if not isdir(surfPointsDir):
-        if not isdir(writeFileDir):
-            mkdir(writeFileDir)
         mkdir(surfPointsDir)
+    surfAtoms = tuple((atom.X, atom.Y, atom.Z, atom.ID) for atom in atoms if atom.isSurf)
     with open(f"{surfPointsDir}/{npName}_surfPoints.xyz", 'w') as f:
-        f.write(f"{len(surfPointXYZs) + len(nonSurfPointXYZs) + len(atomsSurfIdxs)}\n\n")
+        f.write(f"{len(surfPointXYZs) + len(nonSurfPointXYZs) + len(surfAtoms)}\n\n")
         for (i, xyz) in enumerate(surfPointXYZs):
             f.write(f"OU {xyz[0]} {xyz[1]} {xyz[2]} {i}\n")
         for (i, xyz) in enumerate(nonSurfPointXYZs):
             f.write(f"IN {xyz[0]} {xyz[1]} {xyz[2]} {i}\n")
-        for atomIdx in atomsSurfIdxs:
-            xyz = atomsXYZ[atomIdx]
-            f.write(f"SU {xyz[0]} {xyz[1]} {xyz[2]} {atomIdx}\n")
+        for xyz in surfAtoms:
+            f.write(f"SU {xyz[0]} {xyz[1]} {xyz[2]} {xyz[3]}\n")
 
 
-# @annotate('writeSurfVoxels', color='green')
 def writeSurfVoxels(writeFileDir, npName, surfVoxelXYZs):
-    """Generate an xyz file useful for visualisation of computed surface voxels."""
     surfVoxelsDir = f"{writeFileDir}/surfVoxels"
     if not isdir(surfVoxelsDir):
-        if not isdir(writeFileDir):
-            mkdir(writeFileDir)
         mkdir(surfVoxelsDir)
     with open(f"{surfVoxelsDir}/{npName}_surfVoxels.xyz", 'w') as f:
         f.write(f"{len(surfVoxelXYZs)}\n\n")
@@ -134,33 +103,27 @@ def writeSurfVoxels(writeFileDir, npName, surfVoxelXYZs):
             f.write(f"VX {xyz[0]} {xyz[1]} {xyz[2]} {i}\n")
 
 
-# @annotate('getSurfPoints', color='cyan')
-def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                  npName, writeFileDir, 
-                  radType='atomic', numPoint=300, gridNum=1024,
+def genSurfPoints(atoms,
+                  npName, writeFileDir,
+                  numPoint=300, gridNum=1024,
                   rmInSurf=True, vis=False, verbose=False, genPCD=False):
     """Generate point clouds approximating the outer spherical surface formed by a set of atoms."""
-    # Avoid repeating generation of surface points around atoms with the same radii
-    radDict = ATOMIC_RAD_DICT if radType == 'atomic' else METALLIC_RAD_DICT
-    surfPointsEles = {atomEle: fibonacciSphere(numPoint, radDict[atomEle]) for atomEle in set(atomsEle)}
+    if verbose:
+        print(f"  Approximating the surface with {numPoint} point clouds for each atom...")
 
-    # Generate point clouds and convert to voxels
     surfPointXYZs, nonSurfPointXYZs = [], []
-    for atomIdx in atomsSurfIdxs:
-        outerSurfs, innerSurfs = pointsOnAtom(atomIdx, numPoint,
-                                              atomsSurfIdxs, atomsRad, atomsXYZ, atomsNeighIdxs,
-                                              surfPoints=surfPointsEles[atomsEle[atomIdx]],
-                                              rmInSurf=rmInSurf)
+    for atom1 in atoms:
+        if not atom1.isSurf:
+            continue
+        outerSurfs, innerSurfs = pointsOnAtom(atom1, atoms, numPoint, rmInSurf=rmInSurf)
         surfPointXYZs.extend(outerSurfs)
         nonSurfPointXYZs.extend(innerSurfs)
-    surfVoxelXYZs, surfVoxelIdxs = pointsToVoxels(np.array(surfPointXYZs), gridNum)
 
-    # Generate output files
-    writeSurfVoxelIdxs(writeFileDir, surfVoxelIdxs)
+    surfVoxelXYZs, surfVoxelIdxs = pointsToVoxels(np.array(surfPointXYZs), gridNum, writeFileDir)
     if verbose:
-        print(f"    {len(surfPointXYZs)} surface points -> {len(surfVoxelIdxs)} voxels, # grids: {gridNum}")
+        print(f"  {len(surfPointXYZs)} surface points -> {len(surfVoxelIdxs)} voxels, # grids: {gridNum}")
     if genPCD:
         writePCD(writeFileDir, npName, surfPointXYZs)
     if vis:
-        writeSurfPoints(writeFileDir, npName, atomsSurfIdxs, atomsXYZ, surfPointXYZs, nonSurfPointXYZs)
+        writeSurfPoints(writeFileDir, npName, atoms, surfPointXYZs, nonSurfPointXYZs)
         writeSurfVoxels(writeFileDir, npName, surfVoxelXYZs)
