@@ -167,8 +167,8 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
 
     if verbose:
         print(f"  Representing the surface by treating each atom as exact spheres...")
-        print(f"    Parallelised with {atomScanMaxWorkers} out of {numCPUs} cores for scanning over atoms, "
-              f"the rest over box lengths...")
+        print(f"    Parallelised with {atomScanMaxWorkers} out of {numCPUs} cores for scanning over {len(atomsIdxs)} "
+              f"atoms, the rest over {numBoxLenSample} box lengths...")
         print(f"    (1/eps)    (# bulk)    (# surf)")
     if writeBox:
         if not isdir(writeFileDir):
