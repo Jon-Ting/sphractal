@@ -214,7 +214,7 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
 # @annotate('findSlope', color='green')
 def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange='trim',
               minSampleNum=5, confLvl=95, 
-              visReg=True, figType='article', saveFig=False, showPlot=False):
+              visReg=True, figType='paper', saveFig=False, showPlot=False):
     """
     Compute the slope (box counting dimension) from the box-counting data collected.
 
@@ -237,7 +237,7 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
         Confidence level of confidence interval in percentage.
     visReg : bool, optional
         Whether to generate figures from the linear regression fitting process.
-    figType : {'article', 'poster', 'ppt'}
+    figType : {'paper', 'poster', 'talk'}
         Type of figures to be generated.
     saveFig : bool, optional
         Whether to save the plots generated, only works when 'visReg' is True.
@@ -351,7 +351,7 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
 def runBoxCnt(xyzFilePath, 
               radType='atomic', calcBL=False, findSurfOption='alphaShape', alphaMult=2.0,
               writeFileDir='boxCntOutputs', lenRange='trim', minSampleNum=5, confLvl=95, 
-              rmInSurf=True, vis=True, figType='article', saveFig=False, showPlot=False, verbose=False,
+              rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False,
               runPointCloudBoxCnt=True, numPoints=300, gridNum=1024, exePath='$FASTBC_EXE', genPCD=False,
               runExactSphereBoxCnt=True, minLenMult=0.25, maxLenMult=1, numBoxLenSample=10, writeBox=True): 
     """
@@ -384,7 +384,7 @@ def runBoxCnt(xyzFilePath,
         Whether to remove the surface points on the inner surface.
     vis : bool, optional
         Whether to generate output files for visualisation.
-    figType : {'article', 'poster', 'ppt'}
+    figType : {'paper', 'poster', 'talk'}
         Type of figures to be generated.
     saveFig : bool, optional
         Whether to save the plots generated, only used if 'vis' is True.

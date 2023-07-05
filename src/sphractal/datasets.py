@@ -6,7 +6,7 @@ def getExampleDataPath():
 
     Returns
     -------
-    pathlib.PosixPath
+    str
         Path to file.
     """
     return str(files('sphractal.data').joinpath('example.xyz'))
