@@ -74,7 +74,7 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     >>> eles, rads, xyzs, _, minxyz, maxxyz = readXYZ('example.xyz')
     >>> neighs, _ = findNN(rads, xyzs, minxyz, maxxyz, 2.5)
     >>> surfs = findSurf(xyzs, neighs, 'alphaShape', 5.0)
-    >>> scales, counts = genSurfPoints(eles, rads, surfs, xyzs, neighs, 'example')
+    >>> scalesPC, countsPC = genSurfPoints(eles, rads, surfs, xyzs, neighs, 'example')
 
     Notes
     -----
@@ -85,8 +85,8 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     -  8192 -> 1024 GB (HPC node with huge memories like NCI Gadi megamem queue -> max 2990 GB/node)
     - 16384 -> 8192 GB
     Further details about maximum grid size and memory estimation could be found in 'test.cpp' documented by the authors 
-    (https://www.ugr.es/~demiras/fbc/). As a reference, when 8192 grids are used, allocation of memory took 25 min; while 
-    the CPU algorithm runs for 18 min.
+    (https://www.ugr.es/~demiras/fbc/). As a reference, when 8192 grids are used, allocation of memory took 25 min;
+    while the CPU algorithm runs for 18 min.
     """
     if verbose:
         print(f"  Approximating the surface with {numPoint} point clouds for each atom...")
@@ -157,7 +157,7 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
     >>> eles, rads, xyzs, _, minxyz, maxxyz = readXYZ('example.xyz')
     >>> neighs, _ = findNN(rads, xyzs, minxyz, maxxyz, 1.2)
     >>> surfs = findSurf(xyzs, neighs, 'alphaShape', 2.0)
-    >>> scales, counts = getSphereBoxCnts(eles, rads, surfs, xyzs, neighs, 100, (0.2, 1), minxyz, 'example')
+    >>> scalesES, countsES = getSphereBoxCnts(eles, rads, surfs, xyzs, neighs, 100, (0.2, 1), minxyz, 'example')
     """
     atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs)
     numCPUs = cpu_count()
@@ -167,7 +167,8 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
 
     if verbose:
         print(f"  Representing the surface by treating each atom as exact spheres...")
-        print(f"  Parallelised with {atomScanMaxWorkers} out of {numCPUs} cores for scanning over atoms, the rest over box lengths...")
+        print(f"  Parallelised with {atomScanMaxWorkers} out of {numCPUs} cores for scanning over atoms, "
+              f"the rest over box lengths...")
         print(f"    (1/eps)    (# bulk)    (# surf)")
     if writeBox:
         if not isdir(writeFileDir):
@@ -197,7 +198,8 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
 
     if boxLenConc:
         with Pool(max_workers=boxLenScanMaxWorkers) as pool:
-            for scanAllAtomsResult in pool.map(scanAllAtoms, scanAllAtomsInps, chunksize=ceil(numBoxLenSample / boxLenScanMaxWorkers)):
+            for scanAllAtomsResult in pool.map(scanAllAtoms, scanAllAtomsInps,
+                                               chunksize=ceil(numBoxLenSample / boxLenScanMaxWorkers)):
                 allAtomsSurfBoxs, allAtomsBulkBoxs = scanAllAtomsResult
                 allLensSurfBoxs.append(allAtomsSurfBoxs)
                 allLensBulkBoxs.append(allAtomsBulkBoxs)
@@ -256,7 +258,10 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
         plt.rc('xtick', labelsize='x-small')
         plt.rc('ytick', labelsize='x-small')
         params = PLT_PARAMS[figType]
-        figsize, dpi, fontsize, labelsize, legendsize, linewidth, markersize = params['figsize'], params['dpi'], params['fontsize'], params['labelsize'], params['legendsize'], params['linewidth'], params['markersize']
+        figSize, dpi, fontSize, labelSize = params['figSize'], params['dpi'], params['fontSize'], params['labelSize']
+        legendSize, lineWidth, markerSize = params['legendSize'], params['lineWidth'], params['markerSize']
+    else:
+        figSize = dpi = fontSize = labelSize = legendSize = lineWidth = markerSize = None
 
     # Remove invalid entries in the box counts data collected
     while np.nan in counts:
@@ -265,11 +270,13 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
         del scales[nanIdx]
 
     if abs(confLvl) > 100:
-        warn(f"Confidence level out of range, confidence intervals are unreliable! 'confLvl' should be within [0, 100) instead of {confLvl}")
+        warn(f"Confidence level out of range, confidence intervals are unreliable! 'confLvl' should be within [0, 100) "
+             f"instead of {confLvl}")
     alphaCI = 1 - confLvl/100
 
     firstPointIdx, lastPointIdx, removeSmallBoxes = 0, len(scales), True
-    r2score, boxCntDim, slopeCI, r2scorePrev, boxCntDimPrev, slopeCIPrev = 0.0, 0.0, np.array((np.inf, np.inf)), 0.0, 0.0, np.array((np.inf, np.inf))
+    r2score, boxCntDim, slopeCI = 0.0, 0.0, np.array((np.inf, np.inf))
+    r2scorePrev, boxCntDimPrev, slopeCIPrev = 0.0, 0.0, np.array((np.inf, np.inf))
     while len(scales[firstPointIdx:lastPointIdx]) > minSampleNum:
 
         x, y = scales[firstPointIdx:lastPointIdx], counts[firstPointIdx:lastPointIdx]
@@ -279,27 +286,31 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
 
         if visReg:
             plt.close()
-            fig = plt.figure(figsize=figsize, dpi=dpi)
+            fig = plt.figure(figsize=figSize, dpi=dpi)
             ax = fig.add_subplot(1, 1, 1)
-            handleScatter = ax.scatter(x, y, marker='o', s=markersize, c='r', alpha=1, edgecolors='k', linewidths=1.2, zorder=3)
+            handleScatter = ax.scatter(x, y, marker='o', s=markerSize, c='r', alpha=1, edgecolors='k', linewidths=1.2,
+                                       zorder=3)
             handleBestFit = ax.plot(x, yPred, linestyle='-', linewidth=1., color='k', label='OLS')
             ax.grid(linestyle='dotted')
 
             # Compute confidence bands
             predOLS = regModel.get_prediction()
-            lowCIvals, upCIvals = predOLS.summary_frame()['mean_ci_lower'], predOLS.summary_frame()['mean_ci_upper']
-            handleConfBand = ax.plot(x, upCIvals, linestyle='--', linewidth=linewidth, color='b')
-            ax.plot(x, lowCIvals, linestyle='--', linewidth=linewidth, color='b')
-            ax.fill_between(x, upCIvals, lowCIvals, alpha=0.2)
+            lowCIs, upCIs = predOLS.summary_frame()['mean_ci_lower'], predOLS.summary_frame()['mean_ci_upper']
+            handleConfBand = ax.plot(x, upCIs, linestyle='--', linewidth=lineWidth, color='b')
+            ax.plot(x, lowCIs, linestyle='--', linewidth=lineWidth, color='b')
+            ax.fill_between(x, upCIs, lowCIs, alpha=0.2)
 
-            ax.set_xlabel(r'log$(1/\epsilon)$', fontsize=labelsize)
-            ax.set_ylabel(r'log$(N)$', fontsize=labelsize)
+            ax.set_xlabel(r'log$(1/\epsilon)$', fontsize=labelSize)
+            ax.set_ylabel(r'log$(N)$', fontsize=labelSize)
             ax.yaxis.set_major_formatter(FormatStrFormatter('% 1.1f'))
+            # ax.set_title('', fontsize=fontSize)
             ax.legend(handles=(handleScatter, handleBestFit[0], handleConfBand[0]), 
-                      labels=('Actual box counts', fr"Best fit line ($R^2$: {r2score:.3f})", f"{confLvl}% confidence bands"), 
-                      title=fr"$D_{{box}}$: {boxCntDim:.3f} [{slopeCI[0]:.3f}, {slopeCI[1]:.3f}]", title_fontsize=legendsize, 
-                      fontsize=legendsize)
-            #plt.tight_layout()
+                      labels=('Actual box counts', fr"Best fit line ($R^2$: {r2score:.3f})",
+                              f"{confLvl}% confidence bands"),
+                      title=fr"$D_{{box}}$: {boxCntDim:.3f} [{slopeCI[0]:.3f}, {slopeCI[1]:.3f}]",
+                      title_fontsize=legendSize,
+                      fontsize=legendSize)
+            # plt.tight_layout()
 
         # Removal of next point (beware of weird behaviour in middle range)
         # lstSqErrs = np.subtract(y, yPred) ** 2

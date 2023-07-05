@@ -1,5 +1,5 @@
 from math import dist
-from os import environ
+# from os import environ
 from os.path import exists, isdir, isfile
 from shutil import rmtree
 
@@ -7,7 +7,8 @@ from pytest import approx, mark
 
 from fixtures import fixture, np, egAtomsXYZ, egAtomsNeighIdxs, egAtomsSurfIdxs, egTargetAtomIdxs
 from sphractal.datasets import getExampleDataPath
-from sphractal.utils import estDuration, getMinMaxXYZ, readXYZ, findNN, findSurf, calcDist, closestSurfAtoms, oppositeInnerAtoms
+from sphractal.utils import estDuration, getMinMaxXYZ, readXYZ, findNN, findSurf, calcDist, closestSurfAtoms, \
+    oppositeInnerAtoms
 from sphractal.surfPointClouds import fibonacciSphere, pointsOnAtom, pointsToVoxels
 from sphractal.surfExact import getNearFarCoord, scanBox, writeBoxCoords, findTargetAtoms
 from sphractal.boxCnt import getVoxelBoxCnts, getSphereBoxCnts, findSlope, runBoxCnt
@@ -20,7 +21,7 @@ MAX_RANGE = 36.58499999999998
 
 @fixture
 def egMinMaxXYZ():
-    return np.array([404.065, 404.065, 404.065]), np.array([440.65, 440.65, 440.65]) 
+    return np.array([404.065, 404.065, 404.065]), np.array([440.65, 440.65, 440.65])
 
 
 @fixture
@@ -43,11 +44,6 @@ def egVoxelBoxCnts():
 def egSphereBoxCnts():
     return ([-0.23688234, -0.16309612, -0.10004438, -0.03477764,  0.03932408, 0.10260591,  0.17060299,  0.24023892,  0.30488175,  0.37314659],
             [3.20194306, 3.32139128, 3.5171959 , 3.68142216, 3.80522891, 3.9531796 , 4.09272064, 4.27207379, 4.38937875, 4.52953301])
-
-
-@fixture
-def egBoxCnts(egVoxelBoxCnts, egSphereBoxCnts):
-    return 
 
 
 @fixture
@@ -163,9 +159,9 @@ def test_calcDist(egAtomsXYZ):
 #    assert isOppAct == isOppExp, 'Incorrect results'
 
 
-@mark.parametrize('numPoint, sphereRad, xyzsExp', 
-    [(3, 1.0, np.array([[0., 1., 0.], [-0.73736888, 0., -0.67549029], [0., -1., 0.]])), 
-     (5, 1.5, np.array([[0., 1.5, 0.], [-0.95787027, 0.75, -0.87748763], [0.13113859, 0., 1.49425656], [0.79038527, -0.75, -1.03091762], [-0., -1.5, 0.]])), 
+@mark.parametrize('numPoint, sphereRad, xyzsExp',
+    [(3, 1.0, np.array([[0., 1., 0.], [-0.73736888, 0., -0.67549029], [0., -1., 0.]])),
+     (5, 1.5, np.array([[0., 1.5, 0.], [-0.95787027, 0.75, -0.87748763], [0.13113859, 0., 1.49425656], [0.79038527, -0.75, -1.03091762], [-0., -1.5, 0.]])),
      (2, 100, np.array([[0., 100., 0.], [-0., -100., -0.]]))])
 def test_fibonacciSphere(numPoint, sphereRad, xyzsExp):
     """Unit test of fibonacciSphere()."""
@@ -284,7 +280,7 @@ def test_getSphereBoxCnt(rmInSurf, sphereScalesExp, sphereCountsExp, egAtomsEle,
 
 #def test_runBoxCnt(egVoxelBoxCntDims, egSphereBoxCntDims):
 #    """Unit and regression test of runBoxCnt() (To be uncommented when compiled C++ code could be shipped together)."""
-#    assert isfile(os.environ['FASTBC_EXE']), 'Executable not found at FASTBC_EXE'
+#    assert isfile(environ['FASTBC_EXE']), 'Executable not found at FASTBC_EXE'
 #    boxCntDimsAct = runBoxCnt(getExampleDataPath(), writeFileDir='tests/boxCntOutputs')
 #    assert boxCntDimsAct[:2] == approx(egVoxelBoxCntDims[:2]), 'Incorrect R2 and D_Box for point clouds representation'
 #    assert boxCntDimsAct[2] == approx(egVoxelBoxCntDims[2]), 'Incorrect confidence interval for point clouds representation'

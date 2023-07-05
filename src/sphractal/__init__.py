@@ -21,6 +21,7 @@ Code snippets in docstrings are indicated by three greater-than signs::
 
 Use the built-in ``help`` function to view a function's docstring::
 
+  >>> import sphractal
   >>> help(sphractal.runBoxCnt)
   ... # docstring: +SKIP
 
