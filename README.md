@@ -4,7 +4,7 @@
 
 ## Description
 
-`Sphractal` is a package that provides functionality to estimate the fractal dimension of complex 3D surfaces formed 
+`Sphractal` is a package that provides functionalities to estimate the fractal dimension of complex 3D surfaces formed 
 from overlapping spheres via box-counting algorithm. 
 
 ## Features
