@@ -10,4 +10,3 @@ def getExampleDataPath():
         Path to file.
     """
     return str(files('sphractal.data').joinpath('example.xyz'))
-

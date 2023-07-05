@@ -39,7 +39,9 @@ METALLIC_RAD_DICT = {
     'Sg': defRad, 'Bh': defRad, 'Hs': defRad, 'Mt': defRad, 'Ds': defRad, 'Rg': defRad, 'Cn': defRad, 'Nh': defRad,
     'Fl': defRad, 'Mc': defRad, 'Lv': defRad, 'Ts': defRad, 'Og': defRad
 }
-PLT_PARAMS = {'article': {'figsize': (3.5, 2.5), 'dpi': 300, 'fontsize': 'medium', 'labelsize': 'small', 'legendsize': 'x-small', 'linewidth': 0.5, 'markersize': 24}, 
-        'poster': {'figsize': (4.5, 3.5), 'dpi': 600, 'fontsize': 'x-large', 'labelsize': 'large', 'legendsize': 'medium', 'linewidth': 1.0, 'markersize': 48}, 
-        'ppt': {'figsize': (4, 3), 'dpi': 144, 'fontsize': 'large', 'labelsize': 'medium', 'legendsize': 'small', 'linewidth': 1.0, 'markersize': 36}}
-
+PLT_PARAMS = {'article': {'figSize': (3.5, 2.5), 'dpi': 300, 'fontSize': 'medium', 'labelSize': 'small',
+                          'legendSize': 'x-small', 'lineWidth': 0.5, 'markerSize': 24},
+              'poster': {'figSize': (4.5, 3.5), 'dpi': 600, 'fontSize': 'x-large', 'labelSize': 'large',
+                         'legendSize': 'medium', 'lineWidth': 1.0, 'markerSize': 48},
+              'ppt': {'figSize': (4, 3), 'dpi': 144, 'fontSize': 'large', 'labelSize': 'medium', 'legendSize': 'small',
+                      'lineWidth': 1.0, 'markerSize': 36}}

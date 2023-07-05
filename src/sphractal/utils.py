@@ -35,6 +35,7 @@ def getMinMaxXYZ(atomsXYZ):
 
 
 # @annotate('readXYZ', color='cyan')
+# noinspection GrazieInspection
 def readXYZ(filePath, radType='atomic'):
     """Parse an xyz or a lmp file."""
     radDict = ATOMIC_RAD_DICT if radType == 'atomic' else METALLIC_RAD_DICT
