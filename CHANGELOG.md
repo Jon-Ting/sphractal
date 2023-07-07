@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.0 (2023-07-07)
+
+### Feature
+
+* **figType:** Renamed options for figType based on seaborn style ([`f1a8fb1`](https://github.com/Jon-Ting/sphractal/commit/f1a8fb1ceacb23697ae30b7dd8e26e01745d1e94))
+
+### Documentation
+
+* **readme:** Fixed typo in readme ([`92b38b8`](https://github.com/Jon-Ting/sphractal/commit/92b38b85d33da568ab861cdb61350c69e8f9745c))
+
 ## v0.7.1 (2023-07-05)
 
 
