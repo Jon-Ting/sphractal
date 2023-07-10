@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.1 (2023-07-08)
+
+### Documentation
+
+* **example:** Fixed a typo in example.ipynb ([`157adc3`](https://github.com/Jon-Ting/sphractal/commit/157adc392b7400ac3ff152db55eafa706fdaf78a))
+
 ## v0.8.0 (2023-07-07)
 
 ### Feature
