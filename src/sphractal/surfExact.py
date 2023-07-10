@@ -10,13 +10,10 @@ from sphractal.utils import calcDist, oppositeInnerAtoms
 # from sphractal.utils import annotate
 
 
-MIN_VAL_FROM_BOUND = 5.0  # Angstrom
-
-
 @njit(fastmath=True, cache=True)
-def getNearFarCoord(scanBoxIdx, boxLen, lowBound, atomCoord):
+def getNearFarCoord(scanBoxIdx, boxLen, lowBound, atomCoord, minValFromBound=5.0):
     """Find the nearest and furthest point of a given box from a given atom."""
-    scanBoxMax = lowBound - MIN_VAL_FROM_BOUND + (scanBoxIdx+1)*boxLen
+    scanBoxMax = lowBound - minValFromBound + (scanBoxIdx+1)*boxLen
     scanBoxMin = scanBoxMax - boxLen
     if atomCoord < scanBoxMin:
         scanBoxNear, scanBoxFar = scanBoxMin, scanBoxMax
@@ -33,13 +30,13 @@ def getNearFarCoord(scanBoxIdx, boxLen, lowBound, atomCoord):
 def scanBox(minXYZ, scanBoxIdxs, scanBoxNearFarXYZs, boxLen,
             atomIdx, atomRad, atomXYZ, atomNeighIdxs,
             atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-            rmInSurf=True):
+            minValFromBound=5.0, rmInSurf=True):
     """Find the nearest and furthest point of a given box from a given atom."""
     # Remove the box if it covers the inner surface
     if rmInSurf:
-        scanBoxX = minXYZ[0] - MIN_VAL_FROM_BOUND + (scanBoxIdxs[0]+1)*boxLen - boxLen*0.5
-        scanBoxY = minXYZ[1] - MIN_VAL_FROM_BOUND + (scanBoxIdxs[1]+1)*boxLen - boxLen*0.5
-        scanBoxZ = minXYZ[2] - MIN_VAL_FROM_BOUND + (scanBoxIdxs[2]+1)*boxLen - boxLen*0.5
+        scanBoxX = minXYZ[0] - minValFromBound + (scanBoxIdxs[0]+1)*boxLen - boxLen*0.5
+        scanBoxY = minXYZ[1] - minValFromBound + (scanBoxIdxs[1]+1)*boxLen - boxLen*0.5
+        scanBoxZ = minXYZ[2] - minValFromBound + (scanBoxIdxs[2]+1)*boxLen - boxLen*0.5
         if not oppositeInnerAtoms(np.array((scanBoxX, scanBoxY, scanBoxZ)), atomXYZ, atomNeighIdxs,
                                   atomsSurfIdxs, atomsXYZ, atomsNeighIdxs):
             return 'none'
@@ -65,39 +62,39 @@ def scanBox(minXYZ, scanBoxIdxs, scanBoxNearFarXYZs, boxLen,
 @njit(fastmath=True, cache=True)
 def scanAtom(args):
     """Count the number of boxes that cover the outer spherical surface of a given atom."""
-    magn, boxLen, minXYZ, atomIdx, atomRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, rmInSurf = args
+    magn, boxLen, minXYZ, atomIdx, atomRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, minValFromBound, rmInSurf = args
     atomXYZ, atomNeighIdxsPadded = atomsXYZ[atomIdx], atomsNeighIdxs[atomIdx]
     atomNeighIdxs = atomNeighIdxsPadded[atomNeighIdxsPadded > -1]
 
     atomX, atomY, atomZ = atomXYZ
     minX, minY, minZ = minXYZ
-    atomBoxIdxX = int((atomX - minX + MIN_VAL_FROM_BOUND)/boxLen)
-    atomBoxIdxY = int((atomY - minY + MIN_VAL_FROM_BOUND)/boxLen)
-    atomBoxIdxZ = int((atomZ - minZ + MIN_VAL_FROM_BOUND)/boxLen)
+    atomBoxIdxX = int((atomX - minX + minValFromBound)/boxLen)
+    atomBoxIdxY = int((atomY - minY + minValFromBound)/boxLen)
+    atomBoxIdxZ = int((atomZ - minZ + minValFromBound)/boxLen)
     numScan = ceil((atomRad + boxLen)/boxLen)
     atomSurfBoxs, atomBulkBoxs = [], []
     for i in range(-numScan, numScan + 1):
         scanBoxIdxX = atomBoxIdxX + i
         if scanBoxIdxX < 0 or scanBoxIdxX >= magn:
             continue
-        scanBoxNearX, scanBoxFarX = getNearFarCoord(scanBoxIdxX, boxLen, minX, atomX)
+        scanBoxNearX, scanBoxFarX = getNearFarCoord(scanBoxIdxX, boxLen, minX, atomX, minValFromBound)
         for j in range(-numScan, numScan + 1):
             scanBoxIdxY = atomBoxIdxY + j
             if scanBoxIdxY < 0 or scanBoxIdxY >= magn:
                 continue
-            scanBoxNearY, scanBoxFarY = getNearFarCoord(scanBoxIdxY, boxLen, minY, atomY)
+            scanBoxNearY, scanBoxFarY = getNearFarCoord(scanBoxIdxY, boxLen, minY, atomY, minValFromBound)
             for k in range(-numScan, numScan + 1):
                 scanBoxIdxZ = atomBoxIdxZ + k
                 if scanBoxIdxZ < 0 or scanBoxIdxZ >= magn:
                     continue
-                scanBoxNearZ, scanBoxFarZ = getNearFarCoord(scanBoxIdxZ, boxLen, minZ, atomZ)
+                scanBoxNearZ, scanBoxFarZ = getNearFarCoord(scanBoxIdxZ, boxLen, minZ, atomZ, minValFromBound)
 
                 belong = scanBox(minXYZ, (scanBoxIdxX, scanBoxIdxY, scanBoxIdxZ),
                                  (scanBoxNearX, scanBoxNearY, scanBoxNearZ, scanBoxFarX, scanBoxFarY, scanBoxFarZ),
                                  boxLen,
                                  atomIdx, atomRad, atomXYZ, atomNeighIdxs,
                                  atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                                 rmInSurf)
+                                 minValFromBound, rmInSurf)
                 if belong == 'surf':
                     atomSurfBoxs.append((scanBoxIdxX, scanBoxIdxY, scanBoxIdxZ))
                 elif belong == 'bulk':
@@ -109,12 +106,13 @@ def scanAtom(args):
 @njit(fastmath=True, cache=True)
 def scanAtomsForLoop(atomsIdxs, magn, boxLen, minXYZ,
                      atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                     rmInSurf=True):
+                     minValFromBound=5.0, rmInSurf=True):
     """Serialised loop to scan the atoms for timing comparison with the parallelised version."""
     allAtomsSurfBoxs, allAtomsBulkBoxs = [], []
     for atomIdx in atomsIdxs:
         scanAtomInp = (magn, boxLen, minXYZ, atomIdx,
-                       atomsRad[atomIdx], atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, rmInSurf)
+                       atomsRad[atomIdx], atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, 
+                       minValFromBound, rmInSurf)
         atomSurfBoxs, atomBulkBoxs = scanAtom(scanAtomInp)
         allAtomsSurfBoxs.extend(atomSurfBoxs)
         allAtomsBulkBoxs.extend(atomBulkBoxs)
@@ -124,9 +122,9 @@ def scanAtomsForLoop(atomsIdxs, magn, boxLen, minXYZ,
 # @annotate('scanAllAtoms', color='magenta')
 def scanAllAtoms(args):
     """Count the number of boxes that cover the outer spherical surface of a set of atoms for a given box size."""
-    magn, boxLen, atomsIdxs, minXYZ, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, rmInSurf, verbose, maxCPU = args
+    magn, boxLen, atomsIdxs, minXYZ, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, minValFromBound, rmInSurf, verbose, maxCPU = args
     scanAtomInps = [(magn, boxLen, minXYZ, atomIdx, atomsRad[atomIdx],
-                     atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, rmInSurf) for atomIdx in atomsIdxs]
+                     atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, minValFromBound, rmInSurf) for atomIdx in atomsIdxs]
     allAtomsSurfBoxs, allAtomsBulkBoxs = [], []
     with Pool(max_workers=maxCPU) as pool:
         for scanAtomResult in pool.map(scanAtom, scanAtomInps, chunksize=ceil(len(atomsIdxs) / maxCPU)):
@@ -134,7 +132,7 @@ def scanAllAtoms(args):
             allAtomsBulkBoxs.extend(scanAtomResult[1])
     # allAtomsSurfBoxs, allAtomsBulkBoxs = scanAtomsForLoop(atomsIdxs, magn, boxLen, minXYZ,
     #                                                       atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-    #                                                       rmInSurf)
+    #                                                       minValFromBound, rmInSurf)
     allAtomsSurfBoxs, allAtomsBulkBoxs = set(allAtomsSurfBoxs), set(allAtomsBulkBoxs)
     allAtomsSurfBoxs.difference_update(allAtomsBulkBoxs)
 
@@ -145,7 +143,7 @@ def scanAllAtoms(args):
 
 
 # @annotate('writeBoxCoords', color='yellow')
-def writeBoxCoords(atomsEle, atomsXYZ, allSurfBoxs, allBulkBoxs, minXYZ, boxLens,
+def writeBoxCoords(atomsEle, atomsXYZ, allSurfBoxs, allBulkBoxs, minXYZ, boxLens, minValFromBound,
                    writeFileDir, npName):
     """Write out coordinates of scanned boxes."""
     minX, minY, minZ = minXYZ
@@ -162,14 +160,14 @@ def writeBoxCoords(atomsEle, atomsXYZ, allSurfBoxs, allBulkBoxs, minXYZ, boxLens
             for (j, atomXYZ) in enumerate(atomsXYZ):
                 f.write(f"\n{atomsEle[j]}\t{atomXYZ[0]} {atomXYZ[1]} {atomXYZ[2]}")
             for (boxIDX, boxIDY, boxIDZ) in allSurfBoxs[i]:
-                boxX = minX - MIN_VAL_FROM_BOUND + boxIDX*boxLen + boxLen/2
-                boxY = minY - MIN_VAL_FROM_BOUND + boxIDY*boxLen + boxLen/2
-                boxZ = minZ - MIN_VAL_FROM_BOUND + boxIDZ*boxLen + boxLen/2
+                boxX = minX - minValFromBound + boxIDX*boxLen + boxLen/2
+                boxY = minY - minValFromBound + boxIDY*boxLen + boxLen/2
+                boxZ = minZ - minValFromBound + boxIDZ*boxLen + boxLen/2
                 f.write(f"\nOV\t{boxX:.6f} {boxY:.6f} {boxZ:.6f}")
             for (boxIDX, boxIDY, boxIDZ) in allBulkBoxs[i]:
-                boxX = minX - MIN_VAL_FROM_BOUND + boxIDX*boxLen + boxLen/2
-                boxY = minY - MIN_VAL_FROM_BOUND + boxIDY*boxLen + boxLen/2
-                boxZ = minZ - MIN_VAL_FROM_BOUND + boxIDZ*boxLen + boxLen/2
+                boxX = minX - minValFromBound + boxIDX*boxLen + boxLen/2
+                boxY = minY - minValFromBound + boxIDY*boxLen + boxLen/2
+                boxZ = minZ - minValFromBound + boxIDZ*boxLen + boxLen/2
                 f.write(f"\nIV\t{boxX:.6f} {boxY:.6f} {boxZ:.6f}")
 
 

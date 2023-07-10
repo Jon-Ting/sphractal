@@ -12,7 +12,7 @@ from statsmodels.api import OLS, add_constant
 
 from sphractal.constants import PLT_PARAMS
 from sphractal.surfPointClouds import genSurfPoints
-from sphractal.surfExact import findTargetAtoms, MIN_VAL_FROM_BOUND, scanAllAtoms, writeBoxCoords
+from sphractal.surfExact import findTargetAtoms, scanAllAtoms, writeBoxCoords
 from sphractal.utils import findNN, findSurf, readXYZ
 # from sphractal.utils import estDuration, annotate
 
@@ -108,7 +108,8 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
 
 # @annotate('getSphereBoxCnts', color='blue')
 def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                     maxRange, minMaxBoxLens, minXYZ, npName, writeFileDir='boxCntOutputs', numBoxLenSample=10,
+                     maxRange, minMaxBoxLens, minXYZ, npName, 
+                     writeFileDir='boxCntOutputs', numBoxLenSample=10, minValFromBound=5.0,
                      rmInSurf=True, writeBox=True, verbose=False):
     """
     Count the boxes that cover the outer surface of a set of overlapping spheres represented as exact spheres for
@@ -138,6 +139,8 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
         Path to the directory to store the output files.
     numBoxLenSample : int, optional
         Number of box lengths to use for the collection of the box count data, spaced evenly on logarithmic scale.
+    minValFromBound : Union[int,float]
+        Buffer distance from the borders of the largest box in Angstrom.
     rmInSurf : bool, optional
         Whether to remove the surface points on the inner surface.
     writeBox : bool, optional
@@ -174,7 +177,7 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
         if not isdir(writeFileDir):
             mkdir(writeFileDir)
 
-    overallBoxLen = maxRange + MIN_VAL_FROM_BOUND * 2
+    overallBoxLen = maxRange + minValFromBound * 2
     allLensSurfBoxs, allLensBulkBoxs, allLensSurfCnts, allLensBulkCnts = [], [], [], []
     scales, scanBoxLens, scanAllAtomsInps = [], [], []
     approxScanBoxLens = np.geomspace(minMaxBoxLens[1], minMaxBoxLens[0], num=numBoxLenSample)
@@ -182,7 +185,7 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
         magnFac = int(overallBoxLen / approxScanBoxLen)
         scanBoxLen = overallBoxLen / magnFac
         scanAllAtomsInp = (magnFac, scanBoxLen, atomsIdxs, minXYZ,
-                           atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, 
+                           atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, minValFromBound,
                            rmInSurf, verbose, atomScanMaxWorkers)
         if boxLenConc:
             scanAllAtomsInps.append(scanAllAtomsInp) 
@@ -207,7 +210,8 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
     counts = [log10(sCnt) if sCnt != 0 else np.nan for sCnt in allLensSurfCnts]
 
     if writeBox:
-        writeBoxCoords(atomsEle, atomsXYZ, allLensSurfBoxs, allLensBulkBoxs, minXYZ, scanBoxLens, writeFileDir, npName)
+        writeBoxCoords(atomsEle, atomsXYZ, allLensSurfBoxs, allLensBulkBoxs, minXYZ, scanBoxLens, minValFromBound, 
+                       writeFileDir, npName)
     return scales, counts
 
 
@@ -353,7 +357,7 @@ def runBoxCnt(xyzFilePath,
               writeFileDir='boxCntOutputs', lenRange='trim', minSampleNum=5, confLvl=95, 
               rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False,
               runPointCloudBoxCnt=True, numPoints=300, gridNum=1024, exePath='$FASTBC_EXE', genPCD=False,
-              runExactSphereBoxCnt=True, minLenMult=0.25, maxLenMult=1, numBoxLenSample=10, writeBox=True): 
+              runExactSphereBoxCnt=True, minLenMult=0.25, maxLenMult=1, numBoxLenSample=10, minValFromBound=5.0, writeBox=True): 
     """
     Run box-counting algorithm on the surface of a given object consisting of a set of spheres represented as either
     point clouds or exact spherical surface.
@@ -410,6 +414,8 @@ def runBoxCnt(xyzFilePath,
         Multiplier to the minimum radii to determine the maximum box length for box-counting dimension estimation.
     numBoxLenSample : int, optional
         Number of box lengths to use for the collection of the box count data, spaced evenly on logarithmic scale.
+    minValFromBound : Union[int,float]
+        Buffer distance from the borders of the largest box in Angstrom.
     writeBox : bool, optional
         Whether to generate output files for visualisation.
     
@@ -455,7 +461,7 @@ def runBoxCnt(xyzFilePath,
         minAtomRad = atomsRad.min()
         scalesES, countsES = getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                                               maxRange, (minAtomRad * minLenMult, minAtomRad * maxLenMult),
-                                              minXYZ, testCase, writeFileDir, numBoxLenSample,
+                                              minXYZ, testCase, writeFileDir, numBoxLenSample, minValFromBound,
                                               rmInSurf, writeBox, verbose)
         r2ES, bcDimES, confIntES = findSlope(scalesES, countsES, f"{testCase}_ES", writeFileDir, lenRange,
                                              minSampleNum, confLvl, vis, figType, saveFig, showPlot)
