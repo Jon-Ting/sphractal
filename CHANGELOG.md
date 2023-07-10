@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.0 (2023-07-10)
+
+### Feature
+
+* **minValFromBound:** Added the input argument to related functionalities for exact surface representation ([`0ad3a49`](https://github.com/Jon-Ting/sphractal/commit/0ad3a496c2d954a10d8612ad9fcdb875c9c2585b))
+
 ## v0.8.1 (2023-07-08)
 
 ### Documentation
