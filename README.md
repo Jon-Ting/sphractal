@@ -14,11 +14,6 @@ from overlapping spheres via box-counting algorithm.
 * Efficient algorithm for 3D box-counting calculations.
 * Customisable parameters to control the level of detail and accuracy of the calculation.
 
-### Under Development
-* Optional input argument of surface atoms (to guarantee accurate box counts).
-* Transformation of xyz coordinates when atoms are read in to avoid using minXYZ repetitively in `scanAtom()`.
-* Integration of C++ code for point cloud surface representation into the package.
-
 ## Installation
 
 Use `pip` or `conda` to install `Sphractal`:
