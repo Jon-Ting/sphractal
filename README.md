@@ -7,10 +7,20 @@
 `Sphractal` is a package that provides functionalities to estimate the fractal dimension of complex 3D surfaces formed 
 from overlapping spheres via box-counting algorithm. 
 
+## Background
+* Atomic objects in molecular and nanosciences such are often represented as collection of spheres with radii associated 
+with the atomic radius of the individual component.
+* Some examples of these objects (inclusive of both fine- and coarse-grained representation of the individual components) 
+are small molecules, proteins, nanoparticles, polymers, and porous materials such as zeolite, metal-organic framework (MOFs).
+* The overall properties of these objects are often significantly influenced by their surface properties, in particular 
+the surface area available for interaction with other entities, which is related to the surface roughness.
+* Fractal dimension allows the surface complexity/roughness of objects to be measured quantitatively, more details about 
+fractal dimension is included in the [notebook tutorial](https://github.com/Jon-Ting/sphractal/blob/main/docs/example.ipynb)).
+
 ## Features
 
 ### Aims
-* Representation of the surface as either point clouds or exact surfaces.
+* Representation of the surface as either voxelised point clouds or mathematically exact surfaces.
 * Efficient algorithm for 3D box-counting calculations.
 * Customisable parameters to control the level of detail and accuracy of the calculation.
 
@@ -27,7 +37,7 @@ $ conda install -c conda-forge sphractal
 
 ### Special Requirement for Point Cloud Surface Representation
 `Sphractal` requires an executable compiled from another freely available repository for the functionalities related 
-to point clouds surface representation to operate properly. 
+to voxelised point clouds surface representation to operate properly. 
 
 This could be done by:
 
@@ -36,7 +46,7 @@ This could be done by:
 git clone https://github.com/Jon-Ting/fastBC.git
 ```
 
-* Building an executable by doing either one of the following compilations according to the instructions on the [README.md](https://github.com/Jon-Ting/fastBC/blob/main/README.md) page. This will decide whether you will be running the box counting algorithm with GPU acceleration. Feel free to rename the executables to any other sensible names:
+* Building an executable by doing either one of the following compilations according to the instructions on the [README.md](https://github.com/Jon-Ting/fastBC/blob/main/README.md) page. This will decide whether you will be running the box counting algorithm with GPU acceleration. Feel free to rename the executables:
 ```bash
 $ g++ 3DbinImBCcpu.cpp bcCPU.cpp -o 3DbinImBCcpu.exe
 ```
