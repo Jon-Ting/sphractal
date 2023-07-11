@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.1 (2023-07-11)
+
+### Documentation
+
+* **readme:** Added background section to readme ([`bcfbb62`](https://github.com/Jon-Ting/sphractal/commit/bcfbb62e4eb61beb0254ae24f72ccba1e890ef0a))
+* **readme:** Omitted features under development ([`b9af10a`](https://github.com/Jon-Ting/sphractal/commit/b9af10aa6bc4b969ae9c30bbde5c3b1bb3f31baf))
+
 ## v0.9.0 (2023-07-10)
 
 ### Feature
