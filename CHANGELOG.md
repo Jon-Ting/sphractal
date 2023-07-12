@@ -2,6 +2,23 @@
 
 <!--next-version-placeholder-->
 
+## v0.10.0 (2023-07-12)
+
+### Feature
+
+* **findSlope:** Added notebook option to findSlope() plots ([`f6c6123`](https://github.com/Jon-Ting/sphractal/commit/f6c6123191d7d853fbd486f15049c526376da8da))
+* **boxCnt:** Moved box-counting functions for each representation to respective modules ([`e8bbe38`](https://github.com/Jon-Ting/sphractal/commit/e8bbe38eb46dad1d2964569019f7c0a89c7604e3))
+* Renamed modules, functions, variables to more concise names ([`0119301`](https://github.com/Jon-Ting/sphractal/commit/0119301cd857b5810d5689f6078ae4dd8dfd0dd6))
+
+### Fix
+
+* **test:** Updated test functions ([`894d223`](https://github.com/Jon-Ting/sphractal/commit/894d2239a63cc88e4e85a76218c262fb733e8cc7))
+
+### Documentation
+
+* **example:** Updated example notebook ([`76ecff9`](https://github.com/Jon-Ting/sphractal/commit/76ecff996e7ee04493c6aa5eeb4adf5baa932cbf))
+* **readme:** Updated variable name change on readme ([`ff81621`](https://github.com/Jon-Ting/sphractal/commit/ff81621d7f8c19abc28e49f9d767e6e1cd77503f))
+
 ## v0.9.1 (2023-07-11)
 
 ### Documentation
