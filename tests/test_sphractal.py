@@ -7,11 +7,11 @@ from pytest import approx, mark
 
 from fixtures import fixture, np, egAtomsXYZ, egAtomsNeighIdxs, egAtomsSurfIdxs, egTargetAtomIdxs
 from sphractal.datasets import getExampleDataPath
-from sphractal.utils import estDuration, getMinMaxXYZ, readXYZ, findNN, findSurf, calcDist, closestSurfAtoms, \
+from sphractal.utils import estDuration, getMinMaxXYZ, readInp, findNN, findSurf, calcDist, closestSurfAtoms, \
     oppositeInnerAtoms
-from sphractal.surfPointClouds import fibonacciSphere, pointsOnAtom, pointsToVoxels
-from sphractal.surfExact import getNearFarCoord, scanBox, writeBoxCoords, findTargetAtoms
-from sphractal.boxCnt import getVoxelBoxCnts, getSphereBoxCnts, findSlope, runBoxCnt
+from sphractal.surfVoxel import fibonacciSphere, pointsOnAtom, pointsToVoxels, voxelBoxCnts
+from sphractal.surfExact import getNearFarCoord, scanBox, writeBoxCoords, findTargetAtoms, exactBoxCnts
+from sphractal.boxCnt import voxelBoxCnts, exactBoxCnts, findSlope, runBoxCnt
 
 
 EG_XYZ_ATOM_NUM = 670
@@ -41,7 +41,7 @@ def egVoxelBoxCnts():
 
 
 @fixture
-def egSphereBoxCnts():
+def egExactBoxCnts():
     return ([-0.23688234, -0.16309612, -0.10004438, -0.03477764,  0.03932408, 0.10260591,  0.17060299,  0.24023892,  0.30488175,  0.37314659],
             [3.20194306, 3.32139128, 3.5171959 , 3.68142216, 3.80522891, 3.9531796 , 4.09272064, 4.27207379, 4.38937875, 4.52953301])
 
@@ -52,7 +52,7 @@ def egVoxelBoxCntDims():
 
 
 @fixture
-def egSphereBoxCntDims():
+def egExactBoxCntDims():
     return 0.99660096, 2.24426950, np.array((2.11334077, 2.37519824))
 
 
@@ -65,16 +65,16 @@ def test_estDuration(egMinMaxXYZ):
 
 def test_getExampleDataPath():
     """Unit test of getExampleDataPath()."""
-    xyzFilePathAct = getExampleDataPath()
-    assert isinstance(xyzFilePathAct, str), 'getExampleDataPath did not return a string'
-    assert exists(xyzFilePathAct), 'example.xyz not found'
-    assert isfile(xyzFilePathAct), 'example.xyz is not a file'
+    inpFilePathAct = getExampleDataPath()
+    assert isinstance(inpFilePathAct, str), 'getExampleDataPath did not return a string'
+    assert exists(inpFilePathAct), 'example.xyz not found'
+    assert isfile(inpFilePathAct), 'example.xyz is not a file'
 
 
 @mark.parametrize('radType, atomRad', [('atomic', ATOM_RAD), ('metallic', 1.37)])
-def test_readXYZ(radType, atomRad, egAtomsEle, egAtomsXYZ):
-    """Unit test of readXYZ()."""
-    atomsEleAct, atomsRadAct, atomsXYZAct, maxRangeAct, minXYZAct, maxXYZAct = readXYZ(getExampleDataPath(), radType)
+def test_readInp(radType, atomRad, egAtomsEle, egAtomsXYZ):
+    """Unit test of readInp()."""
+    atomsEleAct, atomsRadAct, atomsXYZAct, maxRangeAct, minXYZAct, maxXYZAct = readInp(getExampleDataPath(), radType)
 
     assert isinstance(atomsEleAct, np.ndarray), 'atomsEle not ndarray'
     assert isinstance(atomsRadAct, np.ndarray), 'atomsRad not ndarray'
@@ -111,14 +111,14 @@ def test_findNN(maxAtomRad, radMult, totNeighNumExp, avgAvgBL, egMinMaxXYZ, egAt
     assert atomsAvgBondLensAct.mean() == approx(avgAvgBL), 'Incorrect atomsAvgBondLens values'
 
 
-@mark.parametrize('findSurfOption, numSurfAtomsExp', [('alphaShape', 326), ('convexHull', 6), ('numNeigh', 326)])
-def test_findSurfOptions(findSurfOption, numSurfAtomsExp, egAtomsXYZ, egAtomsNeighIdxs):
+@mark.parametrize('findSurfAlg, numSurfAtomsExp', [('alphaShape', 326), ('convexHull', 6), ('numNeigh', 326)])
+def test_findSurfAlgs(findSurfAlg, numSurfAtomsExp, egAtomsXYZ, egAtomsNeighIdxs):
     """
-    Unit test of findSurf() outputs for different 'findSurfOption' options.
+    Unit test of findSurf() outputs for different 'findSurfAlg' options.
 
     TODO: Test with extreme alpha.
     """
-    atomsSurfIdxsAct = findSurf(egAtomsXYZ, egAtomsNeighIdxs, findSurfOption, alpha=2.0 * ATOM_RAD)
+    atomsSurfIdxsAct = findSurf(egAtomsXYZ, egAtomsNeighIdxs, findSurfAlg, alpha=2.0 * ATOM_RAD)
     assert isinstance(atomsSurfIdxsAct, np.ndarray), 'atomsSurfIdxs not ndarray'
     assert len(atomsSurfIdxsAct) == numSurfAtomsExp, 'Incorrect number of surface atoms'
 
@@ -209,9 +209,9 @@ def test_findTargetAtoms(egAtomsNeighIdxs, egTargetAtomIdxs):
 @mark.parametrize('lenRange', ['trim', 'full'])
 @mark.parametrize('visReg', [True, False])
 @mark.parametrize('saveFig, figExists', [(True, True), (False, False)])
-def test_findSlopeVis(lenRange, visReg, saveFig, figExists, egSphereBoxCnts):
+def test_findSlopeVis(lenRange, visReg, saveFig, figExists, egExactBoxCnts):
     """Unit test of findSlope() functionalities for different 'lenRange', 'visReg', and 'saveFig' options."""
-    boxCntDimsAct = findSlope(egSphereBoxCnts[0], egSphereBoxCnts[1], 'example_ES', 'tests/boxCntOutputs', lenRange, visReg=visReg, saveFig=saveFig)
+    boxCntDimsAct = findSlope(egExactBoxCnts[0], egExactBoxCnts[1], 'example_ES', 'tests/boxCntOutputs', lenRange, visReg=visReg, saveFig=saveFig)
     assert exists('./tests/boxCntOutputs/boxCntDims/example_ES_boxCntDim.png') == figExists, 'example_ES_boxCntDim.png is not found'
     assert isfile('./tests/boxCntOutputs/boxCntDims/example_ES_boxCntDim.png') == figExists, 'example_ES_boxCntDim.png is not a file'
     if isdir('./tests/boxCntOutputs'):
@@ -219,11 +219,11 @@ def test_findSlopeVis(lenRange, visReg, saveFig, figExists, egSphereBoxCnts):
 
 
 @mark.filterwarnings('ignore')
-@mark.parametrize('minSampleNum, isFinite1', [(-100, True), (9.9, True), (10, False)])
+@mark.parametrize('minSample, isFinite1', [(-100, True), (9.9, True), (10, False)])
 @mark.parametrize('confLvl, isFinite2', [(-101, False), (99.9, True), (100, False)])
-def test_findSlopeConfInt(minSampleNum, isFinite1, confLvl, isFinite2, egSphereBoxCnts):
-    """Unit test of findSlope() outputs for different 'minSampleNum' and 'confLvl' values."""
-    boxCntDimsAct = findSlope(egSphereBoxCnts[0], egSphereBoxCnts[1], minSampleNum=minSampleNum, confLvl=confLvl)
+def test_findSlopeConfInt(minSample, isFinite1, confLvl, isFinite2, egExactBoxCnts):
+    """Unit test of findSlope() outputs for different 'minSample' and 'confLvl' values."""
+    boxCntDimsAct = findSlope(egExactBoxCnts[0], egExactBoxCnts[1], minSample=minSample, confLvl=confLvl)
     assert np.all(np.isfinite(boxCntDimsAct[2])) == (isFinite1 and isFinite2), 'Incorrect confidence interval'
 
 
@@ -238,9 +238,9 @@ def test_findSlopeAcc(scales, counts, boxCntDimsExp):
 
 
 #def test_getVoxelBoxCntVis(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs):
-#    """Unit test of getVoxelBoxCnts() functionalities to generate output files for visualisation (To be uncommented when compiled C++ code could be shipped together)."""
+#    """Unit test of voxelBoxCnts() functionalities to generate output files for visualisation (To be uncommented when compiled C++ code could be shipped together)."""
 #    assert isfile(os.environ['FASTBC_EXE']), 'Executable not found at FASTBC_EXE'
-#    voxelScalesAct, voxelCountsAct = getVoxelBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
+#    voxelScalesAct, voxelCountsAct = voxelBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
 #                                                     'example', 'tests/boxCntOutputs', verbose=True, genPCD=True)
 #    assert exists('./tests/boxCntOutputs/surfVoxelIdxs.txt'), 'surfVoxelBoxIdxs.txt is not found'
 #    assert isfile('./tests/boxCntOutputs/surfVoxelIdxs.txt'), 'surfVoxelBoxIdxs.txt is a file'
@@ -258,34 +258,34 @@ def test_findSlopeAcc(scales, counts, boxCntDimsExp):
 
 #@mark.parametrize('rmInSurf, voxelScalesExp, voxelCountsExp', [(True, [-2.70926996, -2.40823997, -2.10720997, -1.80617997, -1.50514998, -1.20411998, -0.90308999, -0.60205999, -0.30103], [0.90308999, 1.50514998, 2.30963017, 2.91855453, 3.49192171, 4.05419158, 4.47568571, 4.51703746, 4.52071928]), (False, [-2.70926996, -2.40823997, -2.10720997, -1.80617997, -1.50514998, -1.20411998, -0.90308999, -0.60205999, -0.30103], [0.90308999, 1.50514998, 2.35024802, 3.02530587, 3.62479758, 4.14640714, 4.54740546, 4.5884958, 4.59508819])])
 #def test_getVoxelBoxCntAcc(rmInSurf, voxelScalesExp, voxelCountsExp, egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs):
-#    """Unit test of getVoxelBoxCnts() outputs accuracy (To be uncommented when compiled C++ code could be shipped together)."""
-#    voxelScalesAct, voxelCountsAct = getVoxelBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
+#    """Unit test of voxelBoxCnts() outputs accuracy (To be uncommented when compiled C++ code could be shipped together)."""
+#    voxelScalesAct, voxelCountsAct = voxelBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
 #                                                     'example', 'tests/boxCntOutputs', rmInSurf=rmInSurf, vis=False)
 #    assert voxelScalesAct == approx(voxelScalesExp), 'Incorrect scales'
 #    assert voxelCountsAct == approx(voxelCountsExp), 'Incorrect box counts'
 
 
-@mark.parametrize('rmInSurf, sphereScalesExp, sphereCountsExp', [(True, [-0.23688234, -0.16309612, -0.10004438, -0.03477764, 0.03932408, 0.10260591, 0.17060299, 0.24023892, 0.30488175, 0.37314659], [3.20194306, 3.32139128, 3.5171959, 3.68142216, 3.80522891, 3.9531796, 4.09272064, 4.27207379, 4.38937875, 4.52953301]), (False, [-0.23688234, -0.16309612, -0.10004438, -0.03477764, 0.03932408, 0.10260591, 0.17060299, 0.24023892, 0.30488175, 0.37314659], [3.13289977, 3.35024802, 3.50920252, 3.66482994, 3.85564028, 4.01249978, 4.16524433, 4.31234664, 4.44814957, 4.58442169])])
-def test_getSphereBoxCnt(rmInSurf, sphereScalesExp, sphereCountsExp, egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs, egMinMaxXYZ):
-    """Unit test of getSphereBoxCnts()."""
-    sphereScalesAct, sphereCountsAct = getSphereBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
+@mark.parametrize('rmInSurf, exactScalesExp, exactCountsExp', [(True, [-0.23688234, -0.16309612, -0.10004438, -0.03477764, 0.03932408, 0.10260591, 0.17060299, 0.24023892, 0.30488175, 0.37314659], [3.20194306, 3.32139128, 3.5171959, 3.68142216, 3.80522891, 3.9531796, 4.09272064, 4.27207379, 4.38937875, 4.52953301]), (False, [-0.23688234, -0.16309612, -0.10004438, -0.03477764, 0.03932408, 0.10260591, 0.17060299, 0.24023892, 0.30488175, 0.37314659], [3.13289977, 3.35024802, 3.50920252, 3.66482994, 3.85564028, 4.01249978, 4.16524433, 4.31234664, 4.44814957, 4.58442169])])
+def test_getExactBoxCnt(rmInSurf, exactScalesExp, exactCountsExp, egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs, egMinMaxXYZ):
+    """Unit test of exactBoxCnts()."""
+    exactScalesAct, exactCountsAct = exactBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
                                                         MAX_RANGE, (ATOM_RAD*0.25, ATOM_RAD), egMinMaxXYZ[0], 'example', 'tests/boxCntOutputs', rmInSurf=rmInSurf)
-    assert sphereCountsAct == approx(sphereCountsExp), 'Incorrect scales'
-    assert sphereCountsAct == approx(sphereCountsExp), 'Incorrect box counts'
+    assert exactCountsAct == approx(exactCountsExp), 'Incorrect scales'
+    assert exactCountsAct == approx(exactCountsExp), 'Incorrect box counts'
     assert exists('./tests/boxCntOutputs/boxCoords/example_boxCoords.xyz'), 'example_boxCoords.xyz is not found'
     assert isfile('./tests/boxCntOutputs/boxCoords/example_boxCoords.xyz'), 'example_boxCoords.xyz is not a file'
     if isdir('./tests/boxCntOutputs'):
         rmtree('./tests/boxCntOutputs')
 
 
-#def test_runBoxCnt(egVoxelBoxCntDims, egSphereBoxCntDims):
+#def test_runBoxCnt(egVoxelBoxCntDims, egExactBoxCntDims):
 #    """Unit and regression test of runBoxCnt() (To be uncommented when compiled C++ code could be shipped together)."""
 #    assert isfile(environ['FASTBC_EXE']), 'Executable not found at FASTBC_EXE'
 #    boxCntDimsAct = runBoxCnt(getExampleDataPath(), writeFileDir='tests/boxCntOutputs')
 #    assert boxCntDimsAct[:2] == approx(egVoxelBoxCntDims[:2]), 'Incorrect R2 and D_Box for point clouds representation'
 #    assert boxCntDimsAct[2] == approx(egVoxelBoxCntDims[2]), 'Incorrect confidence interval for point clouds representation'
-#    assert boxCntDimsAct[-3:-1] == approx(egSphereBoxCntDims[:2]), 'Incorrect R2 and D_Box for exact surface representation'
-#    assert boxCntDimsAct[-1] == approx(egSphereBoxCntDims[2]), 'Incorrect confidence interval for exact surface representation'
+#    assert boxCntDimsAct[-3:-1] == approx(egExactBoxCntDims[:2]), 'Incorrect R2 and D_Box for exact surface representation'
+#    assert boxCntDimsAct[-1] == approx(egExactBoxCntDims[2]), 'Incorrect confidence interval for exact surface representation'
 #    if isdir('./tests/boxCntOutputs'):
 #        rmtree('./tests/boxCntOutputs')
 
