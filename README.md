@@ -65,8 +65,8 @@ Note that for the environment variable to be persistent (to still exist after th
 ```python
 from sphractal import getExampleDataPath, runBoxCnt
 
-xyzFilePath = getExampleDataPath()  # Replace with the path to your xyz or lmp file
-boxCntResults = runBoxCnt(xyzFilePath)
+inpFile = getExampleDataPath()  # Replace with the path to your xyz or lmp file
+boxCntResults = runBoxCnt(inpFile)
 ```
 
 Check out the [notebook tutorial](https://github.com/Jon-Ting/sphractal/blob/main/docs/example.ipynb) for further explanations and demonstrations!
