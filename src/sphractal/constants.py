@@ -41,6 +41,8 @@ METALLIC_RAD_DICT = {
 }
 PLT_PARAMS = {'paper': {'figSize': (3.5, 2.5), 'dpi': 300, 'fontSize': 'medium', 'labelSize': 'small',
                         'legendSize': 'x-small', 'lineWidth': 0.5, 'markerSize': 24},
+              'notebook': {'figSize': (3.5, 2.5), 'dpi': 120, 'fontSize': 'medium', 'labelSize': 'small',
+                         'legendSize': 'x-small', 'lineWidth': 0.5, 'markerSize': 18},
               'poster': {'figSize': (4.5, 3.5), 'dpi': 600, 'fontSize': 'x-large', 'labelSize': 'large',
                          'legendSize': 'medium', 'lineWidth': 1.0, 'markerSize': 48},
               'talk': {'figSize': (4, 3), 'dpi': 144, 'fontSize': 'large', 'labelSize': 'medium', 'legendSize': 'small',

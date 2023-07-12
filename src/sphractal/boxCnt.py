@@ -65,8 +65,6 @@ def findSlope(scales, counts, npName='', outDir='boxCntOutputs', lenRange='trim'
         legendSize, lineWidth, markerSize = params['legendSize'], params['lineWidth'], params['markerSize']
     else:
         figSize = dpi = fontSize = labelSize = legendSize = lineWidth = markerSize = None
-    figSize = (3.5, 2.5)
-    print(figSize)
 
     # Remove invalid entries in the box counts data collected
     while np.nan in counts:
@@ -115,7 +113,7 @@ def findSlope(scales, counts, npName='', outDir='boxCntOutputs', lenRange='trim'
                       title=fr"$D_{{box}}$: {boxCntDim:.3f} [{slopeCI[0]:.3f}, {slopeCI[1]:.3f}]",
                       title_fontsize=legendSize,
                       fontsize=legendSize)
-            # plt.tight_layout()
+            plt.tight_layout()
 
         # Removal of next point (beware of weird behaviour in middle range)
         # lstSqErrs = np.subtract(y, yPred) ** 2
