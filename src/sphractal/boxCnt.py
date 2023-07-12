@@ -13,15 +13,15 @@ from statsmodels.api import OLS, add_constant
 from sphractal.constants import PLT_PARAMS
 from sphractal.surfPointClouds import genSurfPoints
 from sphractal.surfExact import findTargetAtoms, scanAllAtoms, writeBoxCoords
-from sphractal.utils import findNN, findSurf, readXYZ
+from sphractal.utils import findNN, findSurf, readInp
 # from sphractal.utils import estDuration, annotate
 
 
-# @annotate('getVoxelBoxCnts', color='blue')
-def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                    npName, writeFileDir='boxCntOutputs', exePath='$FASTBC_EXE',
-                    radType='atomic', numPoint=300, gridNum=1024,
-                    rmInSurf=True, vis=True, verbose=False, genPCD=False):
+# @annotate('voxelBoxCnts', color='blue')
+def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
+                 npName, outDir='boxCntOutputs', exePath='$FASTBC_EXE',
+                 radType='atomic', numPoint=300, gridNum=1024,
+                 rmInSurf=True, vis=True, verbose=False, genPCD=False):
     """
     Count the boxes that cover the outer surface of a set of overlapping spheres represented as point clouds for
     different box sizes, using 3D box-counting algorithm written by Ruiz de Miras et al. in C++. 
@@ -43,7 +43,7 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         Neighbour atoms indices of each atom.
     npName : str
         Identifier of the measured object, which forms part of the output file name, ideally unique.
-    writeFileDir : str, optional
+    outDir : str, optional
         Path to the directory to store the output files.
     exePath : str, optional
         Path to the compiled C++ executable for box-counting.
@@ -71,10 +71,10 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
 
     Examples
     --------
-    >>> eles, rads, xyzs, _, minxyz, maxxyz = readXYZ('example.xyz')
+    >>> eles, rads, xyzs, _, minxyz, maxxyz = readInp('example.xyz')
     >>> neighs, _ = findNN(rads, xyzs, minxyz, maxxyz, 2.5)
     >>> surfs = findSurf(xyzs, neighs, 'alphaShape', 5.0)
-    >>> scalesPC, countsPC = genSurfPoints(eles, rads, surfs, xyzs, neighs, 'example')
+    >>> scalesPC, countsPC = voxelBoxCnts(eles, rads, surfs, xyzs, neighs, 'example')
 
     Notes
     -----
@@ -90,27 +90,27 @@ def getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     """
     if verbose:
         print(f"  Approximating the surface with {numPoint} point clouds for each atom...")
-    if not isdir(writeFileDir):
-        mkdir(writeFileDir)
+    if not isdir(outDir):
+        mkdir(outDir)
 
     genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                  npName, writeFileDir,
+                  npName, outDir,
                   radType, numPoint, gridNum,
                   rmInSurf, vis, verbose, genPCD)
-    system(f"{exePath} {gridNum} {writeFileDir}/surfVoxelIdxs.txt {writeFileDir}/surfVoxelBoxCnts.txt")
+    system(f"{exePath} {gridNum} {outDir}/surfVoxelIdxs.txt {outDir}/surfVoxelBoxCnts.txt")
     scales, counts = [], []
-    with open(f"{writeFileDir}/surfVoxelBoxCnts.txt", 'r') as f:
+    with open(f"{outDir}/surfVoxelBoxCnts.txt", 'r') as f:
         for line in f:
             scales.append(log10(1 / int(line.split()[0])))
             counts.append(log10(int(line.split()[1])))
     return scales[::-1], counts[::-1]
 
 
-# @annotate('getSphereBoxCnts', color='blue')
-def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                     maxRange, minMaxBoxLens, minXYZ, npName, 
-                     writeFileDir='boxCntOutputs', numBoxLenSample=10, minValFromBound=5.0,
-                     rmInSurf=True, writeBox=True, verbose=False):
+# @annotate('exactBoxCnts', color='blue')
+def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
+                 maxRange, minMaxBoxLens, minXYZ, npName, 
+                 outDir='boxCntOutputs', numBoxLen=10, bufferDist=5.0,
+                 rmInSurf=True, writeBox=True, verbose=False):
     """
     Count the boxes that cover the outer surface of a set of overlapping spheres represented as exact spheres for
     different box sizes.
@@ -135,11 +135,11 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
         Minimum values of each dimension in the Cartesian space.
     npName : str
         Identifier of the measured object, which forms part of the output file name, ideally unique.
-    writeFileDir : str, optional
+    outDir : str, optional
         Path to the directory to store the output files.
-    numBoxLenSample : int, optional
+    numBoxLen : int, optional
         Number of box lengths to use for the collection of the box count data, spaced evenly on logarithmic scale.
-    minValFromBound : Union[int,float]
+    bufferDist : Union[int,float]
         Buffer distance from the borders of the largest box in Angstrom.
     rmInSurf : bool, optional
         Whether to remove the surface points on the inner surface.
@@ -157,35 +157,35 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
     
     Examples
     --------
-    >>> eles, rads, xyzs, _, minxyz, maxxyz = readXYZ('example.xyz')
+    >>> eles, rads, xyzs, _, minxyz, maxxyz = readInp('example.xyz')
     >>> neighs, _ = findNN(rads, xyzs, minxyz, maxxyz, 1.2)
     >>> surfs = findSurf(xyzs, neighs, 'alphaShape', 2.0)
-    >>> scalesES, countsES = getSphereBoxCnts(eles, rads, surfs, xyzs, neighs, 100, (0.2, 1), minxyz, 'example')
+    >>> scalesES, countsES = exactBoxCnts(eles, rads, surfs, xyzs, neighs, 100, (0.2, 1), minxyz, 'example')
     """
     atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs)
     numCPUs = cpu_count()
-    boxLenScanMaxWorkers = ceil(numCPUs * numBoxLenSample / len(atomsIdxs))
+    boxLenScanMaxWorkers = ceil(numCPUs * numBoxLen / len(atomsIdxs))
     boxLenConc = False if boxLenScanMaxWorkers < 2 else True
     atomScanMaxWorkers = numCPUs - boxLenScanMaxWorkers if boxLenConc else numCPUs
 
     if verbose:
         print(f"  Representing the surface by treating each atom as exact spheres...")
         print(f"    Parallelised with {atomScanMaxWorkers} out of {numCPUs} cores for scanning over {len(atomsIdxs)} "
-              f"atoms, the rest over {numBoxLenSample} box lengths...")
+              f"atoms, the rest over {numBoxLen} box lengths...")
         print(f"    (1/eps)    (# bulk)    (# surf)")
     if writeBox:
-        if not isdir(writeFileDir):
-            mkdir(writeFileDir)
+        if not isdir(outDir):
+            mkdir(outDir)
 
-    overallBoxLen = maxRange + minValFromBound * 2
+    overallBoxLen = maxRange + bufferDist * 2
     allLensSurfBoxs, allLensBulkBoxs, allLensSurfCnts, allLensBulkCnts = [], [], [], []
     scales, scanBoxLens, scanAllAtomsInps = [], [], []
-    approxScanBoxLens = np.geomspace(minMaxBoxLens[1], minMaxBoxLens[0], num=numBoxLenSample)
+    approxScanBoxLens = np.geomspace(minMaxBoxLens[1], minMaxBoxLens[0], num=numBoxLen)
     for approxScanBoxLen in approxScanBoxLens:  # Evenly reduced box lengths on log scale
         magnFac = int(overallBoxLen / approxScanBoxLen)
         scanBoxLen = overallBoxLen / magnFac
         scanAllAtomsInp = (magnFac, scanBoxLen, atomsIdxs, minXYZ,
-                           atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, minValFromBound,
+                           atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, bufferDist,
                            rmInSurf, verbose, atomScanMaxWorkers)
         if boxLenConc:
             scanAllAtomsInps.append(scanAllAtomsInp) 
@@ -202,7 +202,7 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
     if boxLenConc:
         with Pool(max_workers=boxLenScanMaxWorkers) as pool:
             for scanAllAtomsResult in pool.map(scanAllAtoms, scanAllAtomsInps,
-                                               chunksize=ceil(numBoxLenSample / boxLenScanMaxWorkers)):
+                                               chunksize=ceil(numBoxLen / boxLenScanMaxWorkers)):
                 allAtomsSurfBoxs, allAtomsBulkBoxs = scanAllAtomsResult
                 allLensSurfBoxs.append(allAtomsSurfBoxs)
                 allLensBulkBoxs.append(allAtomsBulkBoxs)
@@ -210,14 +210,14 @@ def getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs
     counts = [log10(sCnt) if sCnt != 0 else np.nan for sCnt in allLensSurfCnts]
 
     if writeBox:
-        writeBoxCoords(atomsEle, atomsXYZ, allLensSurfBoxs, allLensBulkBoxs, minXYZ, scanBoxLens, minValFromBound, 
-                       writeFileDir, npName)
+        writeBoxCoords(atomsEle, atomsXYZ, allLensSurfBoxs, allLensBulkBoxs, minXYZ, scanBoxLens, bufferDist, 
+                       outDir, npName)
     return scales, counts
 
 
 # @annotate('findSlope', color='green')
-def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange='trim',
-              minSampleNum=5, confLvl=95, 
+def findSlope(scales, counts, npName='', outDir='boxCntOutputs', lenRange='trim',
+              minSample=5, confLvl=95, 
               visReg=True, figType='paper', saveFig=False, showPlot=False):
     """
     Compute the slope (box counting dimension) from the box-counting data collected.
@@ -230,12 +230,12 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
         Number of boxes that cover the exact spherical surface of interest.
     npName : str, optional
         Identifier of the measured object, which forms part of the output file name, ideally unique.
-    writeFileDir : str, optional
+    outDir : str, optional
         Path to the directory to store the output files.
     lenRange : {'trim', 'full'}, optional
         Range of box lengths to include for determining the box-counting dimension. Choosing 'trim' finds the highest 
         coefficient of determination by iteratively removing the box counts obtained using boxes of extreme sizes.
-    minSampleNum : int, optional
+    minSample : int, optional
         Minimum number of box count data points to be retained for slope estimation from the linear regression fitting.
     confLvl : Union[int, float]
         Confidence level of confidence interval in percentage.
@@ -281,7 +281,7 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
     firstPointIdx, lastPointIdx, removeSmallBoxes = 0, len(scales), True
     r2score, boxCntDim, slopeCI = 0.0, 0.0, np.array((np.inf, np.inf))
     r2scorePrev, boxCntDimPrev, slopeCIPrev = 0.0, 0.0, np.array((np.inf, np.inf))
-    while len(scales[firstPointIdx:lastPointIdx]) > minSampleNum:
+    while len(scales[firstPointIdx:lastPointIdx]) > minSample:
 
         x, y = scales[firstPointIdx:lastPointIdx], counts[firstPointIdx:lastPointIdx]
         regModel = OLS(endog=y, exog=add_constant(x)).fit()
@@ -337,10 +337,10 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
         r2scorePrev, boxCntDimPrev, slopeCIPrev = r2score, boxCntDim, slopeCI
 
         if saveFig:
-            boxCntDimsDir = f"{writeFileDir}/boxCntDims"
+            boxCntDimsDir = f"{outDir}/boxCntDims"
             if not isdir(boxCntDimsDir):
-                if not isdir(writeFileDir):
-                    mkdir(writeFileDir)
+                if not isdir(outDir):
+                    mkdir(outDir)
                 mkdir(boxCntDimsDir)
             plt.savefig(f"{boxCntDimsDir}/{npName}_boxCntDim.png", bbox_inches='tight')
         if showPlot:
@@ -352,35 +352,35 @@ def findSlope(scales, counts, npName='', writeFileDir='boxCntOutputs', lenRange=
 
 # @annotate('runCase', color='cyan')
 # @estDuration
-def runBoxCnt(xyzFilePath, 
-              radType='atomic', calcBL=False, findSurfOption='alphaShape', alphaMult=2.0,
-              writeFileDir='boxCntOutputs', lenRange='trim', minSampleNum=5, confLvl=95, 
+def runBoxCnt(inpFilePath, 
+              radType='atomic', calcBL=False, findSurfAlg='alphaShape', alphaMult=2.0,
+              outDir='boxCntOutputs', lenRange='trim', minSample=5, confLvl=95, 
               rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False,
-              runPointCloudBoxCnt=True, numPoints=300, gridNum=1024, exePath='$FASTBC_EXE', genPCD=False,
-              runExactSphereBoxCnt=True, minLenMult=0.25, maxLenMult=1, numBoxLenSample=10, minValFromBound=5.0, writeBox=True): 
+              voxelSurf=True, numPoints=300, gridNum=1024, exePath='$FASTBC_EXE', genPCD=False,
+              exactSurf=True, minLenMult=0.25, maxLenMult=1, numBoxLen=10, bufferDist=5.0, writeBox=True): 
     """
     Run box-counting algorithm on the surface of a given object consisting of a set of spheres represented as either
     point clouds or exact spherical surface.
     
     Parameters
     ----------
-    xyzFilePath : str
+    inpFilePath : str
         Path to an xyz file containing the Cartesian coordinates of a set of spheres.
     radType : {'atomic', 'metallic'}, optional
         Type of radii to use for the spheres.
     calcBL : bool, optional
         Whether to compute the average distance from its neighbours for each atom
-    findSurfOption : {'alphaShape', 'convexHull', 'numNeigh'}, optional
+    findSurfAlg : {'alphaShape', 'convexHull', 'numNeigh'}, optional
         Algorithm to identify the spheres on the surface.
     alphaMult : Union[int, float], optional
         Multiplier to the minimum spherical radii to decide 'alpha' for the alpha shape algorithm, only used if
-        'findSurfOption' is 'alphaShape'.
-    writeFileDir : str, optional
+        'findSurfAlg' is 'alphaShape'.
+    outDir : str, optional
         Path to the directory to store the output files.
     lenRange : {'trim', 'full'}, optional
         Range of box lengths to include for determining the box-counting dimension. Choosing 'trim' finds the highest 
         coefficient of determination by iteratively removing the box counts obtained using boxes of extreme sizes.
-    minSampleNum : int, optional
+    minSample : int, optional
         Minimum number of box count data points to be retained for slope estimation from the linear regression fitting.
     confLvl : Union[int, float], optional
         Confidence level of confidence interval in percentage.
@@ -396,7 +396,7 @@ def runBoxCnt(xyzFilePath,
         Whether to show the plots generated, only used if 'vis' is True.
     verbose : bool, optional
         Whether to display the details.
-    runPointCloudBoxCnt : bool, optional
+    voxelSurf : bool, optional
         Whether to represent the surface as point clouds.
     numPoints : int, optional
         Number of surface points to be generated around each atom.
@@ -406,15 +406,15 @@ def runBoxCnt(xyzFilePath,
         Path to the compiled C++ executable for box-counting.
     genPCD : bool, optional
         Whether to generate pcd file for box-counting using MATLAB code written by Kazuaki Iida.
-    runExactSphereBoxCnt : bool, optional
+    exactSurf : bool, optional
         Whether to represent the surface as exact spheres.
     minLenMult : float, optional
         Multiplier to the minimum radii to determine the minimum box length for box-counting dimension estimation.
     maxLenMult : float, optional
         Multiplier to the minimum radii to determine the maximum box length for box-counting dimension estimation.
-    numBoxLenSample : int, optional
+    numBoxLen : int, optional
         Number of box lengths to use for the collection of the box count data, spaced evenly on logarithmic scale.
-    minValFromBound : Union[int,float]
+    bufferDist : Union[int,float]
         Buffer distance from the borders of the largest box in Angstrom.
     writeBox : bool, optional
         Whether to generate output files for visualisation.
@@ -439,35 +439,35 @@ def runBoxCnt(xyzFilePath,
     >>> r2Points, bcDimPoints, confIntPoints, r2Exact, bcDimExact, confIntExact = runBoxCnt('example.xyz')
     """
     radMult = 1.2 if radType == 'atomic' else 1.5  # Radius multiplier to identify nearest neighbour
-    atomsEle, atomsRad, atomsXYZ, maxRange, minXYZ, maxXYZ = readXYZ(xyzFilePath, radType)
+    atomsEle, atomsRad, atomsXYZ, maxRange, minXYZ, maxXYZ = readInp(inpFilePath, radType)
     atomsNeighIdxs, atomsAvgBondLen = findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, atomsRad.max(), radMult, calcBL)
-    atomsSurfIdxs = findSurf(atomsXYZ, atomsNeighIdxs, findSurfOption, alphaMult * atomsRad.min())
-    testCase = xyzFilePath.split('/')[-1][:-4]
+    atomsSurfIdxs = findSurf(atomsXYZ, atomsNeighIdxs, findSurfAlg, alphaMult * atomsRad.min())
+    testCase = inpFilePath.split('/')[-1][:-4]
     if verbose:
         print(f"\n{testCase}")
 
     r2PC, bcDimPC, confIntPC = np.nan, np.nan, (np.nan, np.nan)
     r2ES, bcDimES, confIntES = np.nan, np.nan, (np.nan, np.nan)
-    if not isdir(writeFileDir):
-        mkdir(writeFileDir)
-    if runPointCloudBoxCnt:
-        scalesPC, countsPC = getVoxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                                             testCase, writeFileDir, exePath,
-                                             radType, numPoints, gridNum,
-                                             rmInSurf, vis, verbose, genPCD)
-        r2PC, bcDimPC, confIntPC = findSlope(scalesPC, countsPC, f"{testCase}_PC", writeFileDir, lenRange,
-                                             minSampleNum, confLvl, vis, figType, saveFig, showPlot)
-    if runExactSphereBoxCnt:
+    if not isdir(outDir):
+        mkdir(outDir)
+    if voxelSurf:
+        scalesPC, countsPC = voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
+                                          testCase, outDir, exePath,
+                                          radType, numPoints, gridNum,
+                                          rmInSurf, vis, verbose, genPCD)
+        r2PC, bcDimPC, confIntPC = findSlope(scalesPC, countsPC, f"{testCase}_PC", outDir, lenRange,
+                                             minSample, confLvl, vis, figType, saveFig, showPlot)
+    if exactSurf:
         minAtomRad = atomsRad.min()
-        scalesES, countsES = getSphereBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                                              maxRange, (minAtomRad * minLenMult, minAtomRad * maxLenMult),
-                                              minXYZ, testCase, writeFileDir, numBoxLenSample, minValFromBound,
-                                              rmInSurf, writeBox, verbose)
-        r2ES, bcDimES, confIntES = findSlope(scalesES, countsES, f"{testCase}_ES", writeFileDir, lenRange,
-                                             minSampleNum, confLvl, vis, figType, saveFig, showPlot)
+        scalesES, countsES = exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
+                                          maxRange, (minAtomRad * minLenMult, minAtomRad * maxLenMult),
+                                          minXYZ, testCase, outDir, numBoxLen, bufferDist,
+                                          rmInSurf, writeBox, verbose)
+        r2ES, bcDimES, confIntES = findSlope(scalesES, countsES, f"{testCase}_ES", outDir, lenRange,
+                                             minSample, confLvl, vis, figType, saveFig, showPlot)
     if verbose:
-        if runPointCloudBoxCnt:
+        if voxelSurf:
             print(f"  Point clouds  D_Box: {bcDimPC:.4f} [{confIntPC[0]:.4f}, {confIntPC[1]:.4f}],  R2: {r2PC:.4f}")
-        if runExactSphereBoxCnt:
+        if exactSurf:
             print(f"  Exact surface D_Box: {bcDimES:.4f} [{confIntES[0]:.4f}, {confIntES[1]:.4f}],  R2: {r2ES:.4f}")
     return r2PC, bcDimPC, confIntPC, r2ES, bcDimES, confIntES

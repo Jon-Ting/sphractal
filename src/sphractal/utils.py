@@ -35,9 +35,9 @@ def getMinMaxXYZ(atomsXYZ):
     return max(maxXYZ - minXYZ), minXYZ, maxXYZ
 
 
-# @annotate('readXYZ', color='cyan')
+# @annotate('readInp', color='cyan')
 # noinspection GrazieInspection
-def readXYZ(filePath, radType='atomic'):
+def readInp(filePath, radType='atomic'):
     """Parse an xyz or a lmp file."""
     radDict = ATOMIC_RAD_DICT if radType == 'atomic' else METALLIC_RAD_DICT
     atomsEle, atomsRad, atomsXYZ = [], [], []

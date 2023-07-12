@@ -79,20 +79,20 @@ def pointsToVoxels(pointXYZs, gridSize):
 
 
 # @annotate('writeSurfVoxelIdxs', color='yellow')
-def writeSurfVoxelIdxs(writeFileDir, voxelIdxs):
+def writeSurfVoxelIdxs(outDir, voxelIdxs):
     """Generate a txt file required for 3D box-counting using C++ code written by Ruiz de Miras and Posadas."""
-    with open(f"{writeFileDir}/surfVoxelIdxs.txt", 'w') as f:
+    with open(f"{outDir}/surfVoxelIdxs.txt", 'w') as f:
         for idx in voxelIdxs:
             f.write(f"{idx}\n")
 
 
 # @annotate('writePCD', color='yellow')
-def writePCD(writeFileDir, npName, surfPointXYZs):
+def writePCD(outDir, npName, surfPointXYZs):
     """Generate a pcd file required for 3D box-counting using MATLAB code written by Kazuaki Iida."""
-    surfPointsDir = f"{writeFileDir}/surfPoints"
+    surfPointsDir = f"{outDir}/surfPoints"
     if not isdir(surfPointsDir):
-        if not isdir(writeFileDir):
-            mkdir(writeFileDir)
+        if not isdir(outDir):
+            mkdir(outDir)
         mkdir(surfPointsDir)
     with open(f"{surfPointsDir}/{npName}_surfPoints.pcd", 'w') as f:
         f.write('# .PCD v.7 - Point Cloud Data file format\nVERSION .7')
@@ -103,12 +103,12 @@ def writePCD(writeFileDir, npName, surfPointXYZs):
 
 
 # @annotate('writeSurfPoints', color='blue')
-def writeSurfPoints(writeFileDir, npName, atomsSurfIdxs, atomsXYZ, surfPointXYZs, nonSurfPointXYZs):
+def writeSurfPoints(outDir, npName, atomsSurfIdxs, atomsXYZ, surfPointXYZs, nonSurfPointXYZs):
     """Generate an xyz file for visualisation of classified point clouds."""
-    surfPointsDir = f"{writeFileDir}/surfPoints"
+    surfPointsDir = f"{outDir}/surfPoints"
     if not isdir(surfPointsDir):
-        if not isdir(writeFileDir):
-            mkdir(writeFileDir)
+        if not isdir(outDir):
+            mkdir(outDir)
         mkdir(surfPointsDir)
     with open(f"{surfPointsDir}/{npName}_surfPoints.xyz", 'w') as f:
         f.write(f"{len(surfPointXYZs) + len(nonSurfPointXYZs) + len(atomsSurfIdxs)}\n\n")
@@ -122,12 +122,12 @@ def writeSurfPoints(writeFileDir, npName, atomsSurfIdxs, atomsXYZ, surfPointXYZs
 
 
 # @annotate('writeSurfVoxels', color='green')
-def writeSurfVoxels(writeFileDir, npName, surfVoxelXYZs):
+def writeSurfVoxels(outDir, npName, surfVoxelXYZs):
     """Generate an xyz file useful for visualisation of computed surface voxels."""
-    surfVoxelsDir = f"{writeFileDir}/surfVoxels"
+    surfVoxelsDir = f"{outDir}/surfVoxels"
     if not isdir(surfVoxelsDir):
-        if not isdir(writeFileDir):
-            mkdir(writeFileDir)
+        if not isdir(outDir):
+            mkdir(outDir)
         mkdir(surfVoxelsDir)
     with open(f"{surfVoxelsDir}/{npName}_surfVoxels.xyz", 'w') as f:
         f.write(f"{len(surfVoxelXYZs)}\n\n")
@@ -137,7 +137,7 @@ def writeSurfVoxels(writeFileDir, npName, surfVoxelXYZs):
 
 # @annotate('getSurfPoints', color='cyan')
 def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                  npName, writeFileDir, 
+                  npName, outDir, 
                   radType='atomic', numPoint=300, gridNum=1024,
                   rmInSurf=True, vis=False, verbose=False, genPCD=False):
     """Generate point clouds approximating the outer spherical surface formed by a set of atoms."""
@@ -157,11 +157,11 @@ def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     surfVoxelXYZs, surfVoxelIdxs = pointsToVoxels(np.array(surfPointXYZs), gridNum)
 
     # Generate output files
-    writeSurfVoxelIdxs(writeFileDir, surfVoxelIdxs)
+    writeSurfVoxelIdxs(outDir, surfVoxelIdxs)
     if verbose:
         print(f"    {len(surfPointXYZs)} surface points -> {len(surfVoxelIdxs)} voxels, # grids: {gridNum}")
     if genPCD:
-        writePCD(writeFileDir, npName, surfPointXYZs)
+        writePCD(outDir, npName, surfPointXYZs)
     if vis:
-        writeSurfPoints(writeFileDir, npName, atomsSurfIdxs, atomsXYZ, surfPointXYZs, nonSurfPointXYZs)
-        writeSurfVoxels(writeFileDir, npName, surfVoxelXYZs)
+        writeSurfPoints(outDir, npName, atomsSurfIdxs, atomsXYZ, surfPointXYZs, nonSurfPointXYZs)
+        writeSurfVoxels(outDir, npName, surfVoxelXYZs)
