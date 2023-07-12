@@ -65,6 +65,8 @@ def findSlope(scales, counts, npName='', outDir='boxCntOutputs', lenRange='trim'
         legendSize, lineWidth, markerSize = params['legendSize'], params['lineWidth'], params['markerSize']
     else:
         figSize = dpi = fontSize = labelSize = legendSize = lineWidth = markerSize = None
+    figSize = (3.5, 2.5)
+    print(figSize)
 
     # Remove invalid entries in the box counts data collected
     while np.nan in counts:
@@ -220,17 +222,17 @@ def runBoxCnt(inpFilePath,
     
     Returns
     -------
-    r2PC : float
+    r2VX : float
         Coefficient of determination from determination of the dimension of point clouds surface.
-    bcDimPC : float
+    bcDimVX : float
         Box-counting dimension of the point clouds representation of the surface.
-    confIntPC : tuple
+    confIntVX : tuple
         Confidence interval of the box-counting dimension of the point clouds surface.
-    r2ES : float
+    r2EX : float
         Coefficient of determination from determination of the dimension of exact sphere surface.
-    bcDimES : float
+    bcDimEX : float
         Box-counting dimension of the exact sphere representation of the surface.
-    confIntES : tuple
+    confIntEX : tuple
         Confidence interval of the box-counting dimension of the exact sphere surface.
     
     Examples
@@ -245,28 +247,28 @@ def runBoxCnt(inpFilePath,
     if verbose:
         print(f"\n{testCase}")
 
-    r2PC, bcDimPC, confIntPC = np.nan, np.nan, (np.nan, np.nan)
-    r2ES, bcDimES, confIntES = np.nan, np.nan, (np.nan, np.nan)
+    r2VX, bcDimVX, confIntVX = np.nan, np.nan, (np.nan, np.nan)
+    r2EX, bcDimEX, confIntEX = np.nan, np.nan, (np.nan, np.nan)
     if not isdir(outDir):
         mkdir(outDir)
     if voxelSurf:
-        scalesPC, countsPC = voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
+        scalesVX, countsVX = voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                                           testCase, outDir, exePath,
                                           radType, numPoints, gridNum,
                                           rmInSurf, vis, verbose, genPCD)
-        r2PC, bcDimPC, confIntPC = findSlope(scalesPC, countsPC, f"{testCase}_PC", outDir, lenRange,
+        r2VX, bcDimVX, confIntVX = findSlope(scalesVX, countsVX, f"{testCase}_VX", outDir, lenRange,
                                              minSample, confLvl, vis, figType, saveFig, showPlot)
     if exactSurf:
         minAtomRad = atomsRad.min()
-        scalesES, countsES = exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
+        scalesEX, countsEX = exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                                           maxRange, (minAtomRad * minLenMult, minAtomRad * maxLenMult),
                                           minXYZ, testCase, outDir, numBoxLen, bufferDist,
                                           rmInSurf, writeBox, verbose)
-        r2ES, bcDimES, confIntES = findSlope(scalesES, countsES, f"{testCase}_ES", outDir, lenRange,
+        r2EX, bcDimEX, confIntEX = findSlope(scalesEX, countsEX, f"{testCase}_EX", outDir, lenRange,
                                              minSample, confLvl, vis, figType, saveFig, showPlot)
     if verbose:
         if voxelSurf:
-            print(f"  Point clouds  D_Box: {bcDimPC:.4f} [{confIntPC[0]:.4f}, {confIntPC[1]:.4f}],  R2: {r2PC:.4f}")
+            print(f"  Point clouds  D_Box: {bcDimVX:.4f} [{confIntVX[0]:.4f}, {confIntVX[1]:.4f}],  R2: {r2VX:.4f}")
         if exactSurf:
-            print(f"  Exact surface D_Box: {bcDimES:.4f} [{confIntES[0]:.4f}, {confIntES[1]:.4f}],  R2: {r2ES:.4f}")
-    return r2PC, bcDimPC, confIntPC, r2ES, bcDimES, confIntES
+            print(f"  Exact surface D_Box: {bcDimEX:.4f} [{confIntEX[0]:.4f}, {confIntEX[1]:.4f}],  R2: {r2EX:.4f}")
+    return r2VX, bcDimVX, confIntVX, r2EX, bcDimEX, confIntEX
