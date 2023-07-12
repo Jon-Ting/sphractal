@@ -38,8 +38,10 @@ from importlib.metadata import version
 __version__ = version('sphractal')
 
 # Populate package namespace
-__all__ = ['constants', 'datasets', 'utils', 'boxCnt']
+__all__ = ['constants', 'datasets', 'utils', 'surfVoxel', 'surfExact', 'boxCnt']
 from sphractal.constants import ATOMIC_RAD_DICT, METALLIC_RAD_DICT, PLT_PARAMS
 from sphractal.datasets import getExampleDataPath
 from sphractal.utils import readInp, findNN, findSurf
-from sphractal.boxCnt import voxelBoxCnts, exactBoxCnts, findSlope, runBoxCnt
+from sphractal.surfVoxel import voxelBoxCnts
+from sphractal.surfExact import exactBoxCnts
+from sphractal.boxCnt import findSlope, runBoxCnt

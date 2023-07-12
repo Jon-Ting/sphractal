@@ -1,5 +1,5 @@
-from math import cos, pi, sin, sqrt
-from os import mkdir
+from math import cos, log10, pi, sin, sqrt
+from os import mkdir, system
 from os.path import isdir
 
 from numba import njit
@@ -165,3 +165,92 @@ def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     if vis:
         writeSurfPoints(outDir, npName, atomsSurfIdxs, atomsXYZ, surfPointXYZs, nonSurfPointXYZs)
         writeSurfVoxels(outDir, npName, surfVoxelXYZs)
+
+
+# @annotate('voxelBoxCnts', color='blue')
+def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
+                 npName, outDir='boxCntOutputs', exePath='$FASTBC_EXE',
+                 radType='atomic', numPoint=300, gridNum=1024,
+                 rmInSurf=True, vis=True, verbose=False, genPCD=False):
+    """
+    Count the boxes that cover the outer surface of a set of overlapping spheres represented as point clouds for
+    different box sizes, using 3D box-counting algorithm written by Ruiz de Miras et al. in C++. 
+
+    IMPORTANT: Make sure the source code has been downloaded from https://github.com/Jon-Ting/fastBC and compiled 
+    on your machine. 'exePath' should point to the right directory if FASTBC_EXE is not set as an environment variable.
+    
+    Parameters
+    ----------
+    atomsEle : 1D ndarray
+        Element type of each atom.
+    atomsRad : 1D ndarray
+        Radius of each atom.
+    atomsSurfIdxs : 1D ndarray
+        Indices of surface atoms.
+    atomsXYZ : 2D ndarray
+        Cartesian coordinates of each atom.
+    atomsNeighIdxs : 2D ndarray
+        Neighbour atoms indices of each atom.
+    npName : str
+        Identifier of the measured object, which forms part of the output file name, ideally unique.
+    outDir : str, optional
+        Path to the directory to store the output files.
+    exePath : str, optional
+        Path to the compiled C++ executable for box-counting.
+    radType : {'atomic', 'metallic'}, optional
+        Type of radii to use for the spheres.
+    numPoint : int, optional
+        Number of surface points to be generated around each atom.
+    gridNum : int, optional
+        Resolution of the 3D binary image.
+    rmInSurf : bool, optional
+        Whether to remove the surface points on the inner surface.
+    vis : bool, optional
+        Whether to generate output files for visualisation.
+    verbose : bool
+        Whether to display the details.
+    genPCD : bool, optional
+        Whether to generate pcd file for box-counting using MATLAB code written by Kazuaki Iida.
+    
+    Returns
+    -------
+    scales : list
+        Box lengths.
+    counts : list
+        Number of boxes that cover the surface of interest, as represented by the voxels in the 3D binary image.
+
+    Examples
+    --------
+    >>> eles, rads, xyzs, _, minxyz, maxxyz = readInp('example.xyz')
+    >>> neighs, _ = findNN(rads, xyzs, minxyz, maxxyz, 2.5)
+    >>> surfs = findSurf(xyzs, neighs, 'alphaShape', 5.0)
+    >>> scalesPC, countsPC = voxelBoxCnts(eles, rads, surfs, xyzs, neighs, 'example')
+
+    Notes
+    -----
+    The 3D binary image resolution (gridNum) is restricted by RAM size available, the relationship is illustrated below:
+    -  1024 ->    2 GB (laptops -> typically 8 GB)
+    -  2048 ->   16 GB (HPC nodes with GPUs like NCI Gadi gpuvolta queue -> max 32 GB/node)
+    -  4096 ->  128 GB
+    -  8192 -> 1024 GB (HPC node with huge memories like NCI Gadi megamem queue -> max 2990 GB/node)
+    - 16384 -> 8192 GB
+    Further details about maximum grid size and memory estimation could be found in 'test.cpp' documented by the authors 
+    (https://www.ugr.es/~demiras/fbc/). As a reference, when 8192 grids are used, allocation of memory took 25 min;
+    while the CPU algorithm runs for 18 min.
+    """
+    if verbose:
+        print(f"  Approximating the surface with {numPoint} point clouds for each atom...")
+    if not isdir(outDir):
+        mkdir(outDir)
+
+    genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
+                  npName, outDir,
+                  radType, numPoint, gridNum,
+                  rmInSurf, vis, verbose, genPCD)
+    system(f"{exePath} {gridNum} {outDir}/surfVoxelIdxs.txt {outDir}/surfVoxelBoxCnts.txt")
+    scales, counts = [], []
+    with open(f"{outDir}/surfVoxelBoxCnts.txt", 'r') as f:
+        for line in f:
+            scales.append(log10(1 / int(line.split()[0])))
+            counts.append(log10(int(line.split()[1])))
+    return scales[::-1], counts[::-1]

@@ -1,5 +1,6 @@
 from concurrent.futures import ProcessPoolExecutor as Pool
-from math import ceil
+from math import ceil, log10
+from multiprocessing import cpu_count
 from os import mkdir
 from os.path import isdir
 
@@ -180,3 +181,113 @@ def findTargetAtoms(atomsNeighIdxs):
         if sum(atomNeighIdxs[atomNeighIdxs > -1]) > 0:
             atomsIdxs.append(atomIdx)
     return np.array(atomsIdxs)
+
+
+# @annotate('exactBoxCnts', color='blue')
+def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
+                 maxRange, minMaxBoxLens, minXYZ, npName, 
+                 outDir='boxCntOutputs', numBoxLen=10, bufferDist=5.0,
+                 rmInSurf=True, writeBox=True, verbose=False):
+    """
+    Count the boxes that cover the outer surface of a set of overlapping spheres represented as exact spheres for
+    different box sizes.
+    
+    Parameters
+    ----------
+    atomsEle : 1D ndarray
+        Element type of each atom.
+    atomsRad : 1D ndarray
+        Radius of each atom.
+    atomsSurfIdxs : 1D ndarray
+        Indices of surface atoms.
+    atomsXYZ : 2D ndarray
+        Cartesian coordinates of each atom.
+    atomsNeighIdxs : 2D ndarray
+        Neighbour atoms indices of each atom.
+    maxRange : float
+        Maximum range among all dimensions of the Cartesian space, defines the borders of the largest box.
+    minMaxBoxLens : tuple of floats
+        Minimum and maximum box lengths.
+    minXYZ : 1D ndarray
+        Minimum values of each dimension in the Cartesian space.
+    npName : str
+        Identifier of the measured object, which forms part of the output file name, ideally unique.
+    outDir : str, optional
+        Path to the directory to store the output files.
+    numBoxLen : int, optional
+        Number of box lengths to use for the collection of the box count data, spaced evenly on logarithmic scale.
+    bufferDist : Union[int,float]
+        Buffer distance from the borders of the largest box in Angstrom.
+    rmInSurf : bool, optional
+        Whether to remove the surface points on the inner surface.
+    writeBox : bool, optional
+        Whether to generate output files for visualisation.
+    verbose : bool, optional
+        Whether to display the details.
+    
+    Returns
+    -------
+    scales : list
+        Box lengths.
+    counts : list
+        Number of boxes that cover the exact spherical surface of interest.
+    
+    Examples
+    --------
+    >>> eles, rads, xyzs, _, minxyz, maxxyz = readInp('example.xyz')
+    >>> neighs, _ = findNN(rads, xyzs, minxyz, maxxyz, 1.2)
+    >>> surfs = findSurf(xyzs, neighs, 'alphaShape', 2.0)
+    >>> scalesES, countsES = exactBoxCnts(eles, rads, surfs, xyzs, neighs, 100, (0.2, 1), minxyz, 'example')
+    """
+    atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs)
+    numCPUs = cpu_count()
+    boxLenScanMaxWorkers = ceil(numCPUs * numBoxLen / len(atomsIdxs))
+    boxLenConc = False if boxLenScanMaxWorkers < 2 else True
+    atomScanMaxWorkers = numCPUs - boxLenScanMaxWorkers if boxLenConc else numCPUs
+
+    if verbose:
+        print(f"  Representing the surface by treating each atom as exact spheres...")
+        print(f"    Parallelised with {atomScanMaxWorkers} out of {numCPUs} cores for scanning over {len(atomsIdxs)} "
+              f"atoms, the rest over {numBoxLen} box lengths...")
+        print(f"    (1/eps)    (# bulk)    (# surf)")
+    if writeBox:
+        if not isdir(outDir):
+            mkdir(outDir)
+
+    overallBoxLen = maxRange + bufferDist * 2
+    allLensSurfBoxs, allLensBulkBoxs, allLensSurfCnts, allLensBulkCnts = [], [], [], []
+    scales, scanBoxLens, scanAllAtomsInps = [], [], []
+    approxScanBoxLens = np.geomspace(minMaxBoxLens[1], minMaxBoxLens[0], num=numBoxLen)
+    for approxScanBoxLen in approxScanBoxLens:  # Evenly reduced box lengths on log scale
+        magnFac = int(overallBoxLen / approxScanBoxLen)
+        scanBoxLen = overallBoxLen / magnFac
+        scanAllAtomsInp = (magnFac, scanBoxLen, atomsIdxs, minXYZ,
+                           atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, bufferDist,
+                           rmInSurf, verbose, atomScanMaxWorkers)
+        if boxLenConc:
+            scanAllAtomsInps.append(scanAllAtomsInp) 
+        else:
+            scanAllAtomsResult = scanAllAtoms(scanAllAtomsInp) 
+            allAtomsSurfBoxs, allAtomsBulkBoxs = scanAllAtomsResult
+            allLensSurfBoxs.append(allAtomsSurfBoxs)
+            allLensBulkBoxs.append(allAtomsBulkBoxs)
+            allLensSurfCnts.append(len(allAtomsSurfBoxs))
+
+        scales.append(log10(magnFac / overallBoxLen))
+        scanBoxLens.append(scanBoxLen)
+
+    if boxLenConc:
+        with Pool(max_workers=boxLenScanMaxWorkers) as pool:
+            for scanAllAtomsResult in pool.map(scanAllAtoms, scanAllAtomsInps,
+                                               chunksize=ceil(numBoxLen / boxLenScanMaxWorkers)):
+                allAtomsSurfBoxs, allAtomsBulkBoxs = scanAllAtomsResult
+                allLensSurfBoxs.append(allAtomsSurfBoxs)
+                allLensBulkBoxs.append(allAtomsBulkBoxs)
+                allLensSurfCnts.append(len(allAtomsSurfBoxs))
+    counts = [log10(sCnt) if sCnt != 0 else np.nan for sCnt in allLensSurfCnts]
+
+    if writeBox:
+        writeBoxCoords(atomsEle, atomsXYZ, allLensSurfBoxs, allLensBulkBoxs, minXYZ, scanBoxLens, bufferDist, 
+                       outDir, npName)
+    return scales, counts
+
