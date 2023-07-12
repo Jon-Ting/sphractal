@@ -11,7 +11,7 @@ import numpy as np
 from statsmodels.api import OLS, add_constant
 
 from sphractal.constants import PLT_PARAMS
-from sphractal.surfPointClouds import genSurfPoints
+from sphractal.surfVoxel import genSurfPoints
 from sphractal.surfExact import findTargetAtoms, scanAllAtoms, writeBoxCoords
 from sphractal.utils import findNN, findSurf, readInp
 # from sphractal.utils import estDuration, annotate
