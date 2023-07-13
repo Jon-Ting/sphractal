@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.0 (2023-07-13)
+
+### Feature
+
+* **data:** Added more example data and updated functionalities to get them ([`d65c3d2`](https://github.com/Jon-Ting/sphractal/commit/d65c3d21200a616208c2aa27c3001a3acbbec0ac))
+
 ## v0.10.0 (2023-07-12)
 
 ### Feature
