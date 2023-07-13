@@ -6,7 +6,7 @@ from shutil import rmtree
 from pytest import approx, mark
 
 from fixtures import fixture, np, egAtomsXYZ, egAtomsNeighIdxs, egAtomsSurfIdxs, egTargetAtomIdxs
-from sphractal.datasets import getExampleDataPath
+from sphractal.datasets import getExampleDataPath, getBenchmarkDataPaths
 from sphractal.utils import estDuration, getMinMaxXYZ, readInp, findNN, findSurf, calcDist, closestSurfAtoms, \
     oppositeInnerAtoms
 from sphractal.surfVoxel import fibonacciSphere, pointsOnAtom, pointsToVoxels, voxelBoxCnts
@@ -66,9 +66,17 @@ def test_estDuration(egMinMaxXYZ):
 def test_getExampleDataPath():
     """Unit test of getExampleDataPath()."""
     inpFilePathAct = getExampleDataPath()
-    assert isinstance(inpFilePathAct, str), 'getExampleDataPath did not return a string'
-    assert exists(inpFilePathAct), 'example.xyz not found'
-    assert isfile(inpFilePathAct), 'example.xyz is not a file'
+    assert isinstance(inpFilePathAct, str), 'getExampleDataPath() did not return a string'
+    assert exists(inpFilePathAct), 'exampleOT.xyz not found'
+    assert isfile(inpFilePathAct), 'exampleOT.xyz is not a file'
+
+
+def test_getBenchmarkDataPaths():
+    """Unit test of getBenchmarkDataPaths()."""
+    inpFilePathsAct = getBenchmarkDataPaths()
+    assert isinstance(inpFilePathsAct, list), 'getBenchmarkDataPaths() did not return a list'
+    assert isinstance(inpFilePathsAct[0], str), 'Path in list is not str'
+    assert len(inpFilePathsAct) == 20, 'Incorrect number of paths returned'
 
 
 @mark.parametrize('radType, atomRad', [('atomic', ATOM_RAD), ('metallic', 1.37)])
