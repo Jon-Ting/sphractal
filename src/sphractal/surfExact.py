@@ -174,12 +174,16 @@ def writeBoxCoords(atomsEle, atomsXYZ, allSurfBoxs, allBulkBoxs, minXYZ, boxLens
 
 # @annotate('findTargetAtoms', color='cyan')
 @njit(fastmath=True, cache=True)
-def findTargetAtoms(atomsNeighIdxs):
+def findTargetAtoms(atomsNeighIdxs, atomsSurfIdxs):
     """Find atoms to be scanned if not removing inner surfaces (atoms with neighbours that are on the surface)."""
     atomsIdxs = []
     for (atomIdx, atomNeighIdxs) in enumerate(atomsNeighIdxs):
-        if sum(atomNeighIdxs[atomNeighIdxs > -1]) > 0:
-            atomsIdxs.append(atomIdx)
+        for neighIdx in atomNeighIdxs:
+            if neighIdx < 0:
+                break
+            if neighIdx in atomsSurfIdxs:
+                atomsIdxs.append(atomIdx)
+                break
     return np.array(atomsIdxs)
 
 
@@ -239,7 +243,8 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     >>> surfs = findSurf(xyzs, neighs, 'alphaShape', 2.0)
     >>> scalesES, countsES = exactBoxCnts(eles, rads, surfs, xyzs, neighs, 100, (0.2, 1), minxyz, 'example')
     """
-    atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs)
+    atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs, atomsSurfIdxs)
+    print(atomsIdxs)
     numCPUs = cpu_count()
     boxLenScanMaxWorkers = ceil(numCPUs * numBoxLen / len(atomsIdxs))
     boxLenConc = False if boxLenScanMaxWorkers < 2 else True
