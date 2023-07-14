@@ -3,6 +3,7 @@ from time import time
 # from warnings import warn
 
 from numba import njit, prange
+from numba.typed import List
 import numpy as np
 # from nvtx import annotate
 from scipy.spatial import ConvexHull, Delaunay
@@ -112,26 +113,19 @@ def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult, calcBL=False
 
 
 @njit(fastmath=True, cache=True)
-def rmDupTris(tris):
-    """Remove triangles that occur twice (internal triangles)."""
-    unqTris = np.zeros_like(tris)
-    unqCnt = 0
-    for (i, triTarget) in enumerate(tris):
-        isUnique = True
-        for (j, triOther) in enumerate(tris):
-            if j != i and np.all(triOther == triTarget):
-                isUnique = False
-                break
-        if isUnique:
-            unqTris[unqCnt] = triTarget
-            unqCnt += 1
-    return unqTris[:unqCnt]
-
-
-@njit(fastmath=True, cache=True)
 def findTetras(tetraVtxsIdxs, r, alpha):
     """Return tetrahedrons with their circumsphere radii smaller than a specified alpha value."""
     return tetraVtxsIdxs[r < alpha, :]
+
+
+@njit(fastmath=True, cache=True)
+def rmDupTris(tris):
+    """Remove triangles that occur twice (internal triangles)."""
+    unqTris = []
+    for tri in tris:
+        if tris.count(tri) == 1:
+            unqTris.append(tri)
+    return unqTris
 
 
 # @annotate('alphaShape', color='cyan')
@@ -158,8 +152,7 @@ def alphaShape(atomsXYZ, tetraVtxsIdxs, alpha):
     tetras = findTetras(tetraVtxsIdxs, r, alpha)
     triComb = np.array([(0, 1, 2), (0, 1, 3), (0, 2, 3), (1, 2, 3)])
     tris = tetras[:, triComb].reshape(-1, 3)
-    tris = np.sort(tris, axis=1)
-    tris = rmDupTris(tris)
+    tris = rmDupTris(List(tuple(i) for i in tris))
     return np.unique(np.concatenate(tris))
 
 
