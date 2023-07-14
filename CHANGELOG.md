@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## v0.12.0 (2023-07-14)
+
+### Feature
+
+* **data:** Unified and included more example data ([`c4cbe5e`](https://github.com/Jon-Ting/sphractal/commit/c4cbe5e54ee753a8cb640a36fe07b80384d90332))
+
+### Fix
+
+* **findTargetAtoms:** Fixed the function for rmInSurf=False ([`c21fd67`](https://github.com/Jon-Ting/sphractal/commit/c21fd67a0b55618df06b5ab4e2701292e92161f5))
+
+### Performance
+
+* **findSurf:** Sped up alpha shape algorithm ([`427536d`](https://github.com/Jon-Ting/sphractal/commit/427536d74b87bf9e445eb878baa7065c0f2e3f9d))
+
 ## v0.11.0 (2023-07-13)
 
 ### Feature
