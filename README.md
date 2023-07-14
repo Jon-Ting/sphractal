@@ -29,10 +29,10 @@ fractal dimension is included in the [notebook tutorial](https://github.com/Jon-
 Use `pip` or `conda` to install `Sphractal`:
 
 ```bash
-$ pip install sphractal
+pip install sphractal
 ```
 ```bash
-$ conda install -c conda-forge sphractal
+conda install -c conda-forge sphractal
 ```
 
 ### Special Requirement for Point Cloud Surface Representation
@@ -48,15 +48,15 @@ git clone https://github.com/Jon-Ting/fastBC.git
 
 * Building an executable by doing either one of the following compilations according to the instructions on the [README.md](https://github.com/Jon-Ting/fastBC/blob/main/README.md) page. This will decide whether you will be running the box counting algorithm with GPU acceleration. Feel free to rename the executables:
 ```bash
-$ g++ 3DbinImBCcpu.cpp bcCPU.cpp -o 3DbinImBCcpu.exe
+g++ 3DbinImBCcpu.cpp bcCPU.cpp -o 3DbinImBCcpu.exe
 ```
 ```bash
-$ nvcc -O3 3DbinImBCgpu.cpp bcCUDA3D.cu -o 3DbinImBCgpu.exe
+nvcc -O3 3DbinImBCgpu.cpp bcCUDA3D.cu -o 3DbinImBCgpu.exe
 ```
 
 * (Optional) Setting the path to the executable as an environment variable accessible by Python (replace `<PATH_TO_EXE>` by the absolute path to the executable file you just built), otherwise you could always pass the path to the executable to the relevant functions:
 ```bash
-$ export FASTBC_EXE=<PATH_TO_EXE>
+export FASTBC_EXE=<PATH_TO_EXE>
 ```
 Note that for the environment variable to be persistent (to still exist after the terminal is closed), the line should be added to your `~/.bashrc`.
 
