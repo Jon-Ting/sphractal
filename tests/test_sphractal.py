@@ -208,9 +208,9 @@ def test_fibonacciSphere(numPoint, sphereRad, xyzsExp):
 #                 rmInSurf=True)
 
 
-def test_findTargetAtoms(egAtomsNeighIdxs, egTargetAtomIdxs):
+def test_findTargetAtoms(egAtomsNeighIdxs, egAtomsSurfIdxs, egTargetAtomIdxs):
     """Unit test of findTargetAtoms()."""
-    targetAtomsIdxsAct = findTargetAtoms(egAtomsNeighIdxs)
+    targetAtomsIdxsAct = findTargetAtoms(egAtomsNeighIdxs, egAtomsSurfIdxs)
     assert np.all(targetAtomsIdxsAct == egTargetAtomIdxs), 'Incorrect atom indices'
 
 
