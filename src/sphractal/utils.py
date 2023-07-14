@@ -90,13 +90,13 @@ def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult, calcBL=False
                     atom2rad = atomsRad[j]
 
                     diffX, diffY, diffZ = abs(atom1X - atom2X), abs(atom1Y - atom2Y), abs(atom1Z - atom2Z)
-                    sumOfSquares = diffX * diffX + diffY * diffY + diffZ * diffZ
+                    sumOfSquares = diffX*diffX + diffY*diffY + diffZ*diffZ
                     if sumOfSquares < ((atom1rad+atom2rad)*radMult) ** 2:
                         atomsNeighIdxs[i].append(j)
                         atomsNeighIdxs[j].append(i)
                         if calcBL:
-                            atomsAvgBondLen[i] += sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ)
-                            atomsAvgBondLen[j] += sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ)
+                            atomsAvgBondLen[i] += sqrt(sumOfSquares)
+                            atomsAvgBondLen[j] += sqrt(sumOfSquares)
         boxes[x][y][z].append(i)
 
     # Turn list of lists into NumPy array padded with -1
@@ -176,7 +176,7 @@ def findSurf(atomsXYZ, atomsNeighIdxs, option='alphaShape', alpha=3.0):
         Neighbour atoms indices of each atom.
     option : {'alphaShape', 'convexHull', 'numNeigh'}, optional
         Algorithm to identify the spheres on the surface. 
-        'convexHull' tends to identify less surface atoms; 'numNeigh' tends to identify more surface atoms. 
+        'convexHull' tends to identify less surface atoms; 'numNeigh' tends to identify more surface atoms.
         'alphaShape' is a generalisation of 'convexHull'.
     alpha : Union[int, float], optional
         'alpha' for the alpha shape algorithm, only used if 'option' is 'alphaShape'.
