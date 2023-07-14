@@ -244,7 +244,6 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     >>> scalesES, countsES = exactBoxCnts(eles, rads, surfs, xyzs, neighs, 100, (0.2, 1), minxyz, 'example')
     """
     atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs, atomsSurfIdxs)
-    print(atomsIdxs)
     numCPUs = cpu_count()
     boxLenScanMaxWorkers = ceil(numCPUs * numBoxLen / len(atomsIdxs))
     boxLenConc = False if boxLenScanMaxWorkers < 2 else True
