@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.12.1 (2023-07-14)
+
+### Fix
+
+* **fastbc:** Updated fastbc submodule name ([`43a9976`](https://github.com/Jon-Ting/sphractal/commit/43a9976d47b8d11648659bdea807c29d7eecc4a3))
+
+### Documentation
+
+* **readme:** Removed dollar signs from readme ([`c6fc475`](https://github.com/Jon-Ting/sphractal/commit/c6fc475e537c5c3ef28029335942a25c70dd584d))
+
 ## v0.12.0 (2023-07-14)
 
 ### Feature
