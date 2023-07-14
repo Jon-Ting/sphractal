@@ -76,7 +76,9 @@ def test_getBenchmarkDataPaths():
     inpFilePathsAct = getBenchmarkDataPaths()
     assert isinstance(inpFilePathsAct, list), 'getBenchmarkDataPaths() did not return a list'
     assert isinstance(inpFilePathsAct[0], str), 'Path in list is not str'
-    assert len(inpFilePathsAct) == 20, 'Incorrect number of paths returned'
+    assert len(inpFilePathsAct) == 19, 'Incorrect number of paths returned'
+    assert exists(inpFilePathsAct[0]), 'Path in list not found'
+    assert isfile(inpFilePathsAct[0]), 'Path in list not a file'
 
 
 @mark.parametrize('radType, atomRad', [('atomic', ATOM_RAD), ('metallic', 1.37)])
