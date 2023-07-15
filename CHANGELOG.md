@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.12.2 (2023-07-15)
+
+### Documentation
+
+* **readme:** Fixed paragraphing problems ([`a637259`](https://github.com/Jon-Ting/sphractal/commit/a637259e1b4472fdc46fbd7201b0b6c18c0c3796))
+* **readme:** Fixed fastbc repo link ([`c43c213`](https://github.com/Jon-Ting/sphractal/commit/c43c213821bc83ac427ff082cd3bf69ce1ae21fa))
+* **readme:** Added figures to readme ([`813de14`](https://github.com/Jon-Ting/sphractal/commit/813de14bae48be15e960581f2a4673f98dafe949))
+
 ## v0.12.1 (2023-07-14)
 
 ### Fix
