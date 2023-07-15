@@ -31,7 +31,6 @@ the surface area available for interaction with other entities, which is related
 <p align="center">
   <img src="https://github.com/Jon-Ting/sphractal/blob/main/docs/figs/exampleSliced.png" alt="Example octahedron palladium nanoparticle exact surface cross section" height="150"/>
 </p>
-* More details are included in the [notebook tutorial](https://github.com/Jon-Ting/sphractal/blob/main/docs/example.ipynb)).
 
 ## Features
 
@@ -57,7 +56,7 @@ to voxelised point clouds surface representation to operate properly.
 
 This could be done by:
 
-* Downloading the source code from the [repository](https://github.com/Jon-Ting/fastBC.git) to a directory of your choice:
+* Downloading the source code from the [repository](https://github.com/Jon-Ting/fastbc.git) to a directory of your choice:
 ```bash
 git clone https://github.com/Jon-Ting/fastBC.git
 ```
