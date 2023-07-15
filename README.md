@@ -10,12 +10,28 @@ from overlapping spheres via box-counting algorithm.
 ## Background
 * Atomic objects in molecular and nanosciences such are often represented as collection of spheres with radii associated 
 with the atomic radius of the individual component.
+<p align="center">
+  <img src="https://github.com/Jon-Ting/sphractal/blob/main/docs/figs/example.png" alt="Example octahedron palladium nanoparticle" height="120"/>
+</p>
 * Some examples of these objects (inclusive of both fine- and coarse-grained representation of the individual components) 
 are small molecules, proteins, nanoparticles, polymers, and porous materials such as zeolite, metal-organic framework (MOFs).
 * The overall properties of these objects are often significantly influenced by their surface properties, in particular 
 the surface area available for interaction with other entities, which is related to the surface roughness.
-* Fractal dimension allows the surface complexity/roughness of objects to be measured quantitatively, more details about 
-fractal dimension is included in the [notebook tutorial](https://github.com/Jon-Ting/sphractal/blob/main/docs/example.ipynb)).
+* Fractal dimension allows the surface complexity/roughness of objects to be measured quantitatively.
+* The fractal dimension could be estimated by applying the box-counting algorithm on surfaces represented as either:
+  * approximated point cloud:
+<p align="center">
+  <img src="https://github.com/Jon-Ting/sphractal/blob/main/docs/figs/exampleSurfPointCloudSliced.png" alt="Example octahedron palladium nanoparticle surface point cloud cross section" height="150"/>
+</p>
+  * that are subsequently voxelised:
+<p align="center">
+  <img src="https://github.com/Jon-Ting/sphractal/blob/main/docs/figs/exampleSurfVoxelsSliced.png" alt="Example octahedron palladium nanoparticle surface voxels section" height="150"/>
+</p>
+  * or mathematically exact surfaces:
+<p align="center">
+  <img src="https://github.com/Jon-Ting/sphractal/blob/main/docs/figs/exampleSliced.png" alt="Example octahedron palladium nanoparticle exact surface cross section" height="150"/>
+</p>
+* More details are included in the [notebook tutorial](https://github.com/Jon-Ting/sphractal/blob/main/docs/example.ipynb)).
 
 ## Features
 
