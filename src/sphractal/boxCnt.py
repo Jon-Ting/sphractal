@@ -156,7 +156,7 @@ def runBoxCnt(inpFilePath,
               outDir='boxCntOutputs', lenRange='trim', minSample=5, confLvl=95, 
               rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False,
               voxelSurf=True, numPoints=300, gridNum=1024, exePath='$FASTBC_EXE', genPCD=False,
-              exactSurf=True, minLenMult=0.25, maxLenMult=1, numBoxLen=10, bufferDist=5.0, writeBox=True): 
+              exactSurf=True, minLenMult=0.25, maxLenMult=1, numCPUs=8, numBoxLen=10, bufferDist=5.0, writeBox=True): 
     """
     Run box-counting algorithm on the surface of a given object consisting of a set of spheres represented as either
     point clouds or exact spherical surface.
@@ -211,6 +211,8 @@ def runBoxCnt(inpFilePath,
         Multiplier to the minimum radii to determine the minimum box length for box-counting dimension estimation.
     maxLenMult : float, optional
         Multiplier to the minimum radii to determine the maximum box length for box-counting dimension estimation.
+    numCPUs : int, optional
+        Number of CPUs to be used for parallelisation of tasks.
     numBoxLen : int, optional
         Number of box lengths to use for the collection of the box count data, spaced evenly on logarithmic scale.
     bufferDist : Union[int,float]
@@ -260,7 +262,7 @@ def runBoxCnt(inpFilePath,
         minAtomRad = atomsRad.min()
         scalesEX, countsEX = exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                                           maxRange, (minAtomRad * minLenMult, minAtomRad * maxLenMult),
-                                          minXYZ, testCase, outDir, numBoxLen, bufferDist,
+                                          minXYZ, testCase, outDir, numCPUs, numBoxLen, bufferDist,
                                           rmInSurf, writeBox, verbose)
         r2EX, bcDimEX, confIntEX = findSlope(scalesEX, countsEX, f"{testCase}_EX", outDir, lenRange,
                                              minSample, confLvl, vis, figType, saveFig, showPlot)

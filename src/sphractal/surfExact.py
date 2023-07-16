@@ -190,7 +190,7 @@ def findTargetAtoms(atomsNeighIdxs, atomsSurfIdxs):
 # @annotate('exactBoxCnts', color='blue')
 def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                  maxRange, minMaxBoxLens, minXYZ, npName, 
-                 outDir='boxCntOutputs', numBoxLen=10, bufferDist=5.0,
+                 outDir='boxCntOutputs', numCPUs=None, numBoxLen=10, bufferDist=5.0,
                  rmInSurf=True, writeBox=True, verbose=False):
     """
     Count the boxes that cover the outer surface of a set of overlapping spheres represented as exact spheres for
@@ -218,6 +218,8 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         Identifier of the measured object, which forms part of the output file name, ideally unique.
     outDir : str, optional
         Path to the directory to store the output files.
+    numCPUs : int, optional
+        Number of CPUs to be used for parallelisation of tasks.
     numBoxLen : int, optional
         Number of box lengths to use for the collection of the box count data, spaced evenly on logarithmic scale.
     bufferDist : Union[int,float]
@@ -244,15 +246,16 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     >>> scalesES, countsES = exactBoxCnts(eles, rads, surfs, xyzs, neighs, 100, (0.2, 1), minxyz, 'example')
     """
     atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs, atomsSurfIdxs)
-    numCPUs = cpu_count()
+    if numCPUs is None: 
+        numCPUs = cpu_count()
+    # Total amount of resources * fraction of box lengths over atoms to scan
     boxLenScanMaxWorkers = ceil(numCPUs * numBoxLen / len(atomsIdxs))
     boxLenConc = False if boxLenScanMaxWorkers < 2 else True
     atomScanMaxWorkers = numCPUs - boxLenScanMaxWorkers if boxLenConc else numCPUs
 
     if verbose:
         print(f"  Representing the surface by treating each atom as exact spheres...")
-        print(f"    Parallelised with {atomScanMaxWorkers} out of {numCPUs} cores for scanning over {len(atomsIdxs)} "
-              f"atoms, the rest over {numBoxLen} box lengths...")
+        print(f"    Scanning over:\n      {len(atomsIdxs)} atoms using {atomScanMaxWorkers} cpu(s)...\n      {numBoxLen} box lengths using {boxLenScanMaxWorkers} cpu(s)...")
         print(f"    (1/eps)    (# bulk)    (# surf)")
     if writeBox:
         if not isdir(outDir):
