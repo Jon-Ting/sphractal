@@ -3,6 +3,7 @@ from math import ceil, log10
 from multiprocessing import cpu_count
 from os import mkdir
 from os.path import isdir
+from time import time
 
 from numba import njit
 import numpy as np
@@ -248,14 +249,17 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs, atomsSurfIdxs)
     if numCPUs is None: 
         numCPUs = cpu_count()
-    # Total amount of resources * fraction of box lengths over atoms to scan
-    boxLenScanMaxWorkers = ceil(numCPUs * numBoxLen / len(atomsIdxs))
-    boxLenConc = False if boxLenScanMaxWorkers < 2 else True
-    atomScanMaxWorkers = numCPUs - boxLenScanMaxWorkers if boxLenConc else numCPUs
+    # Resource allocations for parallelisation (only certain cases have been discovered to gain advantage from box length parallelisation)
+    if numBoxLen > len(atomsIdxs) and numCPUs*10 > len(atomsIdxs):
+        boxLenConc = True
+        boxLenScanMaxWorkers = numCPUs // (len(atomsIdxs) // 10)
+    else:
+        boxLenConc, boxLenScanMaxWorkers = False, 1 
+    atomScanMaxWorkers = numCPUs // boxLenScanMaxWorkers if boxLenConc else numCPUs
 
     if verbose:
         print(f"  Representing the surface by treating each atom as exact spheres...")
-        print(f"    Scanning over:\n      {len(atomsIdxs)} atoms using {atomScanMaxWorkers} cpu(s)...\n      {numBoxLen} box lengths using {boxLenScanMaxWorkers} cpu(s)...")
+        print(f"    Scanning over:\n      {numBoxLen} box lengths using {boxLenScanMaxWorkers} cpu(s)...\n      {len(atomsIdxs)} atoms using {atomScanMaxWorkers} cpu(s)...")
         print(f"    (1/eps)    (# bulk)    (# surf)")
     if writeBox:
         if not isdir(outDir):
@@ -285,7 +289,7 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
 
     if boxLenConc:
         with Pool(max_workers=boxLenScanMaxWorkers) as pool:
-            for scanAllAtomsResult in pool.map(scanAllAtoms, scanAllAtomsInps,
+            for scanAllAtomsResult in pool.map(scanAllAtoms, scanAllAtomsInps, 
                                                chunksize=ceil(numBoxLen / boxLenScanMaxWorkers)):
                 allAtomsSurfBoxs, allAtomsBulkBoxs = scanAllAtomsResult
                 allLensSurfBoxs.append(allAtomsSurfBoxs)
