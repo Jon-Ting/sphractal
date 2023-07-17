@@ -250,7 +250,7 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     if numCPUs is None: 
         numCPUs = cpu_count()
     # Resource allocations for parallelisation (current settings are based on empirical experiments -- optimised for the default minMaxBoxLens range), rooms available for further optimisation
-    minAtomWorkersPerLen = len(atomsIdxs) // 25
+    minAtomWorkersPerLen = max(1, len(atomsIdxs) // 25)
     maxBoxLenWorkers = ceil(numBoxLen / 2)
     if numCPUs > maxBoxLenWorkers * minAtomWorkersPerLen:
        atomScanMaxWorkers = numCPUs // maxBoxLenWorkers
