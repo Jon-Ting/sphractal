@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.13.1 (2023-07-17)
+
+### Fix
+
+* **maxWorkers:** Fix zero cpu for parallelisation error ([`af00b98`](https://github.com/Jon-Ting/sphractal/commit/af00b989d8011afc48d7721632e4733167c30b7f))
+
 ## v0.13.0 (2023-07-17)
 
 ### Feature
