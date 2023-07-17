@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.12.4 (2023-07-17)
+
+### Fix
+
+* **boxLenScanMaxWorkers:** Fixed formula for resource allocations ([`165ec58`](https://github.com/Jon-Ting/sphractal/commit/165ec58e1d52a9836f9adecf4f1ef3455a64b42f))
+
 ## v0.12.3 (2023-07-16)
 
 
