@@ -249,13 +249,17 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs, atomsSurfIdxs)
     if numCPUs is None: 
         numCPUs = cpu_count()
-    # Resource allocations for parallelisation (only certain cases have been discovered to gain advantage from box length parallelisation)
-    if numBoxLen > len(atomsIdxs) and numCPUs*10 > len(atomsIdxs):
-        boxLenConc = True
-        boxLenScanMaxWorkers = numCPUs // (len(atomsIdxs) // 10)
+    # Resource allocations for parallelisation (current settings are based on empirical experiments -- optimised for the default minMaxBoxLens range), rooms available for further optimisation
+    minAtomWorkersPerLen = len(atomsIdxs) // 25
+    maxBoxLenWorkers = ceil(numBoxLen / 2)
+    if numCPUs > maxBoxLenWorkers * minAtomWorkersPerLen:
+       atomScanMaxWorkers = numCPUs // maxBoxLenWorkers
+       boxLenScanMaxWorkers = maxBoxLenWorkers
+    elif numCPUs > minAtomWorkersPerLen:
+        atomScanMaxWorkers = minAtomWorkersPerLen
+        boxLenScanMaxWorkers = numCPUs // minAtomWorkersPerLen
     else:
-        boxLenConc, boxLenScanMaxWorkers = False, 1 
-    atomScanMaxWorkers = numCPUs // boxLenScanMaxWorkers if boxLenConc else numCPUs
+        atomScanMaxWorkers, boxLenScanMaxWorkers = numCPUs, 1
 
     if verbose:
         print(f"  Representing the surface by treating each atom as exact spheres...")
@@ -275,7 +279,7 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         scanAllAtomsInp = (magnFac, scanBoxLen, atomsIdxs, minXYZ,
                            atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, bufferDist,
                            rmInSurf, verbose, atomScanMaxWorkers)
-        if boxLenConc:
+        if boxLenScanMaxWorkers > 1:
             scanAllAtomsInps.append(scanAllAtomsInp) 
         else:
             scanAllAtomsResult = scanAllAtoms(scanAllAtomsInp) 
@@ -287,7 +291,7 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         scales.append(log10(magnFac / overallBoxLen))
         scanBoxLens.append(scanBoxLen)
 
-    if boxLenConc:
+    if boxLenScanMaxWorkers > 1:
         with Pool(max_workers=boxLenScanMaxWorkers) as pool:
             for scanAllAtomsResult in pool.map(scanAllAtoms, scanAllAtomsInps, 
                                                chunksize=ceil(numBoxLen / boxLenScanMaxWorkers)):
