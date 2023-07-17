@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.13.0 (2023-07-17)
+
+### Feature
+
+* **boxLenConc:** Optimised resource allocations for more general cases ([`b107c07`](https://github.com/Jon-Ting/sphractal/commit/b107c078021c89c41e3674e8f7f5dd2cf43d4326))
+
 ## v0.12.4 (2023-07-17)
 
 ### Fix
