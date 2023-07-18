@@ -30,12 +30,12 @@ def getWeakScalingDataPaths():
     Returns
     -------
     xyzFilePaths : list of str
-        Paths to example files.
+        Paths to xyz files.
     """
     dataDir = str(files('sphractal.data'))
     xyzFilePaths = []
     for fileName in listdir(dataDir):
         if 'weak' in fileName:
-            exampleFiles.append(f"{dataDir}/{fileName}")
+            xyzFilePaths.append(f"{dataDir}/{fileName}")
     return xyzFilePaths
 
