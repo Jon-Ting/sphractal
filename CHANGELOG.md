@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.14.0 (2023-07-18)
+
+### Feature
+
+* **data:** Updated example xyz files for scaling tests ([`2e65389`](https://github.com/Jon-Ting/sphractal/commit/2e6538919b2c1c28f4e2298ec837c94644c3f16f))
+
+### Fix
+
+* **test:** Updated test functions related to example data ([`d40e923`](https://github.com/Jon-Ting/sphractal/commit/d40e92397dd78b09dd8a64d40a60fe1648e8a76b))
+* **datasets:** Fixed a typo in getWeakScalingDataPaths() ([`533b5c7`](https://github.com/Jon-Ting/sphractal/commit/533b5c7b551bae0a9a59dd189e62e4d896432497))
+* **datasets:** Added functions to get example data to package namespace ([`1302cdc`](https://github.com/Jon-Ting/sphractal/commit/1302cdc8b2f8942cd7380283c061fcc72c8df87b))
+* **datasets:** Updated functions to get the xyz files used for scaling tests ([`05f61fb`](https://github.com/Jon-Ting/sphractal/commit/05f61fb4f7e0e9995e6d6f144ac0ca9ac2ff126b))
+
 ## v0.13.1 (2023-07-17)
 
 ### Fix
