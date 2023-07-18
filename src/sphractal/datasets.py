@@ -13,19 +13,29 @@ def getExampleDataPath():
     return str(files('sphractal.data').joinpath('exampleOT.xyz'))
 
 
-def getBenchmarkDataPaths():
-    """Get paths to benchmark data files.
+def getStrongScalingDataPath():
+    """Get path to strongScaling.xyz (a sphere palladium nanoparticle with a diameter of 10 nm).
 
     Returns
     -------
-    exampleFiles : list of str
+    str
+        Path to example file.
+    """
+    return str(files('sphractal.data').joinpath('strongScaling.xyz'))
+
+
+def getWeakScalingDataPaths():
+    """Get paths to xyz files used for weak scaling testings.
+
+    Returns
+    -------
+    xyzFilePaths : list of str
         Paths to example files.
     """
     dataDir = str(files('sphractal.data'))
-    exampleFiles = []
+    xyzFilePaths = []
     for fileName in listdir(dataDir):
-        if 'xyz' not in fileName or 'example' in fileName:
-            continue
-        exampleFiles.append(f"{dataDir}/{fileName}")
-    return exampleFiles
+        if 'weak' in fileName:
+            exampleFiles.append(f"{dataDir}/{fileName}")
+    return xyzFilePaths
 
