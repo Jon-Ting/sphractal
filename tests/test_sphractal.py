@@ -6,7 +6,7 @@ from shutil import rmtree
 from pytest import approx, mark
 
 from fixtures import fixture, np, egAtomsXYZ, egAtomsNeighIdxs, egAtomsSurfIdxs, egTargetAtomIdxs
-from sphractal.datasets import getExampleDataPath, getBenchmarkDataPaths
+from sphractal.datasets import getExampleDataPath, getStrongScalingDataPath, getWeakScalingDataPaths
 from sphractal.utils import estDuration, getMinMaxXYZ, readInp, findNN, findSurf, calcDist, closestSurfAtoms, \
     oppositeInnerAtoms
 from sphractal.surfVoxel import fibonacciSphere, pointsOnAtom, pointsToVoxels, voxelBoxCnts
@@ -71,12 +71,20 @@ def test_getExampleDataPath():
     assert isfile(inpFilePathAct), 'exampleOT.xyz is not a file'
 
 
-def test_getBenchmarkDataPaths():
-    """Unit test of getBenchmarkDataPaths()."""
-    inpFilePathsAct = getBenchmarkDataPaths()
-    assert isinstance(inpFilePathsAct, list), 'getBenchmarkDataPaths() did not return a list'
+def test_getStrongScalingDataPath():
+    """Unit test of getStrongScalingDataPath()."""
+    inpFilePathAct = getStrongScalingDataPath()
+    assert isinstance(inpFilePathAct, str), 'getStrongScalingDataPath() did not return a string'
+    assert exists(inpFilePathAct), 'strongScaling.xyz not found'
+    assert isfile(inpFilePathAct), 'strongScaling.xyz is not a file'
+
+
+def test_getWeakScalingDataPaths():
+    """Unit test of getWeakScalingDataPaths()."""
+    inpFilePathsAct = getWeakScalingDataPaths()
+    assert isinstance(inpFilePathsAct, list), 'getWeakScalingDataPaths() did not return a list'
     assert isinstance(inpFilePathsAct[0], str), 'Path in list is not str'
-    assert len(inpFilePathsAct) == 19, 'Incorrect number of paths returned'
+    assert len(inpFilePathsAct) == 12, 'Incorrect number of paths returned'
     assert exists(inpFilePathsAct[0]), 'Path in list not found'
     assert isfile(inpFilePathsAct[0]), 'Path in list not a file'
 
