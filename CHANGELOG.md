@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.14.1 (2023-07-19)
+
+### Documentation
+
+* **example:** Updated example.ipynb ([`578d85d`](https://github.com/Jon-Ting/sphractal/commit/578d85d5e996533c812ca919de7b11a75412ef9b))
+
 ## v0.14.0 (2023-07-18)
 
 ### Feature
