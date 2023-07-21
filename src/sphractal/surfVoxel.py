@@ -1,3 +1,4 @@
+from concurrent.futures import ProcessPoolExecutor as Pool
 from math import cos, log10, pi, sin, sqrt
 from os import mkdir, system
 from os.path import isdir
@@ -137,7 +138,7 @@ def writeSurfVoxels(outDir, npName, surfVoxelXYZs):
 
 # @annotate('getSurfPoints', color='cyan')
 def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                  npName, outDir, 
+                  npName, outDir='boxCntOutputs', numCPUs=None, 
                   radType='atomic', numPoint=300, gridNum=1024,
                   rmInSurf=True, vis=False, verbose=False, genPCD=False):
     """Generate point clouds approximating the outer spherical surface formed by a set of atoms."""
@@ -145,15 +146,43 @@ def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     radDict = ATOMIC_RAD_DICT if radType == 'atomic' else METALLIC_RAD_DICT
     surfPointsEles = {atomEle: fibonacciSphere(numPoint, radDict[atomEle]) for atomEle in set(atomsEle)}
 
+    # Resource allocations
+    if numCPUs is None: 
+        numCPUs = cpu_count()
+    # minAtomCPU = max(1, len(atomsIdxs) // 25)
+    # maxPointCPUperAtom = ceil(numPoint / 2)
+    # if numCPUs > maxPointCPUperAtom * minAtomCPU:
+    #    atomConcMaxCPU = numCPUs // maxPointCPUperAtom
+    #    pointConcMaxCPU = maxPointCPUperAtom
+    # elif numCPUs > minAtomCPUPerLen:
+    #     atomConcMaxCPU = minAtomCPUPerLen
+    #     pointConcMaxCPU = numCPUs // minAtomCPUPerLen
+    # else:
+    #     atomConcMaxCPU, pointConcMaxCPU = numCPUs, 1
+    atomConcMaxCPU, pointConcMaxCPU = numCPUs, 1
+    if verbose:
+        print(f"    Assessing points over:\n      {len(atomsSurfIdxs)} atoms using {atomConcMaxCPU} cpu(s)...\n"
+              f"      {numPoint} points using {pointConcMaxCPU} cpu(s)...")
+
     # Generate point clouds and convert to voxels
     surfPointXYZs, nonSurfPointXYZs = [], []
+    pointsOnAtomInp = []
     for atomIdx in atomsSurfIdxs:
-        outerSurfs, innerSurfs = pointsOnAtom(atomIdx, numPoint,
-                                              atomsSurfIdxs, atomsRad, atomsXYZ, atomsNeighIdxs,
-                                              surfPoints=surfPointsEles[atomsEle[atomIdx]],
-                                              rmInSurf=rmInSurf)
-        surfPointXYZs.extend(outerSurfs)
-        nonSurfPointXYZs.extend(innerSurfs)
+        if atomConcMaxCPU > 1:
+            pointsOnAtomInp.append((atomIdx, numPoint, atomsSurfIdxs, atomsRad, atomsXYZ, atomsNeighIdxs,
+                                    surfPointsEles[atomsEle[atomIdx]], rmInSurf))
+        else:
+            outerSurfs, innerSurfs = pointsOnAtom(atomIdx, numPoint,
+                                                  atomsSurfIdxs, atomsRad, atomsXYZ, atomsNeighIdxs,
+                                                  surfPoints=surfPointsEles[atomsEle[atomIdx]],
+                                                  rmInSurf=rmInSurf)
+            surfPointXYZs.extend(outerSurfs)
+            nonSurfPointXYZs.extend(innerSurfs)
+    with Pool(max_workers=atomConcMaxCPU) as pool:
+        for pointsOnAtomResult in pool.map(pointsOnAtom, pointsOnAtomInps, 
+                                           chunksize=ceil(len(atomsSurfIdxs) / atomConcMaxCPU)):
+            surfPointXYZs.extend(pointsOnAtomResult[0])
+            nonSurfPointXYZs.extend(pointsOnAtomResult[1])
     surfVoxelXYZs, surfVoxelIdxs = pointsToVoxels(np.array(surfPointXYZs), gridNum)
 
     # Generate output files
@@ -169,7 +198,7 @@ def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
 
 # @annotate('voxelBoxCnts', color='blue')
 def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                 npName, outDir='boxCntOutputs', exePath='$FASTBC_EXE',
+                 npName, outDir='boxCntOutputs', numCPUs=None, exePath='$FASTBC_EXE',
                  radType='atomic', numPoint=300, gridNum=1024,
                  rmInSurf=True, vis=True, verbose=False, genPCD=False):
     """
@@ -195,6 +224,8 @@ def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         Identifier of the measured object, which forms part of the output file name, ideally unique.
     outDir : str, optional
         Path to the directory to store the output files.
+    numCPUs : int, optional
+        Number of CPUs to be used for parallelisation of tasks.
     exePath : str, optional
         Path to the compiled C++ executable for box-counting.
     radType : {'atomic', 'metallic'}, optional
@@ -244,7 +275,7 @@ def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         mkdir(outDir)
 
     genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                  npName, outDir,
+                  npName, outDir, numCPUs,
                   radType, numPoint, gridNum,
                   rmInSurf, vis, verbose, genPCD)
     system(f"{exePath} {gridNum} {outDir}/surfVoxelIdxs.txt {outDir}/surfVoxelBoxCnts.txt")
