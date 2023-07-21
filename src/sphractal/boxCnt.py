@@ -206,7 +206,7 @@ def runBoxCnt(inpFilePath,
     genPCD : bool, optional
         Whether to generate pcd file for box-counting using MATLAB code written by Kazuaki Iida.
     exactSurf : bool, optional
-        Whether to represent the surface as mathematically exact surface.
+        Whether to represent the surface in a mathematically exact manner.
     minLenMult : float, optional
         Multiplier to the minimum radius to determine the minimum box length.
     maxLenMult : float, optional
