@@ -1,4 +1,5 @@
 # Directories under development
+src/fastbc
 src/sphractal/pybind11/
 docs/qualityFigsTest.ipynb
 
