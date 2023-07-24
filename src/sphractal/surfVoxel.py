@@ -174,7 +174,7 @@ def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     # Resource allocations
     if numCPUs is None: 
         numCPUs = cpu_count()
-    minAtomCPU = max(1, len(atomsEle) // 25)
+    minAtomCPU = max(1, len(atomsSurfIdxs) // 25)
     maxPointCPUperAtom = ceil(numPoint / numPoint)  # ceil(numPoint / 25)
     if numCPUs > maxPointCPUperAtom * minAtomCPU:
         atomConcMaxCPU = numCPUs // maxPointCPUperAtom
@@ -295,7 +295,7 @@ def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     while the CPU algorithm runs for 18 min.
     """
     if verbose:
-        print(f"  Approximating the surface with {numPoint} point clouds for each atom...")
+        print(f"  Approximating the surface with {numPoint} points for each atom...")
     if not isdir(outDir):
         mkdir(outDir)
 
