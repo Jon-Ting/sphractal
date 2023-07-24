@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.15.0 (2023-07-24)
+
+### Feature
+
+* **surfVoxel:** Implemented parallelisation functionalities for generation of point cloud representation of surface ([#1](https://github.com/Jon-Ting/sphractal/issues/1)) ([`1a576ed`](https://github.com/Jon-Ting/sphractal/commit/1a576ed4f6fd133d1ecffa04aa2775200873c64a))
+
 ## v0.14.1 (2023-07-19)
 
 ### Documentation
