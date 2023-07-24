@@ -250,20 +250,20 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     if numCPUs is None: 
         numCPUs = cpu_count()
     # Resource allocations for parallelisation (current settings are based on empirical experiments -- optimised for the default minMaxBoxLens range), rooms available for further optimisation
-    minAtomWorkersPerLen = max(1, len(atomsIdxs) // 25)
-    maxBoxLenWorkers = ceil(numBoxLen / 2)
-    if numCPUs > maxBoxLenWorkers * minAtomWorkersPerLen:
-       atomScanMaxWorkers = numCPUs // maxBoxLenWorkers
-       boxLenScanMaxWorkers = maxBoxLenWorkers
-    elif numCPUs > minAtomWorkersPerLen:
-        atomScanMaxWorkers = minAtomWorkersPerLen
-        boxLenScanMaxWorkers = numCPUs // minAtomWorkersPerLen
+    minAtomCPUperLen = max(1, len(atomsIdxs) // 25)
+    maxBoxLenCPU = ceil(numBoxLen / 2)
+    if numCPUs > maxBoxLenCPU * minAtomCPUperLen:
+       atomConcMaxCPU = numCPUs // maxBoxLenCPU
+       boxLenConcMaxCPU = maxBoxLenCPU
+    elif numCPUs > minAtomCPUperLen:
+        atomConcMaxCPU = minAtomCPUperLen
+        boxLenConcMaxCPU = numCPUs // minAtomCPUperLen
     else:
-        atomScanMaxWorkers, boxLenScanMaxWorkers = numCPUs, 1
+        atomConcMaxCPU, boxLenConcMaxCPU = numCPUs, 1
 
     if verbose:
         print(f"  Representing the surface by treating each atom as exact spheres...")
-        print(f"    Scanning over:\n      {numBoxLen} box lengths using {boxLenScanMaxWorkers} cpu(s)...\n      {len(atomsIdxs)} atoms using {atomScanMaxWorkers} cpu(s)...")
+        print(f"    Scanning over:\n      {numBoxLen} box lengths using {boxLenConcMaxCPU} cpu(s)...\n      {len(atomsIdxs)} atoms using {atomConcMaxCPU} cpu(s)...")
         print(f"    (1/eps)    (# bulk)    (# surf)")
     if writeBox:
         if not isdir(outDir):
@@ -278,8 +278,8 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         scanBoxLen = overallBoxLen / magnFac
         scanAllAtomsInp = (magnFac, scanBoxLen, atomsIdxs, minXYZ,
                            atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, bufferDist,
-                           rmInSurf, verbose, atomScanMaxWorkers)
-        if boxLenScanMaxWorkers > 1:
+                           rmInSurf, verbose, atomConcMaxCPU)
+        if boxLenConcMaxCPU > 1:
             scanAllAtomsInps.append(scanAllAtomsInp) 
         else:
             scanAllAtomsResult = scanAllAtoms(scanAllAtomsInp) 
@@ -291,10 +291,10 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         scales.append(log10(magnFac / overallBoxLen))
         scanBoxLens.append(scanBoxLen)
 
-    if boxLenScanMaxWorkers > 1:
-        with Pool(max_workers=boxLenScanMaxWorkers) as pool:
+    if boxLenConcMaxCPU > 1:
+        with Pool(max_workers=boxLenConcMaxCPU) as pool:
             for scanAllAtomsResult in pool.map(scanAllAtoms, scanAllAtomsInps, 
-                                               chunksize=ceil(numBoxLen / boxLenScanMaxWorkers)):
+                                               chunksize=ceil(numBoxLen / boxLenConcMaxCPU)):
                 allAtomsSurfBoxs, allAtomsBulkBoxs = scanAllAtomsResult
                 allLensSurfBoxs.append(allAtomsSurfBoxs)
                 allLensBulkBoxs.append(allAtomsBulkBoxs)

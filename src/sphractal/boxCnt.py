@@ -164,15 +164,15 @@ def runBoxCnt(inpFilePath,
     Parameters
     ----------
     inpFilePath : str
-        Path to an xyz file containing the Cartesian coordinates of a set of spheres.
+        Path to an xyz file containing the Cartesian coordinates of a set of atoms.
     radType : {'atomic', 'metallic'}, optional
-        Type of radii to use for the spheres.
+        Type of radii to use for the atoms.
     calcBL : bool, optional
-        Whether to compute the average distance from its neighbours for each atom
+        Whether to compute the average distance from its neighbours for each atom.
     findSurfAlg : {'alphaShape', 'convexHull', 'numNeigh'}, optional
-        Algorithm to identify the spheres on the surface.
+        Algorithm to identify the atoms on the surface.
     alphaMult : Union[int, float], optional
-        Multiplier to the minimum spherical radii to decide 'alpha' for the alpha shape algorithm, only used if
+        Multiplier to the minimum atomic radii to decide 'alpha' for the alpha shape algorithm, only used if
         'findSurfAlg' is 'alphaShape'.
     outDir : str, optional
         Path to the directory to store the output files.
@@ -182,37 +182,37 @@ def runBoxCnt(inpFilePath,
     minSample : int, optional
         Minimum number of box count data points to be retained for slope estimation from the linear regression fitting.
     confLvl : Union[int, float], optional
-        Confidence level of confidence interval in percentage.
+        Confidence level of confidence intervals in percentage.
     rmInSurf : bool, optional
         Whether to remove the surface points on the inner surface.
     vis : bool, optional
         Whether to generate output files for visualisation.
-    figType : {'paper', 'poster', 'talk'}
-        Type of figures to be generated.
-    saveFig : bool, optional
+    figType : {'paper', 'poster', 'talk', 'notebook'}
+        Research purpose for which the figures generated were to be used.
+    saveFig : bool, optiona
         Whether to save the plots generated, only used if 'vis' is True.
     showPlot : bool, optional
         Whether to show the plots generated, only used if 'vis' is True.
     verbose : bool, optional
         Whether to display the details.
     voxelSurf : bool, optional
-        Whether to represent the surface as point clouds.
+        Whether to represent the surface as voxelised point clouds.
     numPoints : int, optional
         Number of surface points to be generated around each atom.
     gridNum : int, optional
         Resolution of the 3D binary image.
     exePath : str, optional
-        Path to the compiled C++ executable for box-counting.
+        Path to the compiled executable of the C++ code for box-counting on 3D binary image written by Ruiz de Miras et al.
     genPCD : bool, optional
         Whether to generate pcd file for box-counting using MATLAB code written by Kazuaki Iida.
     exactSurf : bool, optional
-        Whether to represent the surface as exact spheres.
+        Whether to represent the surface in a mathematically exact manner.
     minLenMult : float, optional
-        Multiplier to the minimum radii to determine the minimum box length for box-counting dimension estimation.
+        Multiplier to the minimum radius to determine the minimum box length.
     maxLenMult : float, optional
-        Multiplier to the minimum radii to determine the maximum box length for box-counting dimension estimation.
+        Multiplier to the maximum radius to determine the maximum box length.
     numCPUs : int, optional
-        Number of CPUs to be used for parallelisation of tasks.
+        Number of cores to be used for parallelisation of tasks.
     numBoxLen : int, optional
         Number of box lengths to use for the collection of the box count data, spaced evenly on logarithmic scale.
     bufferDist : Union[int,float]
@@ -253,7 +253,7 @@ def runBoxCnt(inpFilePath,
         mkdir(outDir)
     if voxelSurf:
         scalesVX, countsVX = voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                                          testCase, outDir, exePath,
+                                          testCase, outDir, numCPUs, exePath,
                                           radType, numPoints, gridNum,
                                           rmInSurf, vis, verbose, genPCD)
         r2VX, bcDimVX, confIntVX = findSlope(scalesVX, countsVX, f"{testCase}_VX", outDir, lenRange,
