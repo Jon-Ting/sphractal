@@ -15,7 +15,7 @@ from sphractal.surfExact import exactBoxCnts
 
 
 # @annotate('findSlope', color='green')
-def findSlope(scales, counts, npName='', outDir='boxCntOutputs', lenRange='trim',
+def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
               minSample=5, confLvl=95, 
               visReg=True, figType='paper', saveFig=False, showPlot=False):
     """
@@ -31,9 +31,8 @@ def findSlope(scales, counts, npName='', outDir='boxCntOutputs', lenRange='trim'
         Identifier of the measured object, which forms part of the output file name, ideally unique.
     outDir : str, optional
         Path to the directory to store the output files.
-    lenRange : {'trim', 'full'}, optional
-        Range of box lengths to include for determining the box-counting dimension. Choosing 'trim' finds the highest 
-        coefficient of determination by iteratively removing the box counts obtained using boxes of extreme sizes.
+    trimLen : bool, optional
+        Whether to remove the box counts obtained using boxes of extreme sizes.
     minSample : int, optional
         Minimum number of box count data points to be retained for slope estimation from the linear regression fitting.
     confLvl : Union[int, float]
@@ -124,7 +123,7 @@ def findSlope(scales, counts, npName='', outDir='boxCntOutputs', lenRange='trim'
         # if lowBoundErrSum > upBoundErrSum: firstPointIdx += 1
         # else: lastPointIdx -= 1
 
-        if lenRange == 'trim':
+        if trimLen:
             if removeSmallBoxes:
                 if round(r2score, 3) < round(r2scorePrev, 3):
                     removeSmallBoxes = False
@@ -144,7 +143,7 @@ def findSlope(scales, counts, npName='', outDir='boxCntOutputs', lenRange='trim'
             plt.savefig(f"{boxCntDimsDir}/{npName}_boxCntDim.png", bbox_inches='tight')
         if showPlot:
             plt.show()
-        if lenRange == 'full':
+        if not trimLen:
             break
     return r2score, boxCntDim, slopeCI
 
@@ -153,9 +152,9 @@ def findSlope(scales, counts, npName='', outDir='boxCntOutputs', lenRange='trim'
 # @estDuration
 def runBoxCnt(inpFilePath, 
               radType='atomic', calcBL=False, findSurfAlg='alphaShape', alphaMult=2.0,
-              outDir='boxCntOutputs', lenRange='trim', minSample=5, confLvl=95, 
+              outDir='outputs', trimLen=True, minSample=5, confLvl=95, 
               rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False,
-              voxelSurf=True, numPoints=300, gridNum=1024, exePath='$FASTBC_EXE', genPCD=False,
+              voxelSurf=True, numPoints=300, gridNum=1024, exePath='$FASTBC', genPCD=False,
               exactSurf=True, minLenMult=0.25, maxLenMult=1, numCPUs=8, numBoxLen=10, bufferDist=5.0, writeBox=True): 
     """
     Run box-counting algorithm on the surface of a given object consisting of a set of spheres represented as either
@@ -164,41 +163,40 @@ def runBoxCnt(inpFilePath,
     Parameters
     ----------
     inpFilePath : str
-        Path to an xyz file containing the Cartesian coordinates of a set of atoms.
+        Path to xyz file containing Cartesian coordinates of a set of atoms.
     radType : {'atomic', 'metallic'}, optional
         Type of radii to use for the atoms.
     calcBL : bool, optional
         Whether to compute the average distance from its neighbours for each atom.
     findSurfAlg : {'alphaShape', 'convexHull', 'numNeigh'}, optional
-        Algorithm to identify the atoms on the surface.
+        Algorithm to identify the surface atoms.
     alphaMult : Union[int, float], optional
-        Multiplier to the minimum atomic radii to decide 'alpha' for the alpha shape algorithm, only used if
+        Multiplier to the minimum atomic radii to decide the 'alpha' value for the alpha shape algorithm, only used if
         'findSurfAlg' is 'alphaShape'.
     outDir : str, optional
-        Path to the directory to store the output files.
-    lenRange : {'trim', 'full'}, optional
-        Range of box lengths to include for determining the box-counting dimension. Choosing 'trim' finds the highest 
-        coefficient of determination by iteratively removing the box counts obtained using boxes of extreme sizes.
+        Path to directory to store the output files.
+    trimLen : bool, optional
+        Whether to remove the box counts obtained using boxes of extreme sizes.
     minSample : int, optional
-        Minimum number of box count data points to be retained for slope estimation from the linear regression fitting.
+        Minimum number of data points to retain for slope estimation from the linear regression fitting.
     confLvl : Union[int, float], optional
-        Confidence level of confidence intervals in percentage.
+        Confidence level of confidence intervals (%).
     rmInSurf : bool, optional
-        Whether to remove the surface points on the inner surface.
+        Whether to remove the inner surface points.
     vis : bool, optional
         Whether to generate output files for visualisation.
     figType : {'paper', 'poster', 'talk', 'notebook'}
-        Research purpose for which the figures generated were to be used.
-    saveFig : bool, optiona
-        Whether to save the plots generated, only used if 'vis' is True.
+        Research purpose of the figures generated.
+    saveFig : bool, optional
+        Whether to save the figures generated, only used if 'vis' is True.
     showPlot : bool, optional
-        Whether to show the plots generated, only used if 'vis' is True.
+        Whether to show the figures generated, only used if 'vis' is True.
     verbose : bool, optional
         Whether to display the details.
     voxelSurf : bool, optional
         Whether to represent the surface as voxelised point clouds.
     numPoints : int, optional
-        Number of surface points to be generated around each atom.
+        Number of surface points to generate around each atom.
     gridNum : int, optional
         Resolution of the 3D binary image.
     exePath : str, optional
@@ -212,13 +210,13 @@ def runBoxCnt(inpFilePath,
     maxLenMult : float, optional
         Multiplier to the maximum radius to determine the maximum box length.
     numCPUs : int, optional
-        Number of cores to be used for parallelisation of tasks.
+        Number of cores to be used for parallelisation.
     numBoxLen : int, optional
-        Number of box lengths to use for the collection of the box count data, spaced evenly on logarithmic scale.
+        Number of box length samples for the collection of the box count data, spaced evenly on logarithmic scale.
     bufferDist : Union[int,float]
-        Buffer distance from the borders of the largest box in Angstrom.
+        Buffer distance from the borders of the largest box (Angstrom).
     writeBox : bool, optional
-        Whether to generate output files for visualisation.
+        Whether to generate output file containing coordinates of examined boxes.
     
     Returns
     -------
@@ -256,7 +254,7 @@ def runBoxCnt(inpFilePath,
                                           testCase, outDir, numCPUs, exePath,
                                           radType, numPoints, gridNum,
                                           rmInSurf, vis, verbose, genPCD)
-        r2VX, bcDimVX, confIntVX = findSlope(scalesVX, countsVX, f"{testCase}_VX", outDir, lenRange,
+        r2VX, bcDimVX, confIntVX = findSlope(scalesVX, countsVX, f"{testCase}_VX", outDir, trimLen,
                                              minSample, confLvl, vis, figType, saveFig, showPlot)
     if exactSurf:
         minAtomRad = atomsRad.min()
@@ -264,7 +262,7 @@ def runBoxCnt(inpFilePath,
                                           maxRange, (minAtomRad * minLenMult, minAtomRad * maxLenMult),
                                           minXYZ, testCase, outDir, numCPUs, numBoxLen, bufferDist,
                                           rmInSurf, writeBox, verbose)
-        r2EX, bcDimEX, confIntEX = findSlope(scalesEX, countsEX, f"{testCase}_EX", outDir, lenRange,
+        r2EX, bcDimEX, confIntEX = findSlope(scalesEX, countsEX, f"{testCase}_EX", outDir, trimLen,
                                              minSample, confLvl, vis, figType, saveFig, showPlot)
     if verbose:
         if voxelSurf:
