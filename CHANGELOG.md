@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.16.0 (2023-07-27)
+
+### Feature
+
+* **boxCnt:** Changed 'lenRange' into  'trimLen' ([`8c9eeaf`](https://github.com/Jon-Ting/sphractal/commit/8c9eeaf8780a55fe7617d15a61d2b0a20536d3c6))
+
 ## v0.15.1 (2023-07-25)
 
 
