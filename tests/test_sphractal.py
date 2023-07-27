@@ -224,12 +224,12 @@ def test_findTargetAtoms(egAtomsNeighIdxs, egAtomsSurfIdxs, egTargetAtomIdxs):
     assert np.all(targetAtomsIdxsAct == egTargetAtomIdxs), 'Incorrect atom indices'
 
 
-@mark.parametrize('lenRange', ['trim', 'full'])
+@mark.parametrize('trimLen', [True, False])
 @mark.parametrize('visReg', [True, False])
 @mark.parametrize('saveFig, figExists', [(True, True), (False, False)])
-def test_findSlopeVis(lenRange, visReg, saveFig, figExists, egExactBoxCnts):
-    """Unit test of findSlope() functionalities for different 'lenRange', 'visReg', and 'saveFig' options."""
-    boxCntDimsAct = findSlope(egExactBoxCnts[0], egExactBoxCnts[1], 'example_ES', 'tests/boxCntOutputs', lenRange, visReg=visReg, saveFig=saveFig)
+def test_findSlopeVis(trimLen, visReg, saveFig, figExists, egExactBoxCnts):
+    """Unit test of findSlope() functionalities for different 'trimLen', 'visReg', and 'saveFig' options."""
+    boxCntDimsAct = findSlope(egExactBoxCnts[0], egExactBoxCnts[1], 'example_ES', 'tests/boxCntOutputs', trimLen, visReg=visReg, saveFig=saveFig)
     assert exists('./tests/boxCntOutputs/boxCntDims/example_ES_boxCntDim.png') == figExists, 'example_ES_boxCntDim.png is not found'
     assert isfile('./tests/boxCntOutputs/boxCntDims/example_ES_boxCntDim.png') == figExists, 'example_ES_boxCntDim.png is not a file'
     if isdir('./tests/boxCntOutputs'):
