@@ -8,7 +8,7 @@ def getExampleDataPath():
     Returns
     -------
     str
-        Path to example file.
+        Path to xyz file.
     """
     return str(files('sphractal.data').joinpath('exampleOT.xyz'))
 
@@ -19,7 +19,7 @@ def getStrongScalingDataPath():
     Returns
     -------
     str
-        Path to example file.
+        Path to xyz file.
     """
     return str(files('sphractal.data').joinpath('strongScaling.xyz'))
 
@@ -38,4 +38,15 @@ def getWeakScalingDataPaths():
         if 'weak' in fileName:
             xyzFilePaths.append(f"{dataDir}/{fileName}")
     return xyzFilePaths
+
+
+def getValidationDataPath():
+    """Get path to singleAtom.xyz (a file containing a single palladium atom).
+
+    Returns
+    -------
+    str
+        Path to xyz file.
+    """
+    return str(files('sphractal.data').joinpath('singleAtom.xyz'))
 
