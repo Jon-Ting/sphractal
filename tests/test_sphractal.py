@@ -6,7 +6,7 @@ from shutil import rmtree
 from pytest import approx, mark
 
 from fixtures import fixture, np, egAtomsXYZ, egAtomsNeighIdxs, egAtomsSurfIdxs, egTargetAtomIdxs
-from sphractal.datasets import getExampleDataPath, getStrongScalingDataPath, getWeakScalingDataPaths
+from sphractal.datasets import getExampleDataPath, getStrongScalingDataPath, getWeakScalingDataPaths, getValidationDataPath
 from sphractal.utils import estDuration, getMinMaxXYZ, readInp, findNN, findSurf, calcDist, closestSurfAtoms, \
     oppositeInnerAtoms
 from sphractal.surfVoxel import fibonacciSphere, pointsOnAtom, pointsToVoxels, voxelBoxCnts
@@ -87,6 +87,14 @@ def test_getWeakScalingDataPaths():
     assert len(inpFilePathsAct) == 12, 'Incorrect number of paths returned'
     assert exists(inpFilePathsAct[0]), 'Path in list not found'
     assert isfile(inpFilePathsAct[0]), 'Path in list not a file'
+
+
+def test_getValidationDataPath():
+    """Unit test of getValidationDataPath()."""
+    inpFilePathAct = getValidationDataPath()
+    assert isinstance(inpFilePathAct, str), 'getValidationDataPath() did not return a string'
+    assert exists(inpFilePathAct), 'singleAtom.xyz not found'
+    assert isfile(inpFilePathAct), 'singleAtom.xyz is not a file'
 
 
 @mark.parametrize('radType, atomRad', [('atomic', ATOM_RAD), ('metallic', 1.37)])
