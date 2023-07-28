@@ -185,7 +185,7 @@ def findTargetAtoms(atomsNeighIdxs, atomsSurfIdxs):
             if neighIdx in atomsSurfIdxs:
                 atomsIdxs.append(atomIdx)
                 break
-    return np.array(atomsIdxs)
+    return np.array(atomsIdxs) if len(atomsIdxs) > 0 else atomsSurfIdxs
 
 
 # @annotate('exactBoxCnts', color='blue')
