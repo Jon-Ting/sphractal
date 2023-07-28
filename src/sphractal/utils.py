@@ -7,6 +7,7 @@ from numba.typed import List
 import numpy as np
 # from nvtx import annotate
 from scipy.spatial import ConvexHull, Delaunay
+from scipy.spatial._qhull import QhullError
 
 from sphractal.constants import ATOMIC_RAD_DICT, BULK_CN, METALLIC_RAD_DICT
 
@@ -77,7 +78,7 @@ def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult, calcBL=False
     atomsNeighIdxs = [[int(j) for j in range(0)] for _ in range(len(atomsRad))]
     atomsAvgBondLen = np.zeros_like(atomsRad)
     stepSize = ceil(maxAtomRad * 2)
-    numX, numY, numZ = ceil((maxX-minX) / stepSize), ceil((maxY-minY) / stepSize), ceil((maxZ-minZ) / stepSize)
+    numX, numY, numZ = max(1, ceil((maxX-minX) / stepSize)), max(1, ceil((maxY-minY) / stepSize)), max(1, ceil((maxZ-minZ) / stepSize))
     boxes = [[[[int(i) for i in range(0)] for _ in range(numZ)] for _ in range(numY)] for _ in range(numX)]
     allDirections = allDirVecs()
     for (i, atom1rad) in enumerate(atomsRad):
@@ -195,9 +196,12 @@ def findSurf(atomsXYZ, atomsNeighIdxs, option='alphaShape', alpha=3.0):
             if len(atomNeighIdxs[atomNeighIdxs > -1]) < BULK_CN:
                 atomsSurfIdxs[atomIdx] = True
     elif option == 'alphaShape':
-        tetraVtxsIdxs = Delaunay(atomsXYZ).simplices
-        for atomIdx in alphaShape(atomsXYZ, tetraVtxsIdxs, alpha):
-            atomsSurfIdxs[atomIdx] = True
+        try:
+            tetraVtxsIdxs = Delaunay(atomsXYZ).simplices
+            for atomIdx in alphaShape(atomsXYZ, tetraVtxsIdxs, alpha):
+                atomsSurfIdxs[atomIdx] = True
+        except QhullError:
+            atomsSurfIdxs = np.full(len(atomsXYZ), True)
     return np.where(atomsSurfIdxs)[0]
 
 
