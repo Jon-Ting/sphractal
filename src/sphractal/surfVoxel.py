@@ -287,7 +287,7 @@ def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     The 3D binary image resolution (gridNum) is restricted by RAM size available, the relationship is illustrated below:
     -  1024 ->    2 GB (laptops -> typically 8 GB)
     -  2048 ->   16 GB (HPC nodes with GPUs like NCI Gadi gpuvolta queue -> max 32 GB/node)
-    -  4096 ->  128 GB
+    -  4096 ->  128 GB (HPC nodes with modern CPUs like NCI Gadi normal queue -> max 190 GB/node)
     -  8192 -> 1024 GB (HPC node with huge memories like NCI Gadi megamem queue -> max 2990 GB/node)
     - 16384 -> 8192 GB
     Further details about maximum grid size and memory estimation could be found in 'test.cpp' documented by the authors 
