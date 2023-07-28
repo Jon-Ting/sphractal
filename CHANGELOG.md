@@ -2,6 +2,22 @@
 
 <!--next-version-placeholder-->
 
+## v0.17.0 (2023-07-28)
+
+### Feature
+
+* **data:** Added validation data ([`7161b6e`](https://github.com/Jon-Ting/sphractal/commit/7161b6e3dcbb34fa78a9d3a742c5260cb98d24ea))
+
+### Fix
+
+* **test:** Updated ted test function for validation data ([`dcc47b9`](https://github.com/Jon-Ting/sphractal/commit/dcc47b9db5105a71dbc73be89ece49be0d904974))
+* **findTargetAtoms:** Enabled the function to handle single atom case ([`2650e06`](https://github.com/Jon-Ting/sphractal/commit/2650e064a098e5681beb3e855474fb5eedc5f759))
+* Enabled findNN() and findSurf() to handle single atom input ([`8cfdae4`](https://github.com/Jon-Ting/sphractal/commit/8cfdae4139e4772b8a5c0336accd5a8be852d3f4))
+
+### Documentation
+
+* **surfVoxel:** Updated recommendations of resource allocations for voxelBoxCnts() ([`e0eedb0`](https://github.com/Jon-Ting/sphractal/commit/e0eedb018ff919e3e7ee74a19610e78c23928ca4))
+
 ## v0.16.0 (2023-07-27)
 
 ### Feature
