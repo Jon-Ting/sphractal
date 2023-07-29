@@ -284,15 +284,7 @@ def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
 
     Notes
     -----
-    The 3D binary image resolution (gridNum) is restricted by RAM size available, the relationship is illustrated below:
-    -  1024 ->    2 GB (laptops -> typically 8 GB)
-    -  2048 ->   16 GB (HPC nodes with GPUs like NCI Gadi gpuvolta queue -> max 32 GB/node)
-    -  4096 ->  128 GB (HPC nodes with modern CPUs like NCI Gadi normal queue -> max 190 GB/node)
-    -  8192 -> 1024 GB (HPC node with huge memories like NCI Gadi megamem queue -> max 2990 GB/node)
-    - 16384 -> 8192 GB
-    Further details about maximum grid size and memory estimation could be found in 'test.cpp' documented by the authors 
-    (https://www.ugr.es/~demiras/fbc/). As a reference, when 8192 grids are used, allocation of memory took 25 min;
-    while the CPU algorithm runs for 18 min.
+    The 3D binary image resolution (gridNum) is restricted to 1024 or lower. Details about maximum grid size and memory estimation could be found in 'test.cpp' documented by the authors (https://www.ugr.es/~demiras/fbc/).
     """
     if verbose:
         print(f"  Approximating the surface with {numPoint} points for each atom...")
