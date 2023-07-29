@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.17.1 (2023-07-29)
+
+### Documentation
+
+* **surfVoxel:** Simplified docstring for voxelBoxCnts() ([`4d7a395`](https://github.com/Jon-Ting/sphractal/commit/4d7a3950c75b69880881977aa2249507bf1015d8))
+
 ## v0.17.0 (2023-07-28)
 
 ### Feature
