@@ -266,7 +266,7 @@ def runBoxCnt(inpFilePath,
                                              minSample, confLvl, vis, figType, saveFig, showPlot)
     if verbose:
         if voxelSurf:
-            print(f"  Point clouds  D_Box: {bcDimVX:.4f} [{confIntVX[0]:.4f}, {confIntVX[1]:.4f}],  R2: {r2VX:.4f}")
+            print(f"  VX D_Box: {bcDimVX:.4f} [{confIntVX[0]:.4f}, {confIntVX[1]:.4f}],  R2: {r2VX:.4f}")
         if exactSurf:
-            print(f"  Exact surface D_Box: {bcDimEX:.4f} [{confIntEX[0]:.4f}, {confIntEX[1]:.4f}],  R2: {r2EX:.4f}")
+            print(f"  EX D_Box: {bcDimEX:.4f} [{confIntEX[0]:.4f}, {confIntEX[1]:.4f}],  R2: {r2EX:.4f}")
     return r2VX, bcDimVX, confIntVX, r2EX, bcDimEX, confIntEX
