@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.17.2 (2023-07-29)
+
+### Fix
+
+* **surfVoxel:** Imported cpu_count() from multiprocessing ([`640025f`](https://github.com/Jon-Ting/sphractal/commit/640025ff9d869910f798654e74072d97ab0b3069))
+
+### Documentation
+
+* **example:** Updated example.ipynb with recoloured and reoriented figures ([`9c17801`](https://github.com/Jon-Ting/sphractal/commit/9c17801f589184878ca39b0b26a188be50202183))
+
 ## v0.17.1 (2023-07-29)
 
 ### Documentation
