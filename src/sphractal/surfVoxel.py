@@ -1,5 +1,6 @@
 from concurrent.futures import ProcessPoolExecutor as Pool
 from math import ceil, cos, log10, pi, sin, sqrt
+from multiprocessing import cpu_count
 from os import mkdir, system
 from os.path import isdir
 
