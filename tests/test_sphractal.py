@@ -185,13 +185,13 @@ def test_calcDist(egAtomsXYZ):
 #    assert isOppAct == isOppExp, 'Incorrect results'
 
 
-@mark.parametrize('numPoint, sphereRad, xyzsExp',
+@mark.parametrize('numPoints, sphereRad, xyzsExp',
     [(3, 1.0, np.array([[0., 1., 0.], [-0.73736888, 0., -0.67549029], [0., -1., 0.]])),
      (5, 1.5, np.array([[0., 1.5, 0.], [-0.95787027, 0.75, -0.87748763], [0.13113859, 0., 1.49425656], [0.79038527, -0.75, -1.03091762], [-0., -1.5, 0.]])),
      (2, 100, np.array([[0., 100., 0.], [-0., -100., -0.]]))])
-def test_fibonacciSphere(numPoint, sphereRad, xyzsExp):
+def test_fibonacciSphere(numPoints, sphereRad, xyzsExp):
     """Unit test of fibonacciSphere()."""
-    xyzsAct = fibonacciSphere(numPoint, sphereRad)
+    xyzsAct = fibonacciSphere(numPoints, sphereRad)
     assert isinstance(xyzsAct, np.ndarray), 'Incorrect output data type'
     assert xyzsAct == approx(xyzsExp), 'Incorrect surface point coordinates'
 
