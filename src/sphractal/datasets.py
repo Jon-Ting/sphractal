@@ -14,14 +14,14 @@ def getExampleDataPath():
 
 
 def getStrongScalingDataPath():
-    """Get path to strongScaling.xyz (a sphere palladium nanoparticle with a diameter of 10 nm).
+    """Get path to strongScalingSP.xyz (a sphere palladium nanoparticle with a diameter of 10 nm).
 
     Returns
     -------
     str
         Path to xyz file.
     """
-    return str(files('sphractal.data').joinpath('strongScaling.xyz'))
+    return str(files('sphractal.data').joinpath('strongScalingSP.xyz'))
 
 
 def getWeakScalingDataPaths():
@@ -35,7 +35,7 @@ def getWeakScalingDataPaths():
     dataDir = str(files('sphractal.data'))
     xyzFilePaths = []
     for fileName in listdir(dataDir):
-        if 'weak' in fileName:
+        if 'weakScaling' in fileName:
             xyzFilePaths.append(f"{dataDir}/{fileName}")
     return xyzFilePaths
 
@@ -49,4 +49,20 @@ def getValidationDataPath():
         Path to xyz file.
     """
     return str(files('sphractal.data').joinpath('singleAtom.xyz'))
+
+
+def getCaseStudyDataPaths():
+    """Get paths to xyz files used for case study.
+
+    Returns
+    -------
+    xyzFilePaths : list of str
+        Paths to xyz files.
+    """
+    dataDir = str(files('sphractal.data'))
+    xyzFilePaths = []
+    for fileName in listdir(dataDir):
+        if 'caseStudy' in fileName:
+            xyzFilePaths.append(f"{dataDir}/{fileName}")
+    return xyzFilePaths
 
