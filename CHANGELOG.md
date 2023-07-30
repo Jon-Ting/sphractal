@@ -2,6 +2,21 @@
 
 <!--next-version-placeholder-->
 
+## v0.18.0 (2023-07-30)
+
+### Feature
+
+* **datasets:** Added functions to access the case study atomic data ([`126b444`](https://github.com/Jon-Ting/sphractal/commit/126b444ea079828e0ca9759ea8761c65af3bdafe))
+* **data:** Added atomic coordinates used for case studies ([`8111d48`](https://github.com/Jon-Ting/sphractal/commit/8111d4815017e22062401e1d49ebda269d9d79e5))
+
+### Fix
+
+* **tests:** Added test function for getCaseStudyDataPaths() ([`d324685`](https://github.com/Jon-Ting/sphractal/commit/d324685c489f9cb5a2cfbd1388d275f43a3bd37f))
+
+### Documentation
+
+* **example:** Explained the choice of numPoints in example.ipynb ([`8f45bd2`](https://github.com/Jon-Ting/sphractal/commit/8f45bd22e04cc6f2b56243d7a089f753d87349a5))
+
 ## v0.17.3 (2023-07-29)
 
 
