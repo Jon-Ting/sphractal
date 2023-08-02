@@ -21,10 +21,10 @@ the surface area available for interaction with other entities, which is related
 * Fractal dimension allows the surface complexity/roughness of objects to be measured quantitatively.
 * The fractal dimension could be estimated by applying the box-counting algorithm on surfaces represented as either:
   * approximated point cloud:
-    <p align="center"> <img src="https://github.com/Jon-Ting/sphractal/blob/main/docs/figs/exampleSurfPointCloudSliced.png" alt="Example octahedron palladium nanoparticle surface point cloud cross section" height="150"/> </p>
+    <p align="center"> <img src="https://github.com/Jon-Ting/sphractal/blob/main/docs/figs/exampleVXpointCloudSliced.png" alt="Example octahedron palladium nanoparticle surface point cloud cross section" height="150"/> </p>
 
   * that are subsequently voxelised:
-    <p align="center"> <img src="https://github.com/Jon-Ting/sphractal/blob/main/docs/figs/exampleSurfVoxelsSliced.png" alt="Example octahedron palladium nanoparticle surface voxels section" height="150"/> </p>
+    <p align="center"> <img src="https://github.com/Jon-Ting/sphractal/blob/main/docs/figs/exampleVXvoxelsSliced.png" alt="Example octahedron palladium nanoparticle surface voxels section" height="150"/> </p>
 
   * or mathematically exact surfaces:
     <p align="center"> <img src="https://github.com/Jon-Ting/sphractal/blob/main/docs/figs/exampleSliced.png" alt="Example octahedron palladium nanoparticle exact surface cross section" height="150"/> </p>
@@ -68,7 +68,7 @@ nvcc -O3 3DbinImBCgpu.cpp bcCUDA3D.cu -o 3DbinImBCgpu.exe
 
 * (Optional) Setting the path to the executable as an environment variable accessible by Python (replace `<PATH_TO_EXE>` by the absolute path to the executable file you just built), otherwise you could always pass the path to the executable to the relevant functions:
 ```bash
-export FASTBC_EXE=<PATH_TO_EXE>
+export FASTBC=<PATH_TO_EXE>
 ```
 Note that for the environment variable to be persistent (to still exist after the terminal is closed), the line should be added to your `~/.bashrc`.
 

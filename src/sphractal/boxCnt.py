@@ -154,7 +154,7 @@ def runBoxCnt(inpFilePath,
               radType='atomic', calcBL=False, findSurfAlg='alphaShape', alphaMult=2.0,
               outDir='outputs', trimLen=True, minSample=5, confLvl=95, 
               rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False,
-              voxelSurf=True, numPoints=300, gridNum=1024, exePath='$FASTBC', genPCD=False,
+              voxelSurf=True, numPoints=10000, gridNum=1024, exePath='$FASTBC', genPCD=False,
               exactSurf=True, minLenMult=0.25, maxLenMult=1, numCPUs=8, numBoxLen=10, bufferDist=5.0, writeBox=True): 
     """
     Run box-counting algorithm on the surface of a given object consisting of a set of spheres represented as either
@@ -266,7 +266,7 @@ def runBoxCnt(inpFilePath,
                                              minSample, confLvl, vis, figType, saveFig, showPlot)
     if verbose:
         if voxelSurf:
-            print(f"  Point clouds  D_Box: {bcDimVX:.4f} [{confIntVX[0]:.4f}, {confIntVX[1]:.4f}],  R2: {r2VX:.4f}")
+            print(f"  VX D_Box: {bcDimVX:.4f} [{confIntVX[0]:.4f}, {confIntVX[1]:.4f}],  R2: {r2VX:.4f}")
         if exactSurf:
-            print(f"  Exact surface D_Box: {bcDimEX:.4f} [{confIntEX[0]:.4f}, {confIntEX[1]:.4f}],  R2: {r2EX:.4f}")
+            print(f"  EX D_Box: {bcDimEX:.4f} [{confIntEX[0]:.4f}, {confIntEX[1]:.4f}],  R2: {r2EX:.4f}")
     return r2VX, bcDimVX, confIntVX, r2EX, bcDimEX, confIntEX

@@ -1,5 +1,6 @@
 from concurrent.futures import ProcessPoolExecutor as Pool
 from math import ceil, cos, log10, pi, sin, sqrt
+from multiprocessing import cpu_count
 from os import mkdir, system
 from os.path import isdir
 
@@ -12,12 +13,12 @@ from sphractal.utils import calcDist, oppositeInnerAtoms
 
 
 @njit(fastmath=True, cache=True)
-def fibonacciSphere(numPoint, sphereRad):
+def fibonacciSphere(numPoints, sphereRad):
     """Generate evenly spread points on the surface of a sphere with a specified radius."""
-    xyzs = np.empty((numPoint, 3), dtype=np.float64)
+    xyzs = np.empty((numPoints, 3), dtype=np.float64)
     phi = pi * (sqrt(5)-1)  # Golden angle (radians)
-    for i in range(numPoint):
-        y = 1 - (i / float(numPoint-1))*2  # y \in [1, -1]
+    for i in range(numPoints):
+        y = 1 - (i / float(numPoints-1))*2  # y \in [1, -1]
         radius = sqrt(1 - y*y)  # Radius at y
         theta = phi * i  # Golden angle increment
         x = cos(theta) * radius
@@ -50,9 +51,9 @@ def rmPoint(args):
 # @annotate('pointsOnAtom', color='cyan')
 def pointsOnAtom(args):
     """Generate surface points around an atom and classify them as either inner or outer surface."""
-    atomIdx, numPoint, atomsSurfIdxs, atomsRad, atomsXYZ, atomsNeighIdxs, maxCPU, surfPoints, rmInSurf = args
+    atomIdx, numPoints, atomsSurfIdxs, atomsRad, atomsXYZ, atomsNeighIdxs, maxCPU, surfPoints, rmInSurf = args
     if surfPoints is None:
-        surfPoints = fibonacciSphere(numPoint, atomsRad[atomIdx])
+        surfPoints = fibonacciSphere(numPoints, atomsRad[atomIdx])
     atomXYZ, atomNeighIdxsPadded = atomsXYZ[atomIdx], atomsNeighIdxs[atomIdx]
     atomNeighIdxs = atomNeighIdxsPadded[atomNeighIdxsPadded > -1]
     rmPointInp, outerSurfs, innerSurfs = [], [], []
@@ -72,7 +73,7 @@ def pointsOnAtom(args):
     if maxCPU > 1:
         with Pool(max_workers=maxCPU) as pool:
             for rmPointResult in pool.map(rmPoint, rmPointInp, 
-                                          chunksize=ceil(numPoint / maxCPU)):
+                                          chunksize=ceil(numPoints / maxCPU)):
                 if rmPointResult[0] == 'toExclude':
                     outerSurfs.append(rmPointResult[1])
                 elif rmPointResult[0] == 'toInclude':
@@ -164,18 +165,18 @@ def writeSurfVoxels(outDir, npName, surfVoxelXYZs):
 # @annotate('getSurfPoints', color='cyan')
 def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                   npName, outDir='boxCntOutputs', numCPUs=None, 
-                  radType='atomic', numPoint=300, gridNum=1024,
+                  radType='atomic', numPoints=10000, gridNum=1024,
                   rmInSurf=True, vis=False, verbose=False, genPCD=False):
     """Generate point clouds approximating the outer spherical surface formed by a set of atoms."""
     # Avoid repeating generation of surface points around atoms with the same radii
     radDict = ATOMIC_RAD_DICT if radType == 'atomic' else METALLIC_RAD_DICT
-    surfPointsEles = {atomEle: fibonacciSphere(numPoint, radDict[atomEle]) for atomEle in set(atomsEle)}
+    surfPointsEles = {atomEle: fibonacciSphere(numPoints, radDict[atomEle]) for atomEle in set(atomsEle)}
 
     # Resource allocations
     if numCPUs is None: 
         numCPUs = cpu_count()
     minAtomCPU = max(1, len(atomsSurfIdxs) // 25)
-    maxPointCPUperAtom = ceil(numPoint / numPoint)  # ceil(numPoint / 25)
+    maxPointCPUperAtom = ceil(numPoints / numPoints)  # ceil(numPoints / 25)
     if numCPUs > maxPointCPUperAtom * minAtomCPU:
         atomConcMaxCPU = numCPUs // maxPointCPUperAtom
         pointConcMaxCPU = maxPointCPUperAtom
@@ -186,17 +187,17 @@ def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         atomConcMaxCPU, pointConcMaxCPU = numCPUs, 1
     if verbose:
         print(f"    Assessing points over:\n      {len(atomsSurfIdxs)} atoms using {atomConcMaxCPU} cpu(s)...\n"
-              f"      {numPoint} points using {pointConcMaxCPU} cpu(s)...")
+              f"      {numPoints} points using {pointConcMaxCPU} cpu(s)...")
 
     # Generate point clouds and convert to voxels
     surfPointXYZs, nonSurfPointXYZs = [], []
     pointsOnAtomInp = []
     for atomIdx in atomsSurfIdxs:
         if atomConcMaxCPU > 1:  # Adjust back
-            pointsOnAtomInp.append((atomIdx, numPoint, atomsSurfIdxs, atomsRad, atomsXYZ, atomsNeighIdxs, pointConcMaxCPU,
+            pointsOnAtomInp.append((atomIdx, numPoints, atomsSurfIdxs, atomsRad, atomsXYZ, atomsNeighIdxs, pointConcMaxCPU,
                                     surfPointsEles[atomsEle[atomIdx]], rmInSurf))
         else:
-            outerSurfs, innerSurfs = pointsOnAtom((atomIdx, numPoint, atomsSurfIdxs, atomsRad, atomsXYZ, atomsNeighIdxs, pointConcMaxCPU, surfPointsEles[atomsEle[atomIdx]], rmInSurf))
+            outerSurfs, innerSurfs = pointsOnAtom((atomIdx, numPoints, atomsSurfIdxs, atomsRad, atomsXYZ, atomsNeighIdxs, pointConcMaxCPU, surfPointsEles[atomsEle[atomIdx]], rmInSurf))
             surfPointXYZs.extend(outerSurfs)
             nonSurfPointXYZs.extend(innerSurfs)
 
@@ -224,7 +225,7 @@ def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
 # @annotate('voxelBoxCnts', color='blue')
 def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                  npName, outDir='boxCntOutputs', numCPUs=None, exePath='$FASTBC_EXE',
-                 radType='atomic', numPoint=300, gridNum=1024,
+                 radType='atomic', numPoints=300, gridNum=1024,
                  rmInSurf=True, vis=True, verbose=False, genPCD=False):
     """
     Count the boxes that cover the outer surface of a set of overlapping spheres represented as point clouds for
@@ -255,7 +256,7 @@ def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         Path to the compiled C++ executable for box-counting.
     radType : {'atomic', 'metallic'}, optional
         Type of radii to use for the spheres.
-    numPoint : int, optional
+    numPoints : int, optional
         Number of surface points to be generated around each atom.
     gridNum : int, optional
         Resolution of the 3D binary image.
@@ -284,24 +285,16 @@ def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
 
     Notes
     -----
-    The 3D binary image resolution (gridNum) is restricted by RAM size available, the relationship is illustrated below:
-    -  1024 ->    2 GB (laptops -> typically 8 GB)
-    -  2048 ->   16 GB (HPC nodes with GPUs like NCI Gadi gpuvolta queue -> max 32 GB/node)
-    -  4096 ->  128 GB
-    -  8192 -> 1024 GB (HPC node with huge memories like NCI Gadi megamem queue -> max 2990 GB/node)
-    - 16384 -> 8192 GB
-    Further details about maximum grid size and memory estimation could be found in 'test.cpp' documented by the authors 
-    (https://www.ugr.es/~demiras/fbc/). As a reference, when 8192 grids are used, allocation of memory took 25 min;
-    while the CPU algorithm runs for 18 min.
+    The 3D binary image resolution (gridNum) is restricted to 1024 or lower. Details about maximum grid size and memory estimation could be found in 'test.cpp' documented by the authors (https://www.ugr.es/~demiras/fbc/).
     """
     if verbose:
-        print(f"  Approximating the surface with {numPoint} points for each atom...")
+        print(f"  Approximating the surface with {numPoints} points for each atom...")
     if not isdir(outDir):
         mkdir(outDir)
 
     genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                   npName, outDir, numCPUs,
-                  radType, numPoint, gridNum,
+                  radType, numPoints, gridNum,
                   rmInSurf, vis, verbose, genPCD)
     system(f"{exePath} {gridNum} {outDir}/surfVoxelIdxs.txt {outDir}/surfVoxelBoxCnts.txt")
     scales, counts = [], []

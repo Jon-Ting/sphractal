@@ -2,6 +2,63 @@
 
 <!--next-version-placeholder-->
 
+## v0.18.1 (2023-08-02)
+
+### Fix
+
+* **readme:** Fixed readme broken links ([`dabe6e4`](https://github.com/Jon-Ting/sphractal/commit/dabe6e49094a196b8e280e15c2d60a1481747bb8))
+
+## v0.18.0 (2023-07-30)
+
+### Feature
+
+* **datasets:** Added functions to access the case study atomic data ([`126b444`](https://github.com/Jon-Ting/sphractal/commit/126b444ea079828e0ca9759ea8761c65af3bdafe))
+* **data:** Added atomic coordinates used for case studies ([`8111d48`](https://github.com/Jon-Ting/sphractal/commit/8111d4815017e22062401e1d49ebda269d9d79e5))
+
+### Fix
+
+* **tests:** Added test function for getCaseStudyDataPaths() ([`d324685`](https://github.com/Jon-Ting/sphractal/commit/d324685c489f9cb5a2cfbd1388d275f43a3bd37f))
+
+### Documentation
+
+* **example:** Explained the choice of numPoints in example.ipynb ([`8f45bd2`](https://github.com/Jon-Ting/sphractal/commit/8f45bd22e04cc6f2b56243d7a089f753d87349a5))
+
+## v0.17.3 (2023-07-29)
+
+
+
+## v0.17.2 (2023-07-29)
+
+### Fix
+
+* **surfVoxel:** Imported cpu_count() from multiprocessing ([`640025f`](https://github.com/Jon-Ting/sphractal/commit/640025ff9d869910f798654e74072d97ab0b3069))
+
+### Documentation
+
+* **example:** Updated example.ipynb with recoloured and reoriented figures ([`9c17801`](https://github.com/Jon-Ting/sphractal/commit/9c17801f589184878ca39b0b26a188be50202183))
+
+## v0.17.1 (2023-07-29)
+
+### Documentation
+
+* **surfVoxel:** Simplified docstring for voxelBoxCnts() ([`4d7a395`](https://github.com/Jon-Ting/sphractal/commit/4d7a3950c75b69880881977aa2249507bf1015d8))
+
+## v0.17.0 (2023-07-28)
+
+### Feature
+
+* **data:** Added validation data ([`7161b6e`](https://github.com/Jon-Ting/sphractal/commit/7161b6e3dcbb34fa78a9d3a742c5260cb98d24ea))
+
+### Fix
+
+* **test:** Updated ted test function for validation data ([`dcc47b9`](https://github.com/Jon-Ting/sphractal/commit/dcc47b9db5105a71dbc73be89ece49be0d904974))
+* **findTargetAtoms:** Enabled the function to handle single atom case ([`2650e06`](https://github.com/Jon-Ting/sphractal/commit/2650e064a098e5681beb3e855474fb5eedc5f759))
+* Enabled findNN() and findSurf() to handle single atom input ([`8cfdae4`](https://github.com/Jon-Ting/sphractal/commit/8cfdae4139e4772b8a5c0336accd5a8be852d3f4))
+
+### Documentation
+
+* **surfVoxel:** Updated recommendations of resource allocations for voxelBoxCnts() ([`e0eedb0`](https://github.com/Jon-Ting/sphractal/commit/e0eedb018ff919e3e7ee74a19610e78c23928ca4))
+
 ## v0.16.0 (2023-07-27)
 
 ### Feature

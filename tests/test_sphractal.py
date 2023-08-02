@@ -6,7 +6,8 @@ from shutil import rmtree
 from pytest import approx, mark
 
 from fixtures import fixture, np, egAtomsXYZ, egAtomsNeighIdxs, egAtomsSurfIdxs, egTargetAtomIdxs
-from sphractal.datasets import getExampleDataPath, getStrongScalingDataPath, getWeakScalingDataPaths
+from sphractal.datasets import getExampleDataPath, getStrongScalingDataPath, getWeakScalingDataPaths, \
+    getValidationDataPath, getCaseStudyDataPaths
 from sphractal.utils import estDuration, getMinMaxXYZ, readInp, findNN, findSurf, calcDist, closestSurfAtoms, \
     oppositeInnerAtoms
 from sphractal.surfVoxel import fibonacciSphere, pointsOnAtom, pointsToVoxels, voxelBoxCnts
@@ -75,14 +76,32 @@ def test_getStrongScalingDataPath():
     """Unit test of getStrongScalingDataPath()."""
     inpFilePathAct = getStrongScalingDataPath()
     assert isinstance(inpFilePathAct, str), 'getStrongScalingDataPath() did not return a string'
-    assert exists(inpFilePathAct), 'strongScaling.xyz not found'
-    assert isfile(inpFilePathAct), 'strongScaling.xyz is not a file'
+    assert exists(inpFilePathAct), 'strongScalingSP.xyz not found'
+    assert isfile(inpFilePathAct), 'strongScalingSP.xyz is not a file'
 
 
 def test_getWeakScalingDataPaths():
     """Unit test of getWeakScalingDataPaths()."""
     inpFilePathsAct = getWeakScalingDataPaths()
     assert isinstance(inpFilePathsAct, list), 'getWeakScalingDataPaths() did not return a list'
+    assert isinstance(inpFilePathsAct[0], str), 'Path in list is not str'
+    assert len(inpFilePathsAct) == 12, 'Incorrect number of paths returned'
+    assert exists(inpFilePathsAct[0]), 'Path in list not found'
+    assert isfile(inpFilePathsAct[0]), 'Path in list not a file'
+
+
+def test_getValidationDataPath():
+    """Unit test of getValidationDataPath()."""
+    inpFilePathAct = getValidationDataPath()
+    assert isinstance(inpFilePathAct, str), 'getValidationDataPath() did not return a string'
+    assert exists(inpFilePathAct), 'singleAtom.xyz not found'
+    assert isfile(inpFilePathAct), 'singleAtom.xyz is not a file'
+
+
+def test_getCaseStudyDataPaths():
+    """Unit test of getCaseStudyDataPaths()."""
+    inpFilePathsAct = getWeakScalingDataPaths()
+    assert isinstance(inpFilePathsAct, list), 'getCaseStudyDataPaths() did not return a list'
     assert isinstance(inpFilePathsAct[0], str), 'Path in list is not str'
     assert len(inpFilePathsAct) == 12, 'Incorrect number of paths returned'
     assert exists(inpFilePathsAct[0]), 'Path in list not found'
@@ -177,13 +196,13 @@ def test_calcDist(egAtomsXYZ):
 #    assert isOppAct == isOppExp, 'Incorrect results'
 
 
-@mark.parametrize('numPoint, sphereRad, xyzsExp',
+@mark.parametrize('numPoints, sphereRad, xyzsExp',
     [(3, 1.0, np.array([[0., 1., 0.], [-0.73736888, 0., -0.67549029], [0., -1., 0.]])),
      (5, 1.5, np.array([[0., 1.5, 0.], [-0.95787027, 0.75, -0.87748763], [0.13113859, 0., 1.49425656], [0.79038527, -0.75, -1.03091762], [-0., -1.5, 0.]])),
      (2, 100, np.array([[0., 100., 0.], [-0., -100., -0.]]))])
-def test_fibonacciSphere(numPoint, sphereRad, xyzsExp):
+def test_fibonacciSphere(numPoints, sphereRad, xyzsExp):
     """Unit test of fibonacciSphere()."""
-    xyzsAct = fibonacciSphere(numPoint, sphereRad)
+    xyzsAct = fibonacciSphere(numPoints, sphereRad)
     assert isinstance(xyzsAct, np.ndarray), 'Incorrect output data type'
     assert xyzsAct == approx(xyzsExp), 'Incorrect surface point coordinates'
 
