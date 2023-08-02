@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.18.1 (2023-08-02)
+
+### Fix
+
+* **readme:** Fixed readme broken links ([`dabe6e4`](https://github.com/Jon-Ting/sphractal/commit/dabe6e49094a196b8e280e15c2d60a1481747bb8))
+
 ## v0.18.0 (2023-07-30)
 
 ### Feature
