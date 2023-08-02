@@ -42,9 +42,9 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
     figType : {'paper', 'poster', 'talk'}
         Type of figures to be generated.
     saveFig : bool, optional
-        Whether to save the plots generated, only works when 'visReg' is True.
+        Whether to save the final figure generated, only works when 'visReg' is True.
     showPlot : bool, optional
-        Whether to show the plots generated, only works when 'visReg' is True.
+        Whether to show the figures generated, only works when 'visReg' is True.
     
     Returns
     -------
@@ -171,7 +171,7 @@ def runBoxCnt(inpFilePath,
     findSurfAlg : {'alphaShape', 'convexHull', 'numNeigh'}, optional
         Algorithm to identify the surface atoms.
     alphaMult : Union[int, float], optional
-        Multiplier to the minimum atomic radii to decide the 'alpha' value for the alpha shape algorithm, only used if
+        Multiplier to the minimum atomic radii to decide 'alpha' value for the alpha shape algorithm, only used if
         'findSurfAlg' is 'alphaShape'.
     outDir : str, optional
         Path to directory to store the output files.
@@ -184,13 +184,13 @@ def runBoxCnt(inpFilePath,
     rmInSurf : bool, optional
         Whether to remove the inner surface points.
     vis : bool, optional
-        Whether to generate output files for visualisation.
+        Whether to generate files for visualisation.
     figType : {'paper', 'poster', 'talk', 'notebook'}
         Research purpose of the figures generated.
     saveFig : bool, optional
-        Whether to save the figures generated, only used if 'vis' is True.
+        Whether to save the figures generated from linear regression fitting, only used if 'vis' is True.
     showPlot : bool, optional
-        Whether to show the figures generated, only used if 'vis' is True.
+        Whether to show the figures generated from linear regression fitting, only used if 'vis' is True.
     verbose : bool, optional
         Whether to display the details.
     voxelSurf : bool, optional
