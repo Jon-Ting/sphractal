@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.18.2 (2023-08-02)
+
+### Documentation
+
+* **boxCnt:** Improved conciseness of the docstring for runBoxCnt() ([`083f977`](https://github.com/Jon-Ting/sphractal/commit/083f97732860fe71a357e8fca61ae911b43c259a))
+
 ## v0.18.1 (2023-08-02)
 
 ### Fix
