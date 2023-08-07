@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.19.2 (2023-08-07)
+
+### Fix
+
+* **findSlope:** Fixed calling variable before assignment issue ([`6426881`](https://github.com/Jon-Ting/sphractal/commit/6426881373b156d853f326d0d4e8651d4f75e819))
+
 ## v0.19.1 (2023-08-07)
 
 ### Fix
