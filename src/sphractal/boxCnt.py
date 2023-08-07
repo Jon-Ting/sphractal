@@ -54,6 +54,8 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
         Box-counting dimension of the point clouds representation of the surface.
     slopeCI : tuple
         Confidence interval of the box-counting dimension of the point clouds surface.
+    minMaxLens : tuple
+        Minimum and maximum box lengths used to determine slope.
     """
     if visReg:
         plt.rc('font', family='sans-serif')
@@ -77,13 +79,14 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
     alphaCI = 1 - confLvl/100
 
     firstPointIdx, lastPointIdx, removeSmallBoxes = 0, len(scales), True
-    r2score, boxCntDim, slopeCI = 0.0, 0.0, np.array((np.inf, np.inf))
-    r2scorePrev, boxCntDimPrev, slopeCIPrev = 0.0, 0.0, np.array((np.inf, np.inf))
+    r2score, boxCntDim, slopeCI, minMaxLens = 0.0, 0.0, np.array((np.inf, np.inf)), (scales[0], scales[-1])
+    r2scorePrev, boxCntDimPrev, slopeCIPrev, minMaxLensPrev = 0.0, 0.0, np.array((np.inf, np.inf)), (scales[0], scales[-1])
     while len(scales[firstPointIdx:lastPointIdx]) > minSample:
 
         x, y = scales[firstPointIdx:lastPointIdx], counts[firstPointIdx:lastPointIdx]
         regModel = OLS(endog=y, exog=add_constant(x)).fit()
         r2score, boxCntDim, slopeCI = regModel.rsquared, regModel.params[1], regModel.conf_int(alpha=alphaCI)[1]
+        minMaxLens = (x[0], x[-1])
         yPred = regModel.predict()  # Returns ndarray, allowing subtraction later
 
         if visReg:
@@ -130,9 +133,9 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
                 lastPointIdx -= 1
             else:
                 if round(r2score, 3) < round(r2scorePrev, 3):
-                    return r2scorePrev, boxCntDimPrev, slopeCIPrev
+                    return r2scorePrev, boxCntDimPrev, slopeCIPrev, minMaxLensPrev
                 firstPointIdx += 1
-        r2scorePrev, boxCntDimPrev, slopeCIPrev = r2score, boxCntDim, slopeCI
+        r2scorePrev, boxCntDimPrev, slopeCIPrev, minMaxLensPrev = r2score, boxCntDim, slopeCI, minMaxLens
 
         if saveFig:
             boxCntDimsDir = f"{outDir}/boxCntDims"
@@ -145,7 +148,7 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
             plt.show()
         if not trimLen:
             break
-    return r2score, boxCntDim, slopeCI
+    return r2score, boxCntDim, slopeCI, minMaxLens
 
 
 # @annotate('runCase', color='cyan')
@@ -172,7 +175,8 @@ def runBoxCnt(inpFilePath,
         Algorithm to identify the surface atoms.
     alphaMult : Union[int, float], optional
         Multiplier to the minimum atomic radii to decide 'alpha' value for the alpha shape algorithm, only used if
-        'findSurfAlg' is 'alphaShape'.
+        'findSurfAlg' is 'alphaShape'. Recommendation: 
+        2.0 * 100% ATOMIC_RAD == 5/3 * 120% ATOMIC_RAD ~= 100% METALLIC_RAD * 2.5
     outDir : str, optional
         Path to directory to store the output files.
     trimLen : bool, optional
@@ -254,19 +258,19 @@ def runBoxCnt(inpFilePath,
                                           testCase, outDir, numCPUs, exePath,
                                           radType, numPoints, gridNum,
                                           rmInSurf, vis, verbose, genPCD)
-        r2VX, bcDimVX, confIntVX = findSlope(scalesVX, countsVX, f"{testCase}_VX", outDir, trimLen,
-                                             minSample, confLvl, vis, figType, saveFig, showPlot)
+        r2VX, bcDimVX, confIntVX, minMaxLensVX = findSlope(scalesVX, countsVX, f"{testCase}_VX", outDir, trimLen,
+                                                             minSample, confLvl, vis, figType, saveFig, showPlot)
     if exactSurf:
         minAtomRad = atomsRad.min()
         scalesEX, countsEX = exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                                           maxRange, (minAtomRad * minLenMult, minAtomRad * maxLenMult),
                                           minXYZ, testCase, outDir, numCPUs, numBoxLen, bufferDist,
                                           rmInSurf, writeBox, verbose)
-        r2EX, bcDimEX, confIntEX = findSlope(scalesEX, countsEX, f"{testCase}_EX", outDir, trimLen,
-                                             minSample, confLvl, vis, figType, saveFig, showPlot)
+        r2EX, bcDimEX, confIntEX, minMaxLensEX = findSlope(scalesEX, countsEX, f"{testCase}_EX", outDir, trimLen,
+                                                             minSample, confLvl, vis, figType, saveFig, showPlot)
     if verbose:
         if voxelSurf:
-            print(f"  VX D_Box: {bcDimVX:.4f} [{confIntVX[0]:.4f}, {confIntVX[1]:.4f}],  R2: {r2VX:.4f}")
+            print(f"  VX D_Box: {bcDimVX:.4f} [{confIntVX[0]:.4f}, {confIntVX[1]:.4f}],  R2: {r2VX:.4f}, l_max: {minMaxLensVX[0]:.4f}, l_min: {minMaxLensVX[1]:.4f}")
         if exactSurf:
-            print(f"  EX D_Box: {bcDimEX:.4f} [{confIntEX[0]:.4f}, {confIntEX[1]:.4f}],  R2: {r2EX:.4f}")
-    return r2VX, bcDimVX, confIntVX, r2EX, bcDimEX, confIntEX
+            print(f"  EX D_Box: {bcDimEX:.4f} [{confIntEX[0]:.4f}, {confIntEX[1]:.4f}],  R2: {r2EX:.4f}, l_max: {minMaxLensEX[0]:.4f}, l_min: {minMaxLensEX[1]:.4f}")
+    return r2VX, bcDimVX, confIntVX, minMaxLensVX, r2EX, bcDimEX, confIntEX, minMaxLensEX
