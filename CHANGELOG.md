@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## v0.19.0 (2023-08-07)
+
+### Feature
+
+* **findSlope:** Returned final range of box lengths ([`a955fd4`](https://github.com/Jon-Ting/sphractal/commit/a955fd4de609ee30d9874062b59993f44ae839f0))
+
+### Fix
+
+* **test:** Fixed test function related to findSlope() ([`8a95cb3`](https://github.com/Jon-Ting/sphractal/commit/8a95cb3a245aeb453ff1827fe81db7dfdfe8439b))
+
+### Documentation
+
+* **example:** Updated usage of findSlope() in example notebook ([`17f5b6f`](https://github.com/Jon-Ting/sphractal/commit/17f5b6f698b7d096411db6d3f3aa5b511de5ee4c))
+
 ## v0.18.4 (2023-08-04)
 
 
