@@ -248,11 +248,11 @@ def test_findTargetAtoms(egAtomsNeighIdxs, egAtomsSurfIdxs, egTargetAtomIdxs):
 @mark.parametrize('saveFig, figExists', [(True, True), (False, False)])
 def test_findSlopeVis(trimLen, visReg, saveFig, figExists, egExactBoxCnts):
     """Unit test of findSlope() functionalities for different 'trimLen', 'visReg', and 'saveFig' options."""
-    boxCntDimsAct = findSlope(egExactBoxCnts[0], egExactBoxCnts[1], 'example_ES', 'tests/boxCntOutputs', trimLen, visReg=visReg, saveFig=saveFig)
-    assert exists('./tests/boxCntOutputs/boxCntDims/example_ES_boxCntDim.png') == figExists, 'example_ES_boxCntDim.png is not found'
-    assert isfile('./tests/boxCntOutputs/boxCntDims/example_ES_boxCntDim.png') == figExists, 'example_ES_boxCntDim.png is not a file'
-    if isdir('./tests/boxCntOutputs'):
-        rmtree('./tests/boxCntOutputs')
+    boxCntDimsAct = findSlope(egExactBoxCnts[0], egExactBoxCnts[1], 'example_ES', 'tests/outputs', trimLen, visReg=visReg, saveFig=saveFig)
+    assert exists('./tests/outputs/boxCntDims/example_ES_boxCntDim.png') == figExists, 'example_ES_boxCntDim.png is not found'
+    assert isfile('./tests/outputs/boxCntDims/example_ES_boxCntDim.png') == figExists, 'example_ES_boxCntDim.png is not a file'
+    if isdir('./tests/outputs'):
+        rmtree('./tests/outputs')
 
 
 @mark.filterwarnings('ignore')
@@ -278,26 +278,26 @@ def test_findSlopeAcc(scales, counts, boxCntDimsExp):
 #    """Unit test of voxelBoxCnts() functionalities to generate output files for visualisation (To be uncommented when compiled C++ code could be shipped together)."""
 #    assert isfile(os.environ['FASTBC_EXE']), 'Executable not found at FASTBC_EXE'
 #    voxelScalesAct, voxelCountsAct = voxelBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
-#                                                     'example', 'tests/boxCntOutputs', verbose=True, genPCD=True)
-#    assert exists('./tests/boxCntOutputs/surfVoxelIdxs.txt'), 'surfVoxelBoxIdxs.txt is not found'
-#    assert isfile('./tests/boxCntOutputs/surfVoxelIdxs.txt'), 'surfVoxelBoxIdxs.txt is a file'
-#    assert exists('./tests/boxCntOutputs/surfVoxelBoxCnts.txt'), 'surfVoxelBoxCnts is not found'
-#    assert isfile('./tests/boxCntOutputs/surfVoxelBoxCnts.txt'), 'surfVoxelBoxCnts is not a file'
-#    assert exists('./tests/boxCntOutputs/surfPoints/example_surfPoints.xyz'), 'example_surfPoints.xyz is not found'
-#    assert isfile('./tests/boxCntOutputs/surfPoints/example_surfPoints.xyz'), 'example_surfPoints.xyz is not a file'
-#    assert exists('./tests/boxCntOutputs/surfPoints/example_surfPoints.pcd'), 'example_surfPoints.pcd is not found'
-#    assert isfile('./tests/boxCntOutputs/surfPoints/example_surfPoints.pcd'), 'example_surfPoints.pcd is not a file'
-#    assert exists('./tests/boxCntOutputs/surfVoxels/example_surfVoxels.xyz'), 'example_surfVoxels.xyz is not found'
-#    assert isfile('./tests/boxCntOutputs/surfVoxels/example_surfVoxels.xyz'), 'example_surfVoxels.xyz is not a file'
-#    if isdir('./tests/boxCntOutputs'):
-#        rmtree('./tests/boxCntOutputs')
+#                                                     'example', 'tests/outputs', verbose=True, genPCD=True)
+#    assert exists('./tests/outputs/surfVoxelIdxs.txt'), 'surfVoxelBoxIdxs.txt is not found'
+#    assert isfile('./tests/outputs/surfVoxelIdxs.txt'), 'surfVoxelBoxIdxs.txt is a file'
+#    assert exists('./tests/outputs/surfVoxelBoxCnts.txt'), 'surfVoxelBoxCnts is not found'
+#    assert isfile('./tests/outputs/surfVoxelBoxCnts.txt'), 'surfVoxelBoxCnts is not a file'
+#    assert exists('./tests/outputs/surfPoints/example_surfPoints.xyz'), 'example_surfPoints.xyz is not found'
+#    assert isfile('./tests/outputs/surfPoints/example_surfPoints.xyz'), 'example_surfPoints.xyz is not a file'
+#    assert exists('./tests/outputs/surfPoints/example_surfPoints.pcd'), 'example_surfPoints.pcd is not found'
+#    assert isfile('./tests/outputs/surfPoints/example_surfPoints.pcd'), 'example_surfPoints.pcd is not a file'
+#    assert exists('./tests/outputs/surfVoxels/example_surfVoxels.xyz'), 'example_surfVoxels.xyz is not found'
+#    assert isfile('./tests/outputs/surfVoxels/example_surfVoxels.xyz'), 'example_surfVoxels.xyz is not a file'
+#    if isdir('./tests/outputs'):
+#        rmtree('./tests/outputs')
 
 
 #@mark.parametrize('rmInSurf, voxelScalesExp, voxelCountsExp', [(True, [-2.70926996, -2.40823997, -2.10720997, -1.80617997, -1.50514998, -1.20411998, -0.90308999, -0.60205999, -0.30103], [0.90308999, 1.50514998, 2.30963017, 2.91855453, 3.49192171, 4.05419158, 4.47568571, 4.51703746, 4.52071928]), (False, [-2.70926996, -2.40823997, -2.10720997, -1.80617997, -1.50514998, -1.20411998, -0.90308999, -0.60205999, -0.30103], [0.90308999, 1.50514998, 2.35024802, 3.02530587, 3.62479758, 4.14640714, 4.54740546, 4.5884958, 4.59508819])])
 #def test_getVoxelBoxCntAcc(rmInSurf, voxelScalesExp, voxelCountsExp, egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs):
 #    """Unit test of voxelBoxCnts() outputs accuracy (To be uncommented when compiled C++ code could be shipped together)."""
 #    voxelScalesAct, voxelCountsAct = voxelBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
-#                                                     'example', 'tests/boxCntOutputs', rmInSurf=rmInSurf, vis=False)
+#                                                     'example', 'tests/outputs', rmInSurf=rmInSurf, vis=False)
 #    assert voxelScalesAct == approx(voxelScalesExp), 'Incorrect scales'
 #    assert voxelCountsAct == approx(voxelCountsExp), 'Incorrect box counts'
 
@@ -306,23 +306,23 @@ def test_findSlopeAcc(scales, counts, boxCntDimsExp):
 def test_getExactBoxCnt(rmInSurf, exactScalesExp, exactCountsExp, egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs, egMinMaxXYZ):
     """Unit test of exactBoxCnts()."""
     exactScalesAct, exactCountsAct = exactBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
-                                                        MAX_RANGE, (ATOM_RAD*0.25, ATOM_RAD), egMinMaxXYZ[0], 'example', 'tests/boxCntOutputs', rmInSurf=rmInSurf)
+                                                        MAX_RANGE, (ATOM_RAD*0.25, ATOM_RAD), egMinMaxXYZ[0], 'example', 'tests/outputs', rmInSurf=rmInSurf)
     assert exactCountsAct == approx(exactCountsExp), 'Incorrect scales'
     assert exactCountsAct == approx(exactCountsExp), 'Incorrect box counts'
-    assert exists('./tests/boxCntOutputs/boxCoords/example_boxCoords.xyz'), 'example_boxCoords.xyz is not found'
-    assert isfile('./tests/boxCntOutputs/boxCoords/example_boxCoords.xyz'), 'example_boxCoords.xyz is not a file'
-    if isdir('./tests/boxCntOutputs'):
-        rmtree('./tests/boxCntOutputs')
+    assert exists('./tests/outputs/boxCoords/example_boxCoords.xyz'), 'example_boxCoords.xyz is not found'
+    assert isfile('./tests/outputs/boxCoords/example_boxCoords.xyz'), 'example_boxCoords.xyz is not a file'
+    if isdir('./tests/outputs'):
+        rmtree('./tests/outputs')
 
 
 #def test_runBoxCnt(egVoxelBoxCntDims, egExactBoxCntDims):
 #    """Unit and regression test of runBoxCnt() (To be uncommented when compiled C++ code could be shipped together)."""
 #    assert isfile(environ['FASTBC_EXE']), 'Executable not found at FASTBC_EXE'
-#    boxCntDimsAct = runBoxCnt(getExampleDataPath(), writeFileDir='tests/boxCntOutputs')
+#    boxCntDimsAct = runBoxCnt(getExampleDataPath(), writeFileDir='tests/outputs')
 #    assert boxCntDimsAct[:2] == approx(egVoxelBoxCntDims[:2]), 'Incorrect R2 and D_Box for point clouds representation'
 #    assert boxCntDimsAct[2] == approx(egVoxelBoxCntDims[2]), 'Incorrect confidence interval for point clouds representation'
 #    assert boxCntDimsAct[-3:-1] == approx(egExactBoxCntDims[:2]), 'Incorrect R2 and D_Box for exact surface representation'
 #    assert boxCntDimsAct[-1] == approx(egExactBoxCntDims[2]), 'Incorrect confidence interval for exact surface representation'
-#    if isdir('./tests/boxCntOutputs'):
-#        rmtree('./tests/boxCntOutputs')
+#    if isdir('./tests/outputs'):
+#        rmtree('./tests/outputs')
 
