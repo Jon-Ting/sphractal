@@ -270,7 +270,7 @@ def runBoxCnt(inpFilePath,
                                                              minSample, confLvl, vis, figType, saveFig, showPlot)
     if verbose:
         if voxelSurf:
-            print(f"  VX D_Box: {bcDimVX:.4f} [{confIntVX[0]:.4f}, {confIntVX[1]:.4f}],  R2: {r2VX:.4f}, l_max: {minMaxLensVX[0]:.4f}, l_min: {minMaxLensVX[1]:.4f}")
+            print(f"  VX D_Box: {bcDimVX:.4f} [{confIntVX[0]:.4f}, {confIntVX[1]:.4f}],  R2: {r2VX:.4f},  boxLens: ({minMaxLensVX[0]:.4f}, {minMaxLensVX[1]:.4f})")
         if exactSurf:
-            print(f"  EX D_Box: {bcDimEX:.4f} [{confIntEX[0]:.4f}, {confIntEX[1]:.4f}],  R2: {r2EX:.4f}, l_max: {minMaxLensEX[0]:.4f}, l_min: {minMaxLensEX[1]:.4f}")
+            print(f"  EX D_Box: {bcDimEX:.4f} [{confIntEX[0]:.4f}, {confIntEX[1]:.4f}],  R2: {r2EX:.4f},  boxLens: ({minMaxLensEX[0]:.4f}, {minMaxLensEX[1]:.4f})")
     return r2VX, bcDimVX, confIntVX, minMaxLensVX, r2EX, bcDimEX, confIntEX, minMaxLensEX
