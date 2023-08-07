@@ -249,8 +249,8 @@ def runBoxCnt(inpFilePath,
     if verbose:
         print(f"\n{testCase}")
 
-    r2VX, bcDimVX, confIntVX = np.nan, np.nan, (np.nan, np.nan)
-    r2EX, bcDimEX, confIntEX = np.nan, np.nan, (np.nan, np.nan)
+    r2VX, bcDimVX, confIntVX, minMaxLensVX = np.nan, np.nan, (np.nan, np.nan), (np.nan, np.nan)
+    r2EX, bcDimEX, confIntEX, minMaxLensEX = np.nan, np.nan, (np.nan, np.nan), (np.nan, np.nan)
     if not isdir(outDir):
         mkdir(outDir)
     if voxelSurf:
