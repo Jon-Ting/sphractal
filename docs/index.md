@@ -1,14 +1,13 @@
 ```{include} ../README.md
-:relative-docs: docs/
+:relative-images:
 ```
 
 ```{toctree}
-:maxdepth: 1
+:maxdepth: 2
 :hidden:
 
-example.ipynb
-changelog.md
+autoapi/index
 contributing.md
 conduct.md
-autoapi/index
+changelog.md
 ```
