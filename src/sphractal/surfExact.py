@@ -191,7 +191,7 @@ def findTargetAtoms(atomsNeighIdxs, atomsSurfIdxs):
 # @annotate('exactBoxCnts', color='blue')
 def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                  maxRange, minMaxBoxLens, minXYZ, npName, 
-                 outDir='boxCntOutputs', numCPUs=None, numBoxLen=10, bufferDist=5.0,
+                 outDir='outputs', numCPUs=None, numBoxLen=10, bufferDist=5.0,
                  rmInSurf=True, writeBox=True, verbose=False):
     """
     Count the boxes that cover the outer surface of a set of overlapping spheres represented as exact spheres for
