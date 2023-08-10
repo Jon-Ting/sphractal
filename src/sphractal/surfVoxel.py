@@ -164,7 +164,7 @@ def writeSurfVoxels(outDir, npName, surfVoxelXYZs):
 
 # @annotate('getSurfPoints', color='cyan')
 def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                  npName, outDir='boxCntOutputs', numCPUs=None, 
+                  npName, outDir='outputs', numCPUs=None, 
                   radType='atomic', numPoints=10000, gridNum=1024,
                   rmInSurf=True, vis=False, verbose=False, genPCD=False):
     """Generate point clouds approximating the outer spherical surface formed by a set of atoms."""
@@ -224,7 +224,7 @@ def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
 
 # @annotate('voxelBoxCnts', color='blue')
 def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                 npName, outDir='boxCntOutputs', numCPUs=None, exePath='$FASTBC_EXE',
+                 npName, outDir='outputs', numCPUs=None, exePath='$FASTBC',
                  radType='atomic', numPoints=300, gridNum=1024,
                  rmInSurf=True, vis=True, verbose=False, genPCD=False):
     """
@@ -232,7 +232,7 @@ def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     different box sizes, using 3D box-counting algorithm written by Ruiz de Miras et al. in C++. 
 
     IMPORTANT: Make sure the source code has been downloaded from https://github.com/Jon-Ting/fastBC and compiled 
-    on your machine. 'exePath' should point to the right directory if FASTBC_EXE is not set as an environment variable.
+    on your machine. 'exePath' should point to the right directory if FASTBC is not set as an environment variable.
     
     Parameters
     ----------

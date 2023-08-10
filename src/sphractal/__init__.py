@@ -1,15 +1,17 @@
 """
-Sphractal
-=========
+The Sphractal Package
+=====================
+Descriptions
 
+Features
+--------
 Provides
-    1. Representation of surface of 3D complex objects consisting of spherical entities as 
-    either point clouds or exact surfaces.
-    2. Efficient algorithms for box-counting calculations.
-    3. Customisable parameters to control the level of detail and accuracy of the calculation.
+  1. Representation of surface of 3D complex objects consisting of spherical entities as either point clouds or exact surfaces.
+  2. Efficient algorithms for box-counting calculations.
+  3. Customisable parameters to control the level of detail and accuracy of the calculation.
 
-How to use the documentation
-----------------------------
+Documentations
+--------------
 Documentation is available in two forms: docstrings provided with the code, 
 and a loose standing reference guide, available from 
 `the Sphractal homepage <https://sphractal.readthedocs.io/en/latest/>`_.

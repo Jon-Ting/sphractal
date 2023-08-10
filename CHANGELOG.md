@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## v0.19.4 (2023-08-09)
+
+### Fix
+
+* **readthedocs:** Fixed the rendering errors on Sphinx documentations ([`850613a`](https://github.com/Jon-Ting/sphractal/commit/850613ac6f69e364de89d9e53523e00ad70c97f8))
+
+### Documentation
+
+* **init:** Made documentations in __init__.py more concise ([`49dc087`](https://github.com/Jon-Ting/sphractal/commit/49dc0871c014d20f9113f7ce90639c38cb7136be))
+
+## v0.19.3 (2023-08-09)
+
+
+
 ## v0.19.2 (2023-08-07)
 
 ### Fix
