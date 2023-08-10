@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.19.5 (2023-08-10)
+
+### Fix
+
+* **tests:** Corrected the function called to test getCaseStudyPaths() ([`8dcf30c`](https://github.com/Jon-Ting/sphractal/commit/8dcf30c76f55fe2bf022001f169669cadaa74d02))
+* **test:** Corrected the number of case study coordinate files to be retrieved ([`84afd20`](https://github.com/Jon-Ting/sphractal/commit/84afd201c779065e3f9c995e0dc197e9b5ba94d5))
+* **data:** Included the rhombic dodecahedron atomic coordinates as data ([`84edfb7`](https://github.com/Jon-Ting/sphractal/commit/84edfb7f902a8096b2e2c8ab664427a89d3778e6))
+
 ## v0.19.4 (2023-08-09)
 
 ### Fix
