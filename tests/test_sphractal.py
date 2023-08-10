@@ -103,7 +103,7 @@ def test_getCaseStudyDataPaths():
     inpFilePathsAct = getWeakScalingDataPaths()
     assert isinstance(inpFilePathsAct, list), 'getCaseStudyDataPaths() did not return a list'
     assert isinstance(inpFilePathsAct[0], str), 'Path in list is not str'
-    assert len(inpFilePathsAct) == 12, 'Incorrect number of paths returned'
+    assert len(inpFilePathsAct) == 18, 'Incorrect number of paths returned'
     assert exists(inpFilePathsAct[0]), 'Path in list not found'
     assert isfile(inpFilePathsAct[0]), 'Path in list not a file'
 
