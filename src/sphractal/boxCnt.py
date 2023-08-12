@@ -16,7 +16,7 @@ from sphractal.surfExact import exactBoxCnts
 
 # @annotate('findSlope', color='green')
 def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
-              minSample=5, confLvl=95, 
+              minSample=6, confLvl=95, 
               visReg=True, figType='paper', saveFig=False, showPlot=False):
     """
     Compute the slope (box counting dimension) from the box-counting data collected.
@@ -81,7 +81,7 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
     firstPointIdx, lastPointIdx, removeSmallBoxes = 0, len(scales), True
     r2score, boxCntDim, slopeCI, minMaxLens = 0.0, 0.0, np.array((np.inf, np.inf)), (scales[0], scales[-1])
     r2scorePrev, boxCntDimPrev, slopeCIPrev, minMaxLensPrev = 0.0, 0.0, np.array((np.inf, np.inf)), (scales[0], scales[-1])
-    while len(scales[firstPointIdx:lastPointIdx]) > minSample:
+    while len(scales[firstPointIdx:lastPointIdx]) >= minSample:
 
         x, y = scales[firstPointIdx:lastPointIdx], counts[firstPointIdx:lastPointIdx]
         regModel = OLS(endog=y, exog=add_constant(x)).fit()
