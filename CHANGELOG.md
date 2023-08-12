@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.20.1 (2023-08-12)
+
+### Documentation
+
+* **readme:** Fixed position of first image ([`fbfb2f5`](https://github.com/Jon-Ting/sphractal/commit/fbfb2f52ff468b2d026a50430f7bc1c7db123d07))
+
 ## v0.20.0 (2023-08-12)
 
 ### Feature
