@@ -2,6 +2,25 @@
 
 <!--next-version-placeholder-->
 
+## v0.20.0 (2023-08-12)
+
+### Feature
+
+* **findSlope:** Modified while loop condition to better reflect the minSample specified ([`2805b74`](https://github.com/Jon-Ting/sphractal/commit/2805b745ec6b1b80f29853436bb9a8161a259dfe))
+* **findSlope:** Modified while loop condition to better reflect the minSample specified ([`a7b7270`](https://github.com/Jon-Ting/sphractal/commit/a7b7270f095101f844b18120df23a663de1163c3))
+
+### Fix
+
+* **tests:** Removed redundant test combinations ([`374c5f1`](https://github.com/Jon-Ting/sphractal/commit/374c5f1a38f27be8a8197fdf6ba075d7dd31e6a8))
+
+### Documentation
+
+* **findNN:** Added docstring for the function ([`7b22a4c`](https://github.com/Jon-Ting/sphractal/commit/7b22a4c159468db20e9eb66718d2edc23a5fe1fc))
+
+### Performance
+
+* **findSlope:** Added assertion for minSample to make sure it's integer ([`ba6698d`](https://github.com/Jon-Ting/sphractal/commit/ba6698dba109e0cf6376d3a7a33d5a02e27bfc37))
+
 ## v0.19.5 (2023-08-10)
 
 ### Fix
