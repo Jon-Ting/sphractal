@@ -2,6 +2,15 @@
 
 <!--next-version-placeholder-->
 
+## v0.20.2 (2023-08-12)
+
+### Documentation
+
+* **readme:** Attempt to fix pypi readme rendering issue ([`ac8099a`](https://github.com/Jon-Ting/sphractal/commit/ac8099aa0644ba9203be9f0fe869d8b535f5a692))
+* **example:** Updated example notebook ([`753e0f8`](https://github.com/Jon-Ting/sphractal/commit/753e0f851f8c6674011e8902068287e0d87ea4bd))
+* Improved consistency of the docstrings for all functions ([`bbb613d`](https://github.com/Jon-Ting/sphractal/commit/bbb613d8ce7cd800226a5bb8bdcb899505a89069))
+* **readme:** Made readme statements more concise ([`f1ef8ce`](https://github.com/Jon-Ting/sphractal/commit/f1ef8ce6b2779c749e09b84409cd43c0f99c8e01))
+
 ## v0.20.1 (2023-08-12)
 
 ### Documentation
