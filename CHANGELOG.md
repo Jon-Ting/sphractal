@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.20.8 (2023-08-12)
+
+### Fix
+
+* **ci-cd.yml:** Separate out a new pipeline for publishing ([`f7a9989`](https://github.com/Jon-Ting/sphractal/commit/f7a9989a027f7c9b3e3f94973759f76932a855ca))
+* **ci-cd.yml:** Added permission lines to specify trusted publishing flow ([`589468b`](https://github.com/Jon-Ting/sphractal/commit/589468b0554cd6eb8bda7632cda0c0b6162b2b56))
+
 ## v0.20.7 (2023-08-12)
 
 
