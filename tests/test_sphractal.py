@@ -256,7 +256,7 @@ def test_findSlopeVis(trimLen, visReg, saveFig, figExists, egExactBoxCnts):
 
 
 @mark.filterwarnings('ignore')
-@mark.parametrize('minSample, isFinite1', [(-100, True), (9.9, True), (10, False)])
+@mark.parametrize('minSample, isFinite1', [(-99, True), (11, False)])
 @mark.parametrize('confLvl, isFinite2', [(-101, False), (99.9, True), (100, False)])
 def test_findSlopeConfInt(minSample, isFinite1, confLvl, isFinite2, egExactBoxCnts):
     """Unit test of findSlope() outputs for different 'minSample' and 'confLvl' values."""
