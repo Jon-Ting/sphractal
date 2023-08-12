@@ -87,10 +87,8 @@ jobs:
 
     # Define job steps
     steps:
-      - name: Check-out repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+      - name: Retrieve distributions
+      - uses: actions/download-artifact@v3
 
       - name: Publish to TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
