@@ -130,17 +130,6 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
         # if lowBoundErrSum > upBoundErrSum: firstPointIdx += 1
         # else: lastPointIdx -= 1
 
-        if trimLen:
-            if removeSmallBoxes:
-                if round(r2score, 3) < round(r2scorePrev, 3):
-                    removeSmallBoxes = False
-                lastPointIdx -= 1
-            else:
-                if round(r2score, 3) < round(r2scorePrev, 3):
-                    return r2scorePrev, boxCntDimPrev, slopeCIPrev, minMaxLensPrev
-                firstPointIdx += 1
-        r2scorePrev, boxCntDimPrev, slopeCIPrev, minMaxLensPrev = r2score, boxCntDim, slopeCI, minMaxLens
-
         if saveFig:
             boxCntDimsDir = f"{outDir}/boxCntDims"
             if not isdir(boxCntDimsDir):
@@ -150,8 +139,22 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
             plt.savefig(f"{boxCntDimsDir}/{npName}_boxCntDim.png", bbox_inches='tight')
         if showPlot:
             plt.show()
-        if not trimLen:
+
+        if trimLen:
+            if removeSmallBoxes:
+                if round(r2score, 3) < round(r2scorePrev, 3):
+                    removeSmallBoxes = False
+                lastPointIdx -= 1
+            else:
+                if round(r2score, 3) < round(r2scorePrev, 3):
+                    if verbose:
+                        print(f"  D_Box: {boxCntDim:.4f} [{slopeCI[0]:.4f}, {slopeCI[1]:.4f}],  R2: {r2score:.4f},  boxLens: ({minMaxLens[0]:.4f}, {minMaxLens[1]:.4f})\n")
+                    return r2scorePrev, boxCntDimPrev, slopeCIPrev, minMaxLensPrev
+                firstPointIdx += 1
+        else:
             break
+        r2scorePrev, boxCntDimPrev, slopeCIPrev, minMaxLensPrev = r2score, boxCntDim, slopeCI, minMaxLens
+
     if verbose:
         print(f"  D_Box: {boxCntDim:.4f} [{slopeCI[0]:.4f}, {slopeCI[1]:.4f}],  R2: {r2score:.4f},  boxLens: ({minMaxLens[0]:.4f}, {minMaxLens[1]:.4f})\n")
     return r2score, boxCntDim, slopeCI, minMaxLens
