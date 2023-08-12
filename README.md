@@ -10,6 +10,7 @@ from overlapping spheres via box-counting algorithm.
 ## Background
 * Atomic objects in molecular and nanosciences such are often represented as collection of spheres with radii associated 
 with the atomic radius of the individual component.
+
 ![Example octahedron palladium nanoparticle](docs/figs/example.png)
 
 * Some examples of these objects (inclusive of both fine- and coarse-grained representation of the individual components) 
