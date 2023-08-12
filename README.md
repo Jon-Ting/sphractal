@@ -57,7 +57,7 @@ This could be done by:
 
 * Downloading the source code from the [repository](https://github.com/Jon-Ting/fastbc.git) to a directory of your choice:
 ```bash
-git clone https://github.com/Jon-Ting/fastBC.git
+git clone https://github.com/jon-ting/fastbc.git
 ```
 
 * Building an executable by doing either one of the following compilations according to the instructions on the [README.md](https://github.com/Jon-Ting/fastBC/blob/main/README.md) page. This will decide whether you will be running the box counting algorithm with GPU acceleration. Feel free to rename the executables:
@@ -87,7 +87,7 @@ Check out the [notebook tutorial](https://github.com/Jon-Ting/sphractal/blob/mai
 
 ## Documentation
 
-Detailed documentation and usage examples are hosted by [Read the Docs](https://sphractal.readthedocs.io/en/latest/).
+Detailed [documentations](https://sphractal.readthedocs.io/en/latest/) are hosted by `Read the Docs`.
 
 ## Contributing
 
