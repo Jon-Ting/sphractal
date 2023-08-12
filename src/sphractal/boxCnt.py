@@ -57,6 +57,8 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
     minMaxLens : tuple
         Minimum and maximum box lengths used to determine slope.
     """
+    assert isinstance(minSample, int), 'minSample should be integer!'
+
     if visReg:
         plt.rc('font', family='sans-serif')
         plt.rc('xtick', labelsize='x-small')
