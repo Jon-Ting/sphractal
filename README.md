@@ -11,7 +11,7 @@ from overlapping spheres via box-counting algorithm.
 * Atomic objects in molecular and nanosciences such are often represented as collection of spheres with radii associated 
 with the atomic radius of the individual component.
 
-![Example octahedron palladium nanoparticle](docs/figs/example.png)
+![](https://raw.githubusercontent.com/Jon-Ting/sphractal/main/docs/figs/example.png)
 
 * Some examples of these objects (inclusive of both fine- and coarse-grained representation of the individual components) 
 are small molecules, proteins, nanoparticles, polymers, and porous materials such as zeolite, metal-organic framework (MOFs).
@@ -21,11 +21,11 @@ the surface area available for interaction with other entities, which is related
 * The fractal dimension could be estimated by applying the box-counting algorithm on surfaces represented as either:
   * approximated point cloud:
 
-![Example octahedron palladium nanoparticle surface point cloud cross section](docs/figs/exampleVXpointCloudSliced.png)
+![](https://raw.githubusercontent.com/Jon-Ting/sphractal/main/docs/figs/exampleVXpointCloudSliced.png)
 
   * that are subsequently voxelised:
 
-![Example octahedron palladium nanoparticle voxelised surface cross section](docs/figs/exampleVXvoxelsSliced.png)
+![](https://raw.githubusercontent.com/Jon-Ting/sphractal/main/docs/figs/exampleVXvoxelsSliced.png)
 
   * or mathematically exact surfaces:
 
