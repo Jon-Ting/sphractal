@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.20.3 (2023-08-12)
+
+### Documentation
+
+* **example:** Made sure all codes are visible in notebook ([`bc6db5c`](https://github.com/Jon-Ting/sphractal/commit/bc6db5c2904f045f105d0a0c71fe81cad38181a0))
+* **readme:** Fixed pypi readme rendering issue ([`d6cf985`](https://github.com/Jon-Ting/sphractal/commit/d6cf98573c59fbb5cb5ab0fe31dd02254f83c770))
+
 ## v0.20.2 (2023-08-12)
 
 ### Documentation
