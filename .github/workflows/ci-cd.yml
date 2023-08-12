@@ -44,6 +44,10 @@ jobs:
     # Set up operating system
     runs-on: ubuntu-latest
 
+    # IMPORTANT: this permission is mandatory for trusted publishing
+    permissions:
+      id-token: write
+
     # Define job steps
     steps:
       - name: Set up Python
