@@ -88,7 +88,7 @@ jobs:
     # Define job steps
     steps:
       - name: Retrieve distributions
-      - uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3
 
       - name: Publish to TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
