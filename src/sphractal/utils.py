@@ -73,7 +73,33 @@ def allDirVecs():
 # @annotate('findNN', color='magenta')
 @njit(fastmath=True, cache=True)
 def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult, calcBL=False):
-    """Compute the nearest neighbour list and average bond length for each atom."""
+    """
+    Compute the nearest neighbour list and average bond length for each atom.
+
+    Parameters
+    ----------
+    atomsRad : 1D ndarray
+        Radius of each atom.
+    atomsXYZ : 2D ndarray
+        Cartesian coordinates of each atom.
+    minXYZ : 1D ndarray
+        Minimum values of each dimension in the Cartesian space.
+    maxXYZ : 1D ndarray
+        Maximum values of each dimension in the Cartesian space.
+    maxAtomRad : Union[int,float]
+        Maximum value of atomic radius.
+    radMult : Union[int,float]
+        Multiplier to the atomic radii.
+    calcBL : bool, optional
+        Whether to compute the average bond length for each atom.
+
+    Returns
+    -------
+    atomsNeighIdxsPadded : 2D ndarray
+        Neighbour atoms indices of each atom, padded with -1 for fixed number of columns.
+    atomsAvgBondLen : 1D ndarray
+        Average bond lengths for each each.
+    """
     (minX, minY, minZ), (maxX, maxY, maxZ) = minXYZ, maxXYZ
     atomsNeighIdxs = [[int(j) for j in range(0)] for _ in range(len(atomsRad))]
     atomsAvgBondLen = np.zeros_like(atomsRad)
