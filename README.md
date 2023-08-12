@@ -29,7 +29,7 @@ the surface area available for interaction with other entities, which is related
 
   * or mathematically exact surfaces:
 
-    ![Example octahedron palladium nanoparticle mathematically exact surface cross section](docs/figs/exampleSliced.png)
+![](https://raw.githubusercontent.com/Jon-Ting/sphractal/main/docs/figs/exampleSliced.png)
 
 ## Features
 
