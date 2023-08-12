@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.20.10 (2023-08-12)
+
+### Fix
+
+* **build:** Added dist/ ([`078c188`](https://github.com/Jon-Ting/sphractal/commit/078c188e3fb2f32e639529b6c4f6df2481b0c8e4))
+
 ## v0.20.9 (2023-08-12)
 
 
