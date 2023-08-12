@@ -78,13 +78,13 @@ def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult, calcBL=False
 
     Parameters
     ----------
-    atomsRad : 1D ndarray
+    atomsRad : 1D ndarray of floats
         Radius of each atom.
-    atomsXYZ : 2D ndarray
+    atomsXYZ : 2D ndarray of floats
         Cartesian coordinates of each atom.
-    minXYZ : 1D ndarray
+    minXYZ : 1D ndarray of floats
         Minimum values of each dimension in the Cartesian space.
-    maxXYZ : 1D ndarray
+    maxXYZ : 1D ndarray of floats
         Maximum values of each dimension in the Cartesian space.
     maxAtomRad : Union[int,float]
         Maximum value of atomic radius.
@@ -95,9 +95,9 @@ def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult, calcBL=False
 
     Returns
     -------
-    atomsNeighIdxsPadded : 2D ndarray
+    atomsNeighIdxsPadded : 2D ndarray of ints
         Neighbour atoms indices of each atom, padded with -1 for fixed number of columns.
-    atomsAvgBondLen : 1D ndarray
+    atomsAvgBondLen : 1D ndarray of floats
         Average bond lengths for each each.
     """
     (minX, minY, minZ), (maxX, maxY, maxZ) = minXYZ, maxXYZ
@@ -190,9 +190,9 @@ def findSurf(atomsXYZ, atomsNeighIdxs, option='alphaShape', alpha=3.0):
     
     Parameters
     ----------
-    atomsXYZ : 2D ndarray
+    atomsXYZ : 2D ndarray of floats
         Cartesian coordinates of each atom.
-    atomsNeighIdxs : 2D ndarray
+    atomsNeighIdxs : 2D ndarray of ints
         Neighbour atoms indices of each atom.
     option : {'alphaShape', 'convexHull', 'numNeigh'}, optional
         Algorithm to identify the spheres on the surface. 
@@ -203,7 +203,7 @@ def findSurf(atomsXYZ, atomsNeighIdxs, option='alphaShape', alpha=3.0):
     
     Returns
     -------
-    1D ndarray
+    atomsSurfIdxs : 1D ndarray of ints
         Indices of surface atoms.
     
     Notes
@@ -228,7 +228,8 @@ def findSurf(atomsXYZ, atomsNeighIdxs, option='alphaShape', alpha=3.0):
                 atomsSurfIdxs[atomIdx] = True
         except QhullError:
             atomsSurfIdxs = np.full(len(atomsXYZ), True)
-    return np.where(atomsSurfIdxs)[0]
+    atomsSurfIdxs = np.where(atomsSurfIdxs)[0]
+    return atomsSurfIdxs
 
 
 @njit(fastmath=True, cache=True)

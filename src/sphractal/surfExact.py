@@ -194,26 +194,25 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                  outDir='outputs', numCPUs=None, numBoxLen=10, bufferDist=5.0,
                  rmInSurf=True, writeBox=True, verbose=False):
     """
-    Count the boxes that cover the outer surface of a set of overlapping spheres represented as exact spheres for
-    different box sizes.
+    Count the boxes that cover the outer surface of a set of overlapping spheres represented as exact spheres for different box sizes.
     
     Parameters
     ----------
-    atomsEle : 1D ndarray
+    atomsEle : 1D ndarray of strs
         Element type of each atom.
-    atomsRad : 1D ndarray
+    atomsRad : 1D ndarray of floats
         Radius of each atom.
-    atomsSurfIdxs : 1D ndarray
+    atomsSurfIdxs : 1D ndarray of ints
         Indices of surface atoms.
-    atomsXYZ : 2D ndarray
+    atomsXYZ : 2D ndarray of floats
         Cartesian coordinates of each atom.
-    atomsNeighIdxs : 2D ndarray
+    atomsNeighIdxs : 2D ndarray of ints
         Neighbour atoms indices of each atom.
     maxRange : float
         Maximum range among all dimensions of the Cartesian space, defines the borders of the largest box.
     minMaxBoxLens : tuple of floats
         Minimum and maximum box lengths.
-    minXYZ : 1D ndarray
+    minXYZ : 1D ndarray of floats
         Minimum values of each dimension in the Cartesian space.
     npName : str
         Identifier of the measured object, which forms part of the output file name, ideally unique.
@@ -234,16 +233,16 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     
     Returns
     -------
-    scales : list
+    scales : list of floats
         Box lengths.
-    counts : list
+    counts : list of floats
         Number of boxes that cover the exact spherical surface of interest.
     
     Examples
     --------
     >>> eles, rads, xyzs, _, minxyz, maxxyz = readInp('example.xyz')
     >>> neighs, _ = findNN(rads, xyzs, minxyz, maxxyz, 1.2)
-    >>> surfs = findSurf(xyzs, neighs, 'alphaShape', 2.0)
+    >>> surfs = findSurf(xyzs, neighs, 'alphaShape', 5.0)
     >>> scalesES, countsES = exactBoxCnts(eles, rads, surfs, xyzs, neighs, 100, (0.2, 1), minxyz, 'example')
     """
     atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs, atomsSurfIdxs)

@@ -38,6 +38,7 @@ def withinNeighRad(surfPointXYZ, atomNeighIdxs, atomsRad, atomsXYZ):
 
 @njit(fastmath=True, cache=True)
 def rmPoint(args):
+    """Check whether a point falls on the outer surface."""
     surfPoint, atomXYZ, atomNeighIdxs, atomsRad, atomsXYZ, rmInSurf, atomsSurfIdxs, atomsNeighIdxs = args
     surfPointXYZ = surfPoint + atomXYZ
     if withinNeighRad(surfPointXYZ, atomNeighIdxs, atomsRad, atomsXYZ):
@@ -228,23 +229,21 @@ def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                  radType='atomic', numPoints=300, gridNum=1024,
                  rmInSurf=True, vis=True, verbose=False, genPCD=False):
     """
-    Count the boxes that cover the outer surface of a set of overlapping spheres represented as point clouds for
-    different box sizes, using 3D box-counting algorithm written by Ruiz de Miras et al. in C++. 
+    Count the boxes that cover the outer surface of a set of overlapping spheres represented as point clouds for different box sizes, using 3D box-counting algorithm written by Ruiz de Miras et al. in C++. 
 
-    IMPORTANT: Make sure the source code has been downloaded from https://github.com/Jon-Ting/fastBC and compiled 
-    on your machine. 'exePath' should point to the right directory if FASTBC is not set as an environment variable.
+    IMPORTANT: Make sure the source code has been downloaded from https://github.com/Jon-Ting/fastBC and compiled on your machine. 'exePath' should point to the right directory if FASTBC is not set as an environment variable.
     
     Parameters
     ----------
-    atomsEle : 1D ndarray
+    atomsEle : 1D ndarray of strs
         Element type of each atom.
-    atomsRad : 1D ndarray
+    atomsRad : 1D ndarray of floats
         Radius of each atom.
-    atomsSurfIdxs : 1D ndarray
+    atomsSurfIdxs : 1D ndarray of ints
         Indices of surface atoms.
-    atomsXYZ : 2D ndarray
+    atomsXYZ : 2D ndarray of floats
         Cartesian coordinates of each atom.
-    atomsNeighIdxs : 2D ndarray
+    atomsNeighIdxs : 2D ndarray of ints
         Neighbour atoms indices of each atom.
     npName : str
         Identifier of the measured object, which forms part of the output file name, ideally unique.
@@ -279,7 +278,7 @@ def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     Examples
     --------
     >>> eles, rads, xyzs, _, minxyz, maxxyz = readInp('example.xyz')
-    >>> neighs, _ = findNN(rads, xyzs, minxyz, maxxyz, 2.5)
+    >>> neighs, _ = findNN(rads, xyzs, minxyz, maxxyz, 1.2)
     >>> surfs = findSurf(xyzs, neighs, 'alphaShape', 5.0)
     >>> scalesPC, countsPC = voxelBoxCnts(eles, rads, surfs, xyzs, neighs, 'example')
 

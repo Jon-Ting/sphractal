@@ -17,15 +17,15 @@ from sphractal.surfExact import exactBoxCnts
 # @annotate('findSlope', color='green')
 def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
               minSample=6, confLvl=95, 
-              visReg=True, figType='paper', saveFig=False, showPlot=False):
+              visReg=True, figType='paper', saveFig=False, showPlot=False, verbose=False):
     """
     Compute the slope (box counting dimension) from the box-counting data collected.
 
     Parameters
     ----------
-    scales : list
+    scales : list of floats
         Box lengths.
-    counts : list
+    counts : list of floats
         Number of boxes that cover the exact spherical surface of interest.
     npName : str, optional
         Identifier of the measured object, which forms part of the output file name, ideally unique.
@@ -45,6 +45,8 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
         Whether to save the final figure generated, only works when 'visReg' is True.
     showPlot : bool, optional
         Whether to show the figures generated, only works when 'visReg' is True.
+    verbose : bool, optional
+        Whether to display the details.
     
     Returns
     -------
@@ -52,9 +54,9 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
         Coefficient of determination from determination of the dimension of point clouds surface.
     boxCntDim : float
         Box-counting dimension of the point clouds representation of the surface.
-    slopeCI : tuple
+    slopeCI : 1D ndarray of floats
         Confidence interval of the box-counting dimension of the point clouds surface.
-    minMaxLens : tuple
+    minMaxLens : tuple of floats
         Minimum and maximum box lengths used to determine slope.
     """
     assert isinstance(minSample, int), 'minSample should be integer!'
@@ -150,6 +152,8 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
             plt.show()
         if not trimLen:
             break
+    if verbose:
+        print(f"  D_Box: {boxCntDim:.4f} [{slopeCI[0]:.4f}, {slopeCI[1]:.4f}],  R2: {r2score:.4f},  boxLens: ({minMaxLens[0]:.4f}, {minMaxLens[1]:.4f})\n")
     return r2score, boxCntDim, slopeCI, minMaxLens
 
 
@@ -162,8 +166,7 @@ def runBoxCnt(inpFilePath,
               voxelSurf=True, numPoints=10000, gridNum=1024, exePath='$FASTBC', genPCD=False,
               exactSurf=True, minLenMult=0.25, maxLenMult=1, numCPUs=8, numBoxLen=10, bufferDist=5.0, writeBox=True): 
     """
-    Run box-counting algorithm on the surface of a given object consisting of a set of spheres represented as either
-    point clouds or exact spherical surface.
+    Run box-counting algorithm on the surface of a given atomistic object consisting of a set of spheres represented as either a voxelised point cloud or mathematically precise object.
     
     Parameters
     ----------
@@ -227,21 +230,25 @@ def runBoxCnt(inpFilePath,
     Returns
     -------
     r2VX : float
-        Coefficient of determination from determination of the dimension of point clouds surface.
+        Coefficient of determination from linear regression fitting to the box-counting data obtained from the voxelised point cloud surface representation.
     bcDimVX : float
-        Box-counting dimension of the point clouds representation of the surface.
-    confIntVX : tuple
-        Confidence interval of the box-counting dimension of the point clouds surface.
+        Box-counting dimension of the voxelised point cloud representation of the surface.
+    confIntVX : 1D ndarray of floats
+        Confidence interval of the slope estimated for the voxelised point cloud surface representation.
+    minMaxLensVX : tuple of floats
+        Minimum and maximum box lengths for the final slope determination for the voxelised point cloud surface representation.
     r2EX : float
-        Coefficient of determination from determination of the dimension of exact sphere surface.
+        Coefficient of determination from linear regression fitting to the box-counting data obtained from the mathematically exact surface representation.
     bcDimEX : float
-        Box-counting dimension of the exact sphere representation of the surface.
-    confIntEX : tuple
-        Confidence interval of the box-counting dimension of the exact sphere surface.
+        Box-counting dimension of the mathematically exact representation of the surface.
+    confIntEX : 1D ndarray of floats
+        Confidence interval of the slope estimated for the mathematically exact surface representation.
+    minMaxLensEX : tuple of floats
+        Minimum and maximum box lengths for final slope determination for the mathematically exact surface representation.
     
     Examples
     --------
-    >>> r2Points, bcDimPoints, confIntPoints, r2Exact, bcDimExact, confIntExact = runBoxCnt('example.xyz')
+    >>> r2VX, bcDimVX, confIntVX, minMaxLensVX, r2EX, bcDimEX, confIntEX, minMaxLensEX = runBoxCnt('example.xyz')
     """
     radMult = 1.2 if radType == 'atomic' else 1.5  # Radius multiplier to identify nearest neighbour
     atomsEle, atomsRad, atomsXYZ, maxRange, minXYZ, maxXYZ = readInp(inpFilePath, radType)
@@ -261,7 +268,7 @@ def runBoxCnt(inpFilePath,
                                           radType, numPoints, gridNum,
                                           rmInSurf, vis, verbose, genPCD)
         r2VX, bcDimVX, confIntVX, minMaxLensVX = findSlope(scalesVX, countsVX, f"{testCase}_VX", outDir, trimLen,
-                                                             minSample, confLvl, vis, figType, saveFig, showPlot)
+                                                           minSample, confLvl, vis, figType, saveFig, showPlot, verbose)
     if exactSurf:
         minAtomRad = atomsRad.min()
         scalesEX, countsEX = exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
@@ -269,10 +276,5 @@ def runBoxCnt(inpFilePath,
                                           minXYZ, testCase, outDir, numCPUs, numBoxLen, bufferDist,
                                           rmInSurf, writeBox, verbose)
         r2EX, bcDimEX, confIntEX, minMaxLensEX = findSlope(scalesEX, countsEX, f"{testCase}_EX", outDir, trimLen,
-                                                             minSample, confLvl, vis, figType, saveFig, showPlot)
-    if verbose:
-        if voxelSurf:
-            print(f"  VX D_Box: {bcDimVX:.4f} [{confIntVX[0]:.4f}, {confIntVX[1]:.4f}],  R2: {r2VX:.4f},  boxLens: ({minMaxLensVX[0]:.4f}, {minMaxLensVX[1]:.4f})")
-        if exactSurf:
-            print(f"  EX D_Box: {bcDimEX:.4f} [{confIntEX[0]:.4f}, {confIntEX[1]:.4f}],  R2: {r2EX:.4f},  boxLens: ({minMaxLensEX[0]:.4f}, {minMaxLensEX[1]:.4f})")
+                                                           minSample, confLvl, vis, figType, saveFig, showPlot, verbose)
     return r2VX, bcDimVX, confIntVX, minMaxLensVX, r2EX, bcDimEX, confIntEX, minMaxLensEX

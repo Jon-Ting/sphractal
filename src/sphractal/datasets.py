@@ -3,29 +3,31 @@ from os import listdir
 
 
 def getExampleDataPath():
-    """Get path to exampleOT.xyz (an octahedron palladium nanoparticle).
+    """Get path to an example xyz file (an octahedron palladium nanoparticle).
 
     Returns
     -------
-    str
+    xyzFilePath : str
         Path to xyz file.
     """
-    return str(files('sphractal.data').joinpath('exampleOT.xyz'))
+    xyzFilePath = str(files('sphractal.data').joinpath('exampleOT.xyz'))
+    return xyzFilePath
 
 
 def getStrongScalingDataPath():
-    """Get path to strongScalingSP.xyz (a sphere palladium nanoparticle with a diameter of 10 nm).
+    """Get path to the xyz file used for strong scaling tests (a sphere palladium nanoparticle with a diameter of 10 nm).
 
     Returns
     -------
-    str
+    xyzFilePath : str
         Path to xyz file.
     """
     return str(files('sphractal.data').joinpath('strongScalingSP.xyz'))
+    return xyzFilePath
 
 
 def getWeakScalingDataPaths():
-    """Get paths to xyz files used for weak scaling testings.
+    """Get paths to the xyz files used for weak scaling tests (spherical palladium nanoparticles with varying diameters).
 
     Returns
     -------
@@ -41,18 +43,19 @@ def getWeakScalingDataPaths():
 
 
 def getValidationDataPath():
-    """Get path to singleAtom.xyz (a file containing a single palladium atom).
+    """Get path to the xyz file used for validation (a file containing a single palladium atom).
 
     Returns
     -------
-    str
+    xyzFilePath : str
         Path to xyz file.
     """
-    return str(files('sphractal.data').joinpath('singleAtom.xyz'))
+    xyzFilePath = str(files('sphractal.data').joinpath('singleAtom.xyz'))
+    return xyzFilePath
 
 
 def getCaseStudyDataPaths():
-    """Get paths to xyz files used for case study.
+    """Get paths to the xyz files used for case study (ordered and disordered octahedron, rhombic dodecahedron, and tetrahedron palladium nanoparticles).
 
     Returns
     -------

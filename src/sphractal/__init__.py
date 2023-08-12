@@ -6,9 +6,9 @@ Descriptions
 Features
 --------
 Provides
-  1. Representation of surface of 3D complex objects consisting of spherical entities as either point clouds or exact surfaces.
+  1. Representation of the surfaces of 3D atomistic objects consisting of spherical entities as either voxelised point clouds or mathematically exact surfaces.
   2. Efficient algorithms for box-counting calculations.
-  3. Customisable parameters to control the level of detail and accuracy of the calculation.
+  3. Customisable parameters to control the level of detail and precision of the calculations.
 
 Documentations
 --------------
