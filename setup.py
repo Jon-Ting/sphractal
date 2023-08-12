@@ -10,7 +10,7 @@ setuptools.setup(
     version=__version__,
     author="Jonathan Yik Chang Ting",
     author_email="jonting97@gmail.com",
-    description="Package to estimate fractal dimension of 3D surfaces formed from overlapping spheres via box-counting algorithm.",
+    description="Package to estimate surface fractal dimension of 3D objects composed of overlapping spheres via box-counting algorithm.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Jon-Ting/sphractal",
