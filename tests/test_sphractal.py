@@ -5,13 +5,13 @@ from shutil import rmtree
 
 from pytest import approx, mark
 
-from fixtures import fixture, np, egAtomsXYZ, egAtomsNeighIdxs, egAtomsSurfIdxs, egTargetAtomIdxs
+from fixtures import fixture, np, egAtomsXYZ, egAtomsNeighIdxs, egAtomsSurfIdxs, egAtomsWithSurfNeighIdxs
 from sphractal.datasets import getExampleDataPath, getStrongScalingDataPath, getWeakScalingDataPaths, \
     getValidationDataPath, getCaseStudyDataPaths
 from sphractal.utils import estDuration, getMinMaxXYZ, readInp, findNN, findSurf, calcDist, closestSurfAtoms, \
     oppositeInnerAtoms
 from sphractal.surfVoxel import fibonacciSphere, pointsOnAtom, pointsToVoxels, voxelBoxCnts
-from sphractal.surfExact import getNearFarCoord, scanBox, writeBoxCoords, findTargetAtoms, exactBoxCnts
+from sphractal.surfExact import getNearFarCoord, scanBox, writeBoxCoords, findAtomsWithSurfNeighs, exactBoxCnts
 from sphractal.boxCnt import voxelBoxCnts, exactBoxCnts, findSlope, runBoxCnt
 
 
@@ -237,10 +237,10 @@ def test_fibonacciSphere(numPoints, sphereRad, xyzsExp):
 #                 rmInSurf=True)
 
 
-def test_findTargetAtoms(egAtomsNeighIdxs, egAtomsSurfIdxs, egTargetAtomIdxs):
-    """Unit test of findTargetAtoms()."""
-    targetAtomsIdxsAct = findTargetAtoms(egAtomsNeighIdxs, egAtomsSurfIdxs)
-    assert np.all(targetAtomsIdxsAct == egTargetAtomIdxs), 'Incorrect atom indices'
+def test_findAtomsWithSurfNeighs(egAtomsNeighIdxs, egAtomsSurfIdxs, egAtomsWithSurfNeighIdxs):
+    """Unit test of findAtomsWithSurfNeighs()."""
+    atomsWithSurfNeighIdxsAct = findAtomsWithSurfNeighs(egAtomsNeighIdxs, egAtomsSurfIdxs)
+    assert np.all(atomsWithSurfNeighIdxsAct == egAtomsWithSurfNeighIdxs), 'Incorrect atom indices'
 
 
 @mark.parametrize('trimLen', [True, False])
@@ -302,11 +302,12 @@ def test_findSlopeAcc(scales, counts, boxCntDimsExp):
 #    assert voxelCountsAct == approx(voxelCountsExp), 'Incorrect box counts'
 
 
-@mark.parametrize('rmInSurf, exactScalesExp, exactCountsExp', [(True, [-0.23688234, -0.16309612, -0.10004438, -0.03477764, 0.03932408, 0.10260591, 0.17060299, 0.24023892, 0.30488175, 0.37314659], [3.20194306, 3.32139128, 3.5171959, 3.68142216, 3.80522891, 3.9531796, 4.09272064, 4.27207379, 4.38937875, 4.52953301]), (False, [-0.23688234, -0.16309612, -0.10004438, -0.03477764, 0.03932408, 0.10260591, 0.17060299, 0.24023892, 0.30488175, 0.37314659], [3.13289977, 3.35024802, 3.50920252, 3.66482994, 3.85564028, 4.01249978, 4.16524433, 4.31234664, 4.44814957, 4.58442169])])
+@mark.parametrize('rmInSurf, exactScalesExp, exactCountsExp', [(True, [-0.23688234, -0.16309612, -0.10004438, -0.03477764, 0.03932408, 0.10260591, 0.17060299, 0.24023892, 0.30488175, 0.37314659], [3.20194306, 3.32139128, 3.5171959, 3.68142216, 3.80522891, 3.9531796, 4.09272064, 4.27207379, 4.38937875, 4.52953301]), (False, [-0.23688234, -0.16309612, -0.10004438, -0.03477764, 0.03932408, 0.10260591, 0.17060299, 0.24023892, 0.30488175, 0.37314659], [3.49789674, 3.69055046, 3.84997191, 4.00056421, 4.18301346, 4.32281862, 4.47290265, 4.61702132, 4.74061529, 4.86194043])])
 def test_getExactBoxCnt(rmInSurf, exactScalesExp, exactCountsExp, egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs, egMinMaxXYZ):
     """Unit test of exactBoxCnts()."""
     exactScalesAct, exactCountsAct = exactBoxCnts(egAtomsEle, egAtomsRad, egAtomsSurfIdxs, egAtomsXYZ, egAtomsNeighIdxs,
                                                         MAX_RANGE, (ATOM_RAD*0.25, ATOM_RAD), egMinMaxXYZ[0], 'example', 'tests/outputs', rmInSurf=rmInSurf)
+    print(exactScalesAct, exactCountsAct)
     assert exactCountsAct == approx(exactCountsExp), 'Incorrect scales'
     assert exactCountsAct == approx(exactCountsExp), 'Incorrect box counts'
     assert exists('./tests/outputs/boxCoords/example_boxCoords.xyz'), 'example_boxCoords.xyz is not found'
