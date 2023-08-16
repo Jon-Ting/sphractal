@@ -2,6 +2,21 @@
 
 <!--next-version-placeholder-->
 
+## v0.21.0 (2023-08-16)
+
+### Feature
+
+* **findAtomsWithSurfNeighs:** Renamed findTargetAtoms() ([`e4ff459`](https://github.com/Jon-Ting/sphractal/commit/e4ff4595d01c5fc0f382a4c4144d245af505e704))
+* **runBoxCnt:** Modified default value for minSample ([`866d551`](https://github.com/Jon-Ting/sphractal/commit/866d551ea5104f7d4b8a3dcd11d256fed67f553a))
+
+### Fix
+
+* **tests:** Updated test functions related to findTargetAtoms() ([`e0a2557`](https://github.com/Jon-Ting/sphractal/commit/e0a2557b5ab0b4588e7d8854816a89a1c4e7ce99))
+
+### Performance
+
+* **scanBox:** Removed redundant steps for inclusion of inner surface box counts ([`94da738`](https://github.com/Jon-Ting/sphractal/commit/94da73869ad4bcb8e9e6fee4595e9298162bb6e1))
+
 ## v0.20.13 (2023-08-12)
 
 
