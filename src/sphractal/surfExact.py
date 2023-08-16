@@ -167,10 +167,10 @@ def writeBoxCoords(atomsEle, atomsXYZ, allSurfBoxs, allBulkBoxs, minXYZ, boxLens
                 f.write(f"\nIV\t{boxX:.6f} {boxY:.6f} {boxZ:.6f}")
 
 
-# @annotate('findTargetAtoms', color='cyan')
+# @annotate('findAtomsWithSurfNeighs', color='cyan')
 @njit(fastmath=True, cache=True)
-def findTargetAtoms(atomsNeighIdxs, atomsSurfIdxs):
-    """Find atoms to be scanned if not removing inner surfaces (atoms with neighbours that are on the surface)."""
+def findAtomsWithSurfNeighs(atomsNeighIdxs, atomsSurfIdxs):
+    """Find atoms with neighbours that are on the surface."""
     atomsIdxs = []
     for (atomIdx, atomNeighIdxs) in enumerate(atomsNeighIdxs):
         for neighIdx in atomNeighIdxs:
@@ -239,7 +239,7 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     >>> surfs = findSurf(xyzs, neighs, 'alphaShape', 5.0)
     >>> scalesES, countsES = exactBoxCnts(eles, rads, surfs, xyzs, neighs, 100, (0.2, 1), minxyz, 'example')
     """
-    atomsIdxs = atomsSurfIdxs if rmInSurf else np.array(range(len(atomsEle)))  # findTargetAtoms(atomsNeighIdxs, atomsSurfIdxs)
+    atomsIdxs = atomsSurfIdxs if rmInSurf else np.array(range(len(atomsEle)))
     if numCPUs is None: 
         numCPUs = cpu_count()
     # Resource allocations for parallelisation (current settings are based on empirical experiments -- optimised for the default minMaxBoxLens range), rooms available for further optimisation
