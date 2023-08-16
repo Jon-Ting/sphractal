@@ -164,7 +164,7 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
 # @estDuration
 def runBoxCnt(inpFilePath, 
               radType='atomic', calcBL=False, findSurfAlg='alphaShape', alphaMult=2.0,
-              outDir='outputs', trimLen=True, minSample=5, confLvl=95, 
+              outDir='outputs', trimLen=True, minSample=6, confLvl=95, 
               rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False,
               voxelSurf=True, numPoints=10000, gridNum=1024, exePath='$FASTBC', genPCD=False,
               exactSurf=True, minLenMult=0.25, maxLenMult=1, numCPUs=8, numBoxLen=10, bufferDist=5.0, writeBox=True): 
@@ -182,7 +182,7 @@ def runBoxCnt(inpFilePath,
     findSurfAlg : {'alphaShape', 'convexHull', 'numNeigh'}, optional
         Algorithm to identify the surface atoms.
     alphaMult : Union[int, float], optional
-        Multiplier to the minimum atomic radii to decide 'alpha' value for the alpha shape algorithm, only used if
+        Multiplier to the minimum radius to decide 'alpha' value for the alpha shape algorithm, only used if
         'findSurfAlg' is 'alphaShape'. Recommendation: 
         2.0 * 100% ATOMIC_RAD == 5/3 * 120% ATOMIC_RAD ~= 100% METALLIC_RAD * 2.5
     outDir : str, optional
@@ -214,7 +214,7 @@ def runBoxCnt(inpFilePath,
     exePath : str, optional
         Path to the compiled executable of the C++ code for box-counting on 3D binary image written by Ruiz de Miras et al.
     genPCD : bool, optional
-        Whether to generate pcd file for box-counting using MATLAB code written by Kazuaki Iida.
+        Whether to generate point cloud data (pcd) file.
     exactSurf : bool, optional
         Whether to represent the surface in a mathematically exact manner.
     minLenMult : float, optional
