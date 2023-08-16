@@ -46,18 +46,12 @@ def scanBox(minXYZ, scanBoxIdxs, scanBoxNearFarXYZs, boxLen,
     # Check what does the box cover
     distNear = calcDist(atomXYZ, np.array(scanBoxNearFarXYZs[:3]))
     distFar = calcDist(atomXYZ, np.array(scanBoxNearFarXYZs[-3:]))
-    if atomIdx in atomsSurfIdxs:
-        if distNear < atomRad < distFar:
-            return 'surf'
-        elif distFar < atomRad:
-            return 'bulk'
-        else:
-            return 'none'
+    if distNear < atomRad < distFar:
+        return 'surf'
+    elif distFar < atomRad:
+        return 'bulk'
     else:
-        if distNear < atomRad < distFar or distFar < atomRad:
-            return 'bulk'
-        else:
-            return 'none'
+        return 'none'
 
 
 # @annotate('scanAtom', color='cyan')
@@ -245,7 +239,7 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     >>> surfs = findSurf(xyzs, neighs, 'alphaShape', 5.0)
     >>> scalesES, countsES = exactBoxCnts(eles, rads, surfs, xyzs, neighs, 100, (0.2, 1), minxyz, 'example')
     """
-    atomsIdxs = atomsSurfIdxs if rmInSurf else findTargetAtoms(atomsNeighIdxs, atomsSurfIdxs)
+    atomsIdxs = atomsSurfIdxs if rmInSurf else np.array(range(len(atomsEle)))  # findTargetAtoms(atomsNeighIdxs, atomsSurfIdxs)
     if numCPUs is None: 
         numCPUs = cpu_count()
     # Resource allocations for parallelisation (current settings are based on empirical experiments -- optimised for the default minMaxBoxLens range), rooms available for further optimisation
