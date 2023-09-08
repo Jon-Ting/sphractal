@@ -163,7 +163,7 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
 # @annotate('runCase', color='cyan')
 # @estDuration
 def runBoxCnt(inpFilePath, 
-              radType='atomic', calcBL=False, findSurfAlg='alphaShape', alphaMult=2.0,
+              radType='atomic', radMult=1.1, calcBL=False, findSurfAlg='alphaShape', alphaMult=2.0,
               outDir='outputs', trimLen=True, minSample=6, confLvl=95, 
               rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False,
               voxelSurf=True, numPoints=10000, gridNum=1024, exePath='$FASTBC', genPCD=False,
@@ -177,6 +177,8 @@ def runBoxCnt(inpFilePath,
         Path to xyz file containing Cartesian coordinates of a set of atoms.
     radType : {'atomic', 'metallic'}, optional
         Type of radii to use for the atoms.
+    radMult : Union[int, float], optional
+        Multiplier to the radii of atoms to identify their neighbouring atoms.
     calcBL : bool, optional
         Whether to compute the average distance from its neighbours for each atom.
     findSurfAlg : {'alphaShape', 'convexHull', 'numNeigh'}, optional
@@ -253,7 +255,6 @@ def runBoxCnt(inpFilePath,
     --------
     >>> r2VX, bcDimVX, confIntVX, minMaxLensVX, r2EX, bcDimEX, confIntEX, minMaxLensEX = runBoxCnt('example.xyz')
     """
-    radMult = 1.2 if radType == 'atomic' else 1.5  # Radius multiplier to identify nearest neighbour
     atomsEle, atomsRad, atomsXYZ, maxRange, minXYZ, maxXYZ = readInp(inpFilePath, radType)
     atomsNeighIdxs, atomsAvgBondLen = findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, atomsRad.max(), radMult, calcBL)
     atomsSurfIdxs = findSurf(atomsXYZ, atomsNeighIdxs, findSurfAlg, alphaMult * atomsRad.min())
