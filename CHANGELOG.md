@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.22.0 (2023-09-11)
+
+### Feature
+
+* **runBoxCnt:** Added bulkCN as optional argument ([`ddc8b7a`](https://github.com/Jon-Ting/sphractal/commit/ddc8b7aeba31b7503c81e0cfe783e5fed9df1daa))
+* **runBoxCnt:** Added radMult as an optional argument ([`2464081`](https://github.com/Jon-Ting/sphractal/commit/246408149c5e90d5c24ac6254506bc577bdc8864))
+
 ## v0.21.2 (2023-09-05)
 
 
