@@ -163,7 +163,7 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
 # @annotate('runCase', color='cyan')
 # @estDuration
 def runBoxCnt(inpFilePath, 
-              radType='atomic', radMult=1.1, calcBL=False, findSurfAlg='alphaShape', alphaMult=2.0,
+              radType='atomic', radMult=1.2, calcBL=False, findSurfAlg='alphaShape', alphaMult=2.0, bulkCN=12,
               outDir='outputs', trimLen=True, minSample=6, confLvl=95, 
               rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False,
               voxelSurf=True, numPoints=10000, gridNum=1024, exePath='$FASTBC', genPCD=False,
@@ -187,6 +187,8 @@ def runBoxCnt(inpFilePath,
         Multiplier to the minimum radius to decide 'alpha' value for the alpha shape algorithm, only used if
         'findSurfAlg' is 'alphaShape'. Recommendation: 
         2.0 * 100% ATOMIC_RAD == 5/3 * 120% ATOMIC_RAD ~= 100% METALLIC_RAD * 2.5
+    bulkCN : int, optional
+        Minimum number of neighbouring atoms for non-surface atoms.
     outDir : str, optional
         Path to directory to store the output files.
     trimLen : bool, optional
@@ -257,7 +259,7 @@ def runBoxCnt(inpFilePath,
     """
     atomsEle, atomsRad, atomsXYZ, maxRange, minXYZ, maxXYZ = readInp(inpFilePath, radType)
     atomsNeighIdxs, atomsAvgBondLen = findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, atomsRad.max(), radMult, calcBL)
-    atomsSurfIdxs = findSurf(atomsXYZ, atomsNeighIdxs, findSurfAlg, alphaMult * atomsRad.min())
+    atomsSurfIdxs = findSurf(atomsXYZ, atomsNeighIdxs, findSurfAlg, alphaMult * atomsRad.min(), bulkCN)
     testCase = inpFilePath.split('/')[-1][:-4]
     if verbose:
         print(f"\n{testCase}")

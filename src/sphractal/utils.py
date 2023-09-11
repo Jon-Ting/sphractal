@@ -1,6 +1,5 @@
 from math import ceil, floor, sqrt
 from time import time
-# from warnings import warn
 
 from numba import njit, prange
 from numba.typed import List
@@ -9,7 +8,7 @@ import numpy as np
 from scipy.spatial import ConvexHull, Delaunay
 from scipy.spatial._qhull import QhullError
 
-from sphractal.constants import ATOMIC_RAD_DICT, BULK_CN, METALLIC_RAD_DICT
+from sphractal.constants import ATOMIC_RAD_DICT, METALLIC_RAD_DICT
 
 
 def estDuration(func):
@@ -184,7 +183,7 @@ def alphaShape(atomsXYZ, tetraVtxsIdxs, alpha):
 
 
 # @annotate('findSurf', color='yellow')
-def findSurf(atomsXYZ, atomsNeighIdxs, option='alphaShape', alpha=3.0):
+def findSurf(atomsXYZ, atomsNeighIdxs, option='alphaShape', alpha=3.0, bulkCN=12):
     """
     Return the indices of surface atoms.
     
@@ -200,6 +199,8 @@ def findSurf(atomsXYZ, atomsNeighIdxs, option='alphaShape', alpha=3.0):
         'alphaShape' is a generalisation of 'convexHull'.
     alpha : Union[int, float], optional
         'alpha' for the alpha shape algorithm, only used if 'option' is 'alphaShape'.
+    bulkCN : int, optional
+        Minimum number of neighbouring atoms for a non-surface atom.
     
     Returns
     -------
@@ -219,7 +220,7 @@ def findSurf(atomsXYZ, atomsNeighIdxs, option='alphaShape', alpha=3.0):
             atomsSurfIdxs[atomIdx] = True
     elif option == 'numNeigh':
         for (atomIdx, atomNeighIdxs) in enumerate(atomsNeighIdxs):
-            if len(atomNeighIdxs[atomNeighIdxs > -1]) < BULK_CN:
+            if len(atomNeighIdxs[atomNeighIdxs > -1]) < bulkCN:
                 atomsSurfIdxs[atomIdx] = True
     elif option == 'alphaShape':
         try:
@@ -254,8 +255,8 @@ def calcDist(p1, p2):
 
 
 @njit(fastmath=True, cache=True)
-def getSurfNeighCombs(surfNeighDists, surfNeighIdxs):
-    """Compute ID pairs of a set of neighbouring atoms."""
+def getOrdSurfNeighCombs(surfNeighDists, surfNeighIdxs):
+    """Compute ID pairs of a set of neighbouring atoms, ordered by distance from a given point."""
     ordSurfNeighIdxs = surfNeighIdxs[np.argsort(surfNeighDists)]
     surfNeighIdxPairs = np.stack(np.triu_indices(len(ordSurfNeighIdxs), k=1), axis=-1)
     return [ordSurfNeighIdxs[idxPair] for idxPair in surfNeighIdxPairs]
@@ -268,7 +269,7 @@ def closestSurfAtoms(pointXYZ, surfNeighIdxs, atomsXYZ, atomsNeighIdxs):
         return np.array([np.nan]), np.array([np.nan])
     surfNeighXYZs = atomsXYZ[surfNeighIdxs]
     surfNeighDists = np.array([calcDist(pointXYZ, surfNeighXYZ) for surfNeighXYZ in surfNeighXYZs])
-    for idxPair in getSurfNeighCombs(surfNeighDists, surfNeighIdxs):
+    for idxPair in getOrdSurfNeighCombs(surfNeighDists, surfNeighIdxs):
         if idxPair[0] in atomsNeighIdxs[idxPair[1]]:
             return atomsXYZ[idxPair[0]], atomsXYZ[idxPair[1]]
     return np.array([np.nan]), np.array([np.nan])
@@ -283,4 +284,5 @@ def oppositeInnerAtoms(pointXYZ, atom1XYZ, atomNeighIdxs,
     innerNeighXYZs = atomsXYZ[bulkNeighIdxs] if len(bulkNeighIdxs) > 0 else atomsXYZ[surfNeighIdxs]
     avgInnerAtomXYZ = np.array([innerNeighXYZs[:, i].mean() for i in range(3)])
     normal = avgInnerAtomXYZ - atom1XYZ if len(atom3XYZ) == 1 else np.cross(atom2XYZ - atom1XYZ, atom3XYZ - atom1XYZ)
+    # If the given point is on the opposite side of the surface plane, the sign of products of the dot products will be negative
     return np.dot(normal, avgInnerAtomXYZ - atom1XYZ) * np.dot(normal, pointXYZ - atom1XYZ) < 0

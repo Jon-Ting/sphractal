@@ -1,4 +1,3 @@
-BULK_CN = 12  # Assuming FCC/HCP packing
 defRad = 1.0  # Default radius value for missing data
 # Atomic radii (computed from theoretical models) from E. Clementi; D.L. Raimondi; W.P. Reinhardt (1967) "Atomic
 # Screening Constants from SCF Functions. II. Atoms with 37 to 86 Electrons." The Journal of Chemical Physics. 47 (4):
