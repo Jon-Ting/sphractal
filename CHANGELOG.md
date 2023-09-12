@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.22.1 (2023-09-12)
+
+### Fix
+
+* **findNN:** Enlarged stepSize to identify neighbours on surface with {100} packings ([`4f51e17`](https://github.com/Jon-Ting/sphractal/commit/4f51e17e3e2a25a829d21e8162977c4379b53042))
+
 ## v0.22.0 (2023-09-11)
 
 ### Feature
