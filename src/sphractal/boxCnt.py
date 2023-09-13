@@ -148,7 +148,7 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
             else:
                 if round(r2score, 3) < round(r2scorePrev, 3):
                     if verbose:
-                        print(f"  D_Box: {boxCntDim:.4f} [{slopeCI[0]:.4f}, {slopeCI[1]:.4f}],  R2: {r2score:.4f},  boxLens: ({minMaxLens[0]:.4f}, {minMaxLens[1]:.4f})\n")
+                        print(f"  D_Box: {boxCntDimPrev:.4f} [{slopeCIPrev[0]:.4f}, {slopeCIPrev[1]:.4f}],  R2: {r2scorePrev:.4f},  boxLens: ({minMaxLensPrev[0]:.4f}, {minMaxLensPrev[1]:.4f})\n")
                     return r2scorePrev, boxCntDimPrev, slopeCIPrev, minMaxLensPrev
                 firstPointIdx += 1
         else:
