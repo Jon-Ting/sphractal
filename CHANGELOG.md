@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.22.2 (2023-09-13)
+
+### Fix
+
+* **findSlope:** Synchronised printing outputs with actual box-counting results when previous values are returned ([`7a9b15e`](https://github.com/Jon-Ting/sphractal/commit/7a9b15e2e860646d7522c954e2694e8a7cef2c2f))
+
 ## v0.22.1 (2023-09-12)
 
 ### Fix
