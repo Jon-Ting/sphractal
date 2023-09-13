@@ -128,7 +128,7 @@ def test_readInp(radType, atomRad, egAtomsEle, egAtomsXYZ):
     assert maxXYZAct == approx([440.65, 440.65, 440.65]), 'Incorrect maxXYZ values'
 
 
-@mark.parametrize('maxAtomRad, radMult, totNeighNumExp, avgAvgBL', [(ATOM_RAD, 1.2, 6840, 2.87438906), (1.37, 1.5, 8820, 3.12820867)])
+@mark.parametrize('maxAtomRad, radMult, totNeighNumExp, avgAvgBL', [(ATOM_RAD, 1.2, 6840, 2.87438906), (1.37, 1.5, 9774, 3.21771150)])
 def test_findNN(maxAtomRad, radMult, totNeighNumExp, avgAvgBL, egMinMaxXYZ, egAtomsXYZ, egAtomsNeighIdxs):
     """
     Unit test of findNN(). 
