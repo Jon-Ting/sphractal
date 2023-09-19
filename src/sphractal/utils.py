@@ -71,7 +71,7 @@ def allDirVecs():
 
 # @annotate('findNN', color='magenta')
 @njit(fastmath=True, cache=True)
-def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult, calcBL=False):
+def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult=1.2, calcBL=False):
     """
     Compute the nearest neighbour list and average bond length for each atom.
 
