@@ -70,7 +70,7 @@ def allDirVecs():
 
 # @annotate('findNN', color='magenta')
 @njit(fastmath=True, cache=True)
-def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult, calcBL=False):
+def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult=1.2, calcBL=False):
     """
     Compute the nearest neighbour list and average bond length for each atom.
 
@@ -99,9 +99,9 @@ def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult, calcBL=False
         Average bond lengths for each each.
     """
     (minX, minY, minZ), (maxX, maxY, maxZ) = minXYZ, maxXYZ
-    atomsNeighIdxs = [[int(j) for j in range(0)] for _ in range(len(atomsRad))]
+    atomsNeighIdxs = [[int(i) for i in range(0)] for _ in range(len(atomsRad))]
     atomsAvgBondLen = np.zeros_like(atomsRad)
-    stepSize = ceil(maxAtomRad * 2 * radMult)
+    stepSize = maxAtomRad * 2 * radMult
     numX, numY, numZ = max(1, ceil((maxX-minX) / stepSize)), max(1, ceil((maxY-minY) / stepSize)), max(1, ceil((maxZ-minZ) / stepSize))
     boxes = [[[[int(i) for i in range(0)] for _ in range(numZ)] for _ in range(numY)] for _ in range(numX)]
     allDirections = allDirVecs()
