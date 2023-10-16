@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.23.0 (2023-10-16)
+
+### Feature
+
+* **findNN:** Removed ceil() from stepSize definition ([`aac4f34`](https://github.com/Jon-Ting/sphractal/commit/aac4f34c20c39f5c355bb56e4cdcfe8607e87add))
+
 ## v0.22.4 (2023-10-05)
 
 
