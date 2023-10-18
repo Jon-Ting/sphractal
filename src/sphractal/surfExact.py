@@ -1,4 +1,5 @@
-from concurrent.futures import ProcessPoolExecutor as Pool
+# from concurrent.futures import ProcessPoolExecutor as Pool
+from mpi4py.futures import MPIPoolExecutor as Pool
 from math import ceil, log10
 from multiprocessing import cpu_count
 from os import mkdir
