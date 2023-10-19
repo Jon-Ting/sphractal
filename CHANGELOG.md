@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.24.0 (2023-10-19)
+
+### Feature
+
+* **ray:** Used Pool from ray ([`c07487f`](https://github.com/Jon-Ting/sphractal/commit/c07487fd16c849cb1b8194bc0bc9aa032a90e8ca))
+* **Pool:** Replace concurrent.futures with mpi4py.futures ([`3276631`](https://github.com/Jon-Ting/sphractal/commit/3276631c8f6ece302ca6bcaa1bd6302196b5182d))
+
 ## v0.23.1 (2023-10-16)
 
 
