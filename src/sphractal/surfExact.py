@@ -1,5 +1,5 @@
-# from concurrent.futures import ProcessPoolExecutor as Pool
-from mpi4py.futures import MPIPoolExecutor as Pool
+from concurrent.futures import ProcessPoolExecutor as Pool
+from ray.util.multiprocessing import Pool as RayPool
 from math import ceil, log10
 from multiprocessing import cpu_count
 from os import mkdir
@@ -123,7 +123,7 @@ def scanAllAtoms(args):
     scanAtomInps = [(magn, boxLen, minXYZ, atomIdx, atomsRad[atomIdx],
                      atomsSurfIdxs, atomsXYZ, atomsNeighIdxs, bufferDist, rmInSurf) for atomIdx in atomsIdxs]
     allAtomsSurfBoxs, allAtomsBulkBoxs = [], []
-    with Pool(max_workers=maxCPU) as pool:
+    with RayPool(processes=maxCPU) as pool:
         for scanAtomResult in pool.map(scanAtom, scanAtomInps, chunksize=ceil(len(atomsIdxs) / maxCPU)):
             allAtomsSurfBoxs.extend(scanAtomResult[0])
             allAtomsBulkBoxs.extend(scanAtomResult[1])
@@ -286,7 +286,7 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         scanBoxLens.append(scanBoxLen)
 
     if boxLenConcMaxCPU > 1:
-        with Pool(max_workers=boxLenConcMaxCPU) as pool:
+        with Pool(max_workers=atomConcMaxCPU) as pool:
             for scanAllAtomsResult in pool.map(scanAllAtoms, scanAllAtomsInps, 
                                                chunksize=ceil(numBoxLen / boxLenConcMaxCPU)):
                 allAtomsSurfBoxs, allAtomsBulkBoxs = scanAllAtomsResult

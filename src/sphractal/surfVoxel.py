@@ -1,5 +1,5 @@
-# from concurrent.futures import ProcessPoolExecutor as Pool
-from mpi4py.futures import MPIPoolExecutor as Pool
+from concurrent.futures import ProcessPoolExecutor as Pool
+from ray.util.multiprocessing import Pool as RayPool
 from math import ceil, cos, log10, pi, sin, sqrt
 from multiprocessing import cpu_count
 from os import mkdir, system
@@ -73,7 +73,7 @@ def pointsOnAtom(args):
 
     # Parallel implementation of the point position assessment algorithm
     if maxCPU > 1:
-        with Pool(max_workers=maxCPU) as pool:
+        with RayPool(ray_address='auto') as pool:
             for rmPointResult in pool.map(rmPoint, rmPointInp, 
                                           chunksize=ceil(numPoints / maxCPU)):
                 if rmPointResult[0] == 'toExclude':
@@ -205,7 +205,7 @@ def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
 
     # Parallel implementation of the points generation around atoms
     if atomConcMaxCPU > 1:
-        with Pool(max_workers=atomConcMaxCPU) as pool:
+        with RayPool(ray_address='auto') as pool:
             for pointsOnAtomResult in pool.map(pointsOnAtom, pointsOnAtomInp, 
                                                chunksize=ceil(len(atomsSurfIdxs) / atomConcMaxCPU)):
                 surfPointXYZs.extend(pointsOnAtomResult[0])
