@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.25.0 (2023-11-15)
+
+### Feature
+
+* **Pool:** Reverted back to concurrent.futures ([`4a6ea8b`](https://github.com/Jon-Ting/sphractal/commit/4a6ea8bdb5efe718ba533f5912a64b2d03468e86))
+
 ## v0.24.0 (2023-10-19)
 
 ### Feature
