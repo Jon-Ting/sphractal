@@ -165,7 +165,7 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
 def runBoxCnt(inpFilePath, 
               radType='atomic', radMult=1.2, calcBL=False, findSurfAlg='alphaShape', alphaMult=2.0, bulkCN=12,
               outDir='outputs', trimLen=True, minSample=6, confLvl=95, 
-              rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False,
+              rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False, returnCoords=False, 
               voxelSurf=True, numPoints=10000, gridNum=1024, exePath='$FASTBC', genPCD=False,
               exactSurf=True, minLenMult=0.25, maxLenMult=1, numCPUs=8, numBoxLen=10, bufferDist=5.0, writeBox=True): 
     """
@@ -209,6 +209,8 @@ def runBoxCnt(inpFilePath,
         Whether to show the figures generated from linear regression fitting, only used if 'vis' is True.
     verbose : bool, optional
         Whether to display the details.
+    returnCoords : bool, optional
+        Whether to return the atomic coordinates.
     voxelSurf : bool, optional
         Whether to represent the surface as voxelised point clouds.
     numPoints : int, optional
@@ -283,4 +285,7 @@ def runBoxCnt(inpFilePath,
                                           rmInSurf, writeBox, verbose)
         r2EX, bcDimEX, confIntEX, minMaxLensEX = findSlope(scalesEX, countsEX, f"{testCase}_EX", outDir, trimLen,
                                                            minSample, confLvl, vis, figType, saveFig, showPlot, verbose)
-    return r2VX, bcDimVX, confIntVX, minMaxLensVX, r2EX, bcDimEX, confIntEX, minMaxLensEX
+    if returnCoords:
+        return r2VX, bcDimVX, confIntVX, minMaxLensVX, r2EX, bcDimEX, confIntEX, minMaxLensEX, atomsXYZ
+    else:
+        return r2VX, bcDimVX, confIntVX, minMaxLensVX, r2EX, bcDimEX, confIntEX, minMaxLensEX
