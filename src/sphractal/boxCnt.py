@@ -165,11 +165,7 @@ def findSlope(scales, counts, npName='', outDir='outputs', trimLen=True,
 def runBoxCnt(inpFilePath, 
               radType='atomic', radMult=1.2, calcBL=False, findSurfAlg='alphaShape', alphaMult=2.0, bulkCN=12,
               outDir='outputs', trimLen=True, minSample=6, confLvl=95, 
-<<<<<<< HEAD
-              rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False, returnCoords=False, 
-=======
-              rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False, returnCoordsRange=False, 
->>>>>>> f674fae (feat(runBoxCnt): added optional argument to return atomic coordinates)
+              rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False,  
               voxelSurf=True, numPoints=10000, gridNum=1024, exePath='$FASTBC', genPCD=False,
               exactSurf=True, minLenMult=0.25, maxLenMult=1, numCPUs=8, numBoxLen=10, bufferDist=5.0, writeBox=True): 
     """
@@ -213,13 +209,6 @@ def runBoxCnt(inpFilePath,
         Whether to show the figures generated from linear regression fitting, only used if 'vis' is True.
     verbose : bool, optional
         Whether to display the details.
-<<<<<<< HEAD
-    returnCoords : bool, optional
-        Whether to return the atomic coordinates.
-=======
-    returnCoordsRange : bool, optional
-        Whether to return the atomic coordinates and maximum range in dimension.
->>>>>>> f674fae (feat(runBoxCnt): added optional argument to return atomic coordinates)
     voxelSurf : bool, optional
         Whether to represent the surface as voxelised point clouds.
     numPoints : int, optional
@@ -294,7 +283,4 @@ def runBoxCnt(inpFilePath,
                                           rmInSurf, writeBox, verbose)
         r2EX, bcDimEX, confIntEX, minMaxLensEX = findSlope(scalesEX, countsEX, f"{testCase}_EX", outDir, trimLen,
                                                            minSample, confLvl, vis, figType, saveFig, showPlot, verbose)
-    if returnCoordsRange:
-        return r2VX, bcDimVX, confIntVX, minMaxLensVX, r2EX, bcDimEX, confIntEX, minMaxLensEX, atomsXYZ, maxRange
-    else:
-        return r2VX, bcDimVX, confIntVX, minMaxLensVX, r2EX, bcDimEX, confIntEX, minMaxLensEX
+    return r2VX, bcDimVX, confIntVX, minMaxLensVX, r2EX, bcDimEX, confIntEX, minMaxLensEX
