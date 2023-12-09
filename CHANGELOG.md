@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.26.0 (2023-12-09)
+
+### Feature
+
+* **boxCnt:** Reverted back to version without the additional argument ([`620ed70`](https://github.com/Jon-Ting/sphractal/commit/620ed706d0efa75cf4566428aa9077cd5de3461e))
+* **returnCoordsRange:** Fixed conflicts between new and old commits ([`b9b8b71`](https://github.com/Jon-Ting/sphractal/commit/b9b8b71f6941c6ad4ae16f1a177c019c2e6e714b))
+* **runBoxCnt:** Added optional argument to return atomic coordinates ([`a230b08`](https://github.com/Jon-Ting/sphractal/commit/a230b084c342bc74718c7b6fe8c7b9f4f1c1485c))
+
 ## v0.25.2 (2023-11-30)
 
 
