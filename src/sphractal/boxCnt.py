@@ -266,8 +266,6 @@ def runBoxCnt(inpFilePath,
 
     r2VX, bcDimVX, confIntVX, minMaxLensVX = np.nan, np.nan, (np.nan, np.nan), (np.nan, np.nan)
     r2EX, bcDimEX, confIntEX, minMaxLensEX = np.nan, np.nan, (np.nan, np.nan), (np.nan, np.nan)
-    if not isdir(outDir):
-        mkdir(outDir)
     if voxelSurf:
         scalesVX, countsVX = voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                                           testCase, outDir, numCPUs, exePath,

@@ -258,9 +258,6 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         print(f"  Representing the surface by treating each atom as exact spheres...")
         print(f"    Scanning over:\n      {numBoxLen} box lengths using {boxLenConcMaxCPU} cpu(s)...\n      {len(atomsIdxs)} atoms using {atomConcMaxCPU} cpu(s)...")
         print(f"    (1/eps)    (# bulk)    (# surf)")
-    if writeBox:
-        if not isdir(outDir):
-            mkdir(outDir)
 
     overallBoxLen = maxRange + bufferDist * 2
     allLensSurfBoxs, allLensBulkBoxs, allLensSurfCnts, allLensBulkCnts = [], [], [], []
@@ -295,6 +292,8 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     counts = [log10(sCnt) if sCnt != 0 else np.nan for sCnt in allLensSurfCnts]
 
     if writeBox:
+        if not isdir(outDir):
+            mkdir(outDir)
         writeBoxCoords(atomsEle, atomsXYZ, allLensSurfBoxs, allLensBulkBoxs, minXYZ, scanBoxLens, bufferDist, 
                        outDir, npName)
     return scales, counts
