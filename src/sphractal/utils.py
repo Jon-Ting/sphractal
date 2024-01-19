@@ -108,7 +108,9 @@ def findNN(atomsRad, atomsXYZ, minXYZ, maxXYZ, maxAtomRad, radMult=1.2, calcBL=F
     for (i, atom1rad) in enumerate(atomsRad):
         atom1X, atom1Y, atom1Z = atomsXYZ[i]
 
-        x, y, z = floor((atom1X-minX) / stepSize), floor((atom1Y-minY) / stepSize), floor((atom1Z-minZ) / stepSize)
+        x = min(numX - 1, floor((atom1X-minX) / stepSize))
+        y = min(numY - 1, floor((atom1Y-minY) / stepSize))
+        z = min(numZ - 1, floor((atom1Z-minZ) / stepSize))
         for (dirX, dirY, dirZ) in allDirections:
             if 0 <= x + dirX < numX and 0 <= y + dirY < numY and 0 <= z + dirZ < numZ:
                 for j in boxes[x + dirX][y + dirY][z + dirZ]:
