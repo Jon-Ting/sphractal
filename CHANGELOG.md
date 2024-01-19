@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.27.0 (2024-01-19)
+
+### Feature
+
+* **findNN:** Capped the maximum indices for neighbour searching ([`db8a5e0`](https://github.com/Jon-Ting/sphractal/commit/db8a5e045de1ba7f6b3f680f0657f0722781a227))
+
+### Performance
+
+* **mkdir:** Avoid creating unnecessary directories ([`19139bf`](https://github.com/Jon-Ting/sphractal/commit/19139bf857bbcdc3323e751b4f77697ddfb855f0))
+
 ## v0.26.3 (2024-01-11)
 
 
