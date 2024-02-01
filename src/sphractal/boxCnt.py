@@ -166,7 +166,7 @@ def runBoxCnt(inpFilePath,
               radType='atomic', radMult=1.2, calcBL=False, findSurfAlg='alphaShape', alphaMult=2.0, bulkCN=12,
               outDir='outputs', trimLen=True, minSample=6, confLvl=95, 
               rmInSurf=True, vis=True, figType='paper', saveFig=False, showPlot=False, verbose=False,  
-              voxelSurf=True, numPoints=10000, gridNum=1024, exePath='$FASTBC', genPCD=False,
+              voxelSurf=True, numPoints=10000, gridNum=1024, fastbcPath='$FASTBC', genPCD=False,
               exactSurf=True, minLenMult=0.25, maxLenMult=1, numCPUs=8, numBoxLen=10, bufferDist=5.0, writeBox=True): 
     """
     Run box-counting algorithm on the surface of a given atomistic object consisting of a set of spheres represented as either a voxelised point cloud or mathematically precise object.
@@ -215,8 +215,8 @@ def runBoxCnt(inpFilePath,
         Number of surface points to generate around each atom.
     gridNum : int, optional
         Resolution of the 3D binary image.
-    exePath : str, optional
-        Path to the compiled executable of the C++ code for box-counting on 3D binary image written by Ruiz de Miras et al.
+    fastbcPath : str, optional
+        Path to the compiled C++ file for box-counting on 3D binary image written by Ruiz de Miras et al.
     genPCD : bool, optional
         Whether to generate point cloud data (pcd) file.
     exactSurf : bool, optional
@@ -268,7 +268,7 @@ def runBoxCnt(inpFilePath,
     r2EX, bcDimEX, confIntEX, minMaxLensEX = np.nan, np.nan, (np.nan, np.nan), (np.nan, np.nan)
     if voxelSurf:
         scalesVX, countsVX = voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                                          testCase, outDir, numCPUs, exePath,
+                                          testCase, outDir, numCPUs, fastbcPath,
                                           radType, numPoints, gridNum,
                                           rmInSurf, vis, verbose, genPCD)
         r2VX, bcDimVX, confIntVX, minMaxLensVX = findSlope(scalesVX, countsVX, f"{testCase}_VX", outDir, trimLen,

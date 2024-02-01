@@ -225,13 +225,13 @@ def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
 
 # @annotate('voxelBoxCnts', color='blue')
 def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
-                 npName, outDir='outputs', numCPUs=None, exePath='$FASTBC',
+                 npName, outDir='outputs', numCPUs=None, fastbcPath='$FASTBC',
                  radType='atomic', numPoints=300, gridNum=1024,
                  rmInSurf=True, vis=True, verbose=False, genPCD=False):
     """
     Count the boxes that cover the outer surface of a set of overlapping spheres represented as point clouds for different box sizes, using 3D box-counting algorithm written by Ruiz de Miras et al. in C++. 
 
-    IMPORTANT: Make sure the source code has been downloaded from https://github.com/Jon-Ting/fastBC and compiled on your machine. 'exePath' should point to the right directory if FASTBC is not set as an environment variable.
+    IMPORTANT: Make sure the source code has been downloaded from https://github.com/Jon-Ting/fastBC and compiled on your machine. 'fastbcPath' should point to the right file if FASTBC is not set as an environment variable.
     
     Parameters
     ----------
@@ -251,8 +251,8 @@ def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         Path to the directory to store the output files.
     numCPUs : int, optional
         Number of CPUs to be used for parallelisation of tasks.
-    exePath : str, optional
-        Path to the compiled C++ executable for box-counting.
+    fastbcPath : str, optional
+        Path to the compiled C++ file for box-counting.
     radType : {'atomic', 'metallic'}, optional
         Type of radii to use for the spheres.
     numPoints : int, optional
@@ -295,7 +295,7 @@ def voxelBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
                   npName, outDir, numCPUs,
                   radType, numPoints, gridNum,
                   rmInSurf, vis, verbose, genPCD)
-    system(f"{exePath} {gridNum} {outDir}/surfVoxelIdxs.txt {outDir}/surfVoxelBoxCnts.txt")
+    system(f"{fastbcPath} {gridNum} {outDir}/surfVoxelIdxs.txt {outDir}/surfVoxelBoxCnts.txt")
     scales, counts = [], []
     with open(f"{outDir}/surfVoxelBoxCnts.txt", 'r') as f:
         for line in f:
