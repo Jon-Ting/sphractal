@@ -50,7 +50,7 @@ conda install -c conda-forge sphractal
 ```
 
 ### Special Requirement for Point Cloud Surface Representation
-`Sphractal` requires an executable compiled from another freely available repository for the functionalities related 
+`Sphractal` requires a file compiled from another freely available repository for the functionalities related 
 to voxelised point clouds surface representation to operate properly. 
 
 This could be done by:
@@ -60,17 +60,17 @@ This could be done by:
 git clone https://github.com/jon-ting/fastbc.git
 ```
 
-* Building an executable by doing either one of the following compilations according to the instructions on the [README.md](https://github.com/Jon-Ting/fastBC/blob/main/README.md) page. This will decide whether you will be running the box counting algorithm with GPU acceleration. Feel free to rename the executables:
+* Compile the code into an executable file (which works on any operating system) by doing either one of the following compilations according to the instructions on the [README.md](https://github.com/Jon-Ting/fastBC/blob/main/README.md) page. This will decide whether you will be running the box counting algorithm with GPU acceleration. Feel free to rename the output file from the compilation:
 ```bash
-g++ 3DbinImBCcpu.cpp bcCPU.cpp -o 3DbinImBCcpu.exe
+g++ 3DbinImBCcpu.cpp bcCPU.cpp -o 3DbinImBCcpu
 ```
 ```bash
-nvcc -O3 3DbinImBCgpu.cpp bcCUDA3D.cu -o 3DbinImBCgpu.exe
+nvcc -O3 3DbinImBCgpu.cpp bcCUDA3D.cu -o 3DbinImBCgpu
 ```
 
-* (Optional) Setting the path to the executable as an environment variable accessible by Python (replace `<PATH_TO_EXE>` by the absolute path to the executable file you just built), otherwise you could always pass the path to the executable to the relevant functions:
+* (Optional) Setting the path to the compiled file as an environment variable accessible by Python (replace `<PATH_TO_FASTBC>` by the absolute path to the executable file you just built), otherwise you could always pass the path to the compiled file to the relevant functions:
 ```bash
-export FASTBC=<PATH_TO_EXE>
+export FASTBC=<PATH_TO_FASTBC>
 ```
 Note that for the environment variable to be persistent (to still exist after the terminal is closed), the line should be added to your `~/.bashrc`.
 
