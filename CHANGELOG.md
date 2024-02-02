@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.28.0 (2024-02-02)
+
+### Feature
+
+* **voxel:** Renamed exePath as fastbcPath ([`3d7662f`](https://github.com/Jon-Ting/sphractal/commit/3d7662ff65372f754cffd5837722612908a50981))
+
 ## v0.27.2 (2024-02-02)
 
 
