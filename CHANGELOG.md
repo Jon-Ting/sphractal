@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.28.1 (2024-02-03)
+
+### Fix
+
+* **numCPUs:** Replaced cpu_count() by sched_getaffinity() ([`a3cfcf2`](https://github.com/Jon-Ting/sphractal/commit/a3cfcf237488c2abdd8292cfdc3c98deb61d28e1))
+
+### Performance
+
+* **maxBoxLenCPU:** Modified formula for nested parallelisation ([`79dfda7`](https://github.com/Jon-Ting/sphractal/commit/79dfda70505857eb7df5edcc2616c18eae0843e6))
+
 ## v0.28.0 (2024-02-02)
 
 ### Feature
