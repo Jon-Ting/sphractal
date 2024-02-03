@@ -1,7 +1,6 @@
 from concurrent.futures import ProcessPoolExecutor as Pool
 from math import ceil, log10
-from multiprocessing import cpu_count
-from os import mkdir
+from os import mkdir, sched_getaffinity
 from os.path import isdir
 from time import time
 
@@ -241,7 +240,7 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     """
     atomsIdxs = atomsSurfIdxs if rmInSurf else np.array(range(len(atomsEle)))
     if numCPUs is None: 
-        numCPUs = cpu_count()
+        numCPUs = len(sched_getaffinity(0))
     # Resource allocations for parallelisation (current settings are based on empirical experiments -- optimised for the default minMaxBoxLens range), rooms available for further optimisation
     minAtomCPUperLen = max(1, len(atomsIdxs) // 25)
     maxBoxLenCPU = ceil(numBoxLen / 2)
@@ -282,7 +281,7 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         scanBoxLens.append(scanBoxLen)
 
     if boxLenConcMaxCPU > 1:
-        with Pool(max_workers=atomConcMaxCPU) as pool:
+        with Pool(max_workers=boxLenConcMaxCPU) as pool:
             for scanAllAtomsResult in pool.map(scanAllAtoms, scanAllAtomsInps, 
                                                chunksize=ceil(numBoxLen / boxLenConcMaxCPU)):
                 allAtomsSurfBoxs, allAtomsBulkBoxs = scanAllAtomsResult

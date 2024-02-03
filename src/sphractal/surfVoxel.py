@@ -1,7 +1,6 @@
 from concurrent.futures import ProcessPoolExecutor as Pool
 from math import ceil, cos, log10, pi, sin, sqrt
-from multiprocessing import cpu_count
-from os import mkdir, system
+from os import mkdir, sched_getaffinity, system
 from os.path import isdir
 
 from numba import njit
@@ -175,7 +174,8 @@ def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
 
     # Resource allocations
     if numCPUs is None: 
-        numCPUs = cpu_count()
+        numCPUs = len(sched_getaffinity(0))
+    # Resource allocations for parallelisation (current settings are based on empirical experiments -- optimised for the default minMaxBoxLens range), rooms available for further optimisation
     minAtomCPU = max(1, len(atomsSurfIdxs) // 25)
     maxPointCPUperAtom = ceil(numPoints / numPoints)  # ceil(numPoints / 25)
     if numCPUs > maxPointCPUperAtom * minAtomCPU:
