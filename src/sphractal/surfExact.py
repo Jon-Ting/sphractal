@@ -243,13 +243,13 @@ def exactBoxCnts(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
         numCPUs = len(sched_getaffinity(0))
     # Resource allocations for parallelisation (current settings are based on empirical experiments -- optimised for the default minMaxBoxLens range), rooms available for further optimisation
     minAtomCPUperLen = max(1, len(atomsIdxs) // 25)
-    maxBoxLenCPU = ceil(numBoxLen / 2)
+    maxBoxLenCPU = ceil(numBoxLen / numBoxLen)  # ceil(numBoxLen / 2)
     if numCPUs > maxBoxLenCPU * minAtomCPUperLen:
        atomConcMaxCPU = numCPUs // maxBoxLenCPU
        boxLenConcMaxCPU = maxBoxLenCPU
-    elif numCPUs > minAtomCPUperLen:
-        atomConcMaxCPU = minAtomCPUperLen
-        boxLenConcMaxCPU = numCPUs // minAtomCPUperLen
+    # elif numCPUs > minAtomCPUperLen:
+    #     atomConcMaxCPU = minAtomCPUperLen
+    #     boxLenConcMaxCPU = numCPUs // minAtomCPUperLen
     else:
         atomConcMaxCPU, boxLenConcMaxCPU = numCPUs, 1
 
