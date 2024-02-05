@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.28.3 (2024-02-05)
+
+### Fix
+
+* **version:** Release standard version with publication ([`26c4230`](https://github.com/Jon-Ting/sphractal/commit/26c423056c46f2a9a874189813afdad179b89b8b))
+
 ## v0.28.2 (2024-02-05)
 
 
