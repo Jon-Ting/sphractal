@@ -4,19 +4,16 @@
 
 ## Description
 
-`Sphractal` is a package that provides functionalities to estimate the fractal dimension of complex 3D surfaces formed 
-from overlapping spheres via box-counting algorithm. 
+`Sphractal` is a package that provides functionalities to estimate the fractal dimension of complex 3D surfaces formed from overlapping spheres via box-counting algorithm. 
 
 ## Background
-* Atomic objects in molecular and nanosciences such are often represented as collection of spheres with radii associated 
-with the atomic radius of the individual component.
+* Atomic objects in molecular and nanosciences such are often represented as collection of spheres with radii associated with the atomic radius of the individual component.
 
 ![](https://raw.githubusercontent.com/Jon-Ting/sphractal/main/docs/figs/example.png)
 
 * Some examples of these objects (inclusive of both fine- and coarse-grained representation of the individual components) 
 are small molecules, proteins, nanoparticles, polymers, and porous materials such as zeolite, metal-organic framework (MOFs).
-* The overall properties of these objects are often significantly influenced by their surface properties, in particular 
-the surface area available for interaction with other entities, which is related to the surface roughness.
+* The overall properties of these objects are often significantly influenced by their surface properties, in particular the surface area available for interaction with other entities, which is related to the surface roughness.
 * Fractal dimension allows the surface complexity/roughness of objects to be measured quantitatively.
 * The fractal dimension could be estimated by applying the box-counting algorithm on surfaces represented as either:
   * approximated point cloud:
@@ -50,8 +47,7 @@ conda install -c conda-forge sphractal
 ```
 
 ### Special Requirement for Point Cloud Surface Representation
-`Sphractal` requires a file compiled from another freely available repository for the functionalities related 
-to voxelised point clouds surface representation to operate properly. 
+`Sphractal` requires a file compiled from another freely available repository for the functionalities related to voxelised point clouds surface representation to operate properly. 
 
 This could be done by:
 
