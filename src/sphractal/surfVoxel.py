@@ -172,10 +172,9 @@ def genSurfPoints(atomsEle, atomsRad, atomsSurfIdxs, atomsXYZ, atomsNeighIdxs,
     radDict = ATOMIC_RAD_DICT if radType == 'atomic' else METALLIC_RAD_DICT
     surfPointsEles = {atomEle: fibonacciSphere(numPoints, radDict[atomEle]) for atomEle in set(atomsEle)}
 
-    # Resource allocations
+    # Resource allocations for parallelisation, rooms are available for further optimisation
     if numCPUs is None: 
         numCPUs = len(sched_getaffinity(0))
-    # Resource allocations for parallelisation (current settings are based on empirical experiments -- optimised for the default minMaxBoxLens range), rooms available for further optimisation
     minAtomCPU = max(1, len(atomsSurfIdxs) // 25)
     maxPointCPUperAtom = ceil(numPoints / numPoints)  # ceil(numPoints / 25)
     if numCPUs > maxPointCPUperAtom * minAtomCPU:
