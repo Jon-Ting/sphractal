@@ -69,3 +69,21 @@ def getCaseStudyDataPaths():
             xyzFilePaths.append(f"{dataDir}/{fileName}")
     return xyzFilePaths
 
+
+def getMiscellaneousDataPaths():
+    """Get paths to the xyz files for other types of atomistic objects (paracetamol, deoxyribonucleic acid, and graphene).
+
+    Returns
+    -------
+    xyzFilePaths : list of str
+        Paths to xyz files.
+    """
+    dataDir = str(files('sphractal.data'))
+    objNames = ['paracetamol', 'dna', 'graphene']
+    xyzFilePaths = []
+    for fileName in listdir(dataDir):
+        for objName in objNames:
+            if objName in fileName:
+                xyzFilePaths.append(f"{dataDir}/{fileName}")
+    return xyzFilePaths
+
