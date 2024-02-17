@@ -1,6 +1,9 @@
 # Directories under development
 src/fastbc
 
+# Auxiliary directories
+docs/outputs/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
