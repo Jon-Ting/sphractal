@@ -79,7 +79,7 @@ inpFile = getExampleDataPath()  # Replace with the path to your xyz or lmp file
 boxCntResults = runBoxCnt(inpFile)
 ```
 
-Check out the [notebook tutorial](https://github.com/Jon-Ting/sphractal/blob/main/docs/example.ipynb) for further explanations and demonstrations!
+Check out the [basic demonstration](https://github.com/Jon-Ting/sphractal/blob/main/docs/basicDemo.ipynb) and [application demonstration](https://github.com/Jon-Ting/sphractal/blob/main/docs/applicationsDemo.ipynb) notebooks for further explanations and demonstrations!
 
 ## Documentation
 
