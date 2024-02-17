@@ -7,7 +7,7 @@ from pytest import approx, mark
 
 from fixtures import fixture, np, egAtomsXYZ, egAtomsNeighIdxs, egAtomsSurfIdxs, egAtomsWithSurfNeighIdxs
 from sphractal.datasets import getExampleDataPath, getStrongScalingDataPath, getWeakScalingDataPaths, \
-    getValidationDataPath, getCaseStudyDataPaths
+    getValidationDataPath, getCaseStudyDataPaths, getMiscellaneousDataPaths
 from sphractal.utils import estDuration, getMinMaxXYZ, readInp, findNN, findSurf, calcDist, closestSurfAtoms, \
     oppositeInnerAtoms
 from sphractal.surfVoxel import fibonacciSphere, pointsOnAtom, pointsToVoxels, voxelBoxCnts
@@ -104,6 +104,16 @@ def test_getCaseStudyDataPaths():
     assert isinstance(inpFilePathsAct, list), 'getCaseStudyDataPaths() did not return a list'
     assert isinstance(inpFilePathsAct[0], str), 'Path in list is not str'
     assert len(inpFilePathsAct) == 18, 'Incorrect number of paths returned'
+    assert exists(inpFilePathsAct[0]), 'Path in list not found'
+    assert isfile(inpFilePathsAct[0]), 'Path in list not a file'
+
+
+def test_getMiscellaneousDataPaths():
+    """Unit test of getMiscellaneousDataPaths()."""
+    inpFilePathsAct = getMiscellaneousDataPaths()
+    assert isinstance(inpFilePathsAct, list), 'getMiscellaneousDataPaths() did not return a list'
+    assert isinstance(inpFilePathsAct[0], str), 'Path in list is not str'
+    assert len(inpFilePathsAct) == 3, 'Incorrect number of paths returned'
     assert exists(inpFilePathsAct[0]), 'Path in list not found'
     assert isfile(inpFilePathsAct[0]), 'Path in list not a file'
 
