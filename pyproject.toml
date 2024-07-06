@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sphractal"
-version = "1.1.8"
+version = "1.1.9"
 description = "Package to estimate fractal dimension of 3D surfaces formed from overlapping spheres via box-counting algorithm."
 authors = ["Jonathan Yik Chang Ting <jonting97@gmail.com>"]
 license = "MIT"
